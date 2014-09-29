@@ -94,11 +94,13 @@
 
 \begin{abstract}
     This text answers assignment 1
+    this is some more text that I can probably fill in somehow.
+    Hello my name is alfred.
 \end{abstract}
 
-\begin{IEEEkeywords}
-    Stuff
-\end{IEEEkeywords}
+% \begin{IEEEkeywords}
+%     Stuff
+% \end{IEEEkeywords}
 \IEEEPARstart{A*}{} is a local search algorithm. It is similar to DFS and BFS,
 except that when choosing a new node, it always chooses a node based on an 
 index value. 
@@ -149,6 +151,82 @@ In \autoref{fig:UMLstate}, you will find the following:
     \item[betterThanOther] is the function equivalent of the \textless operator,
         used to compare states.
 \end{description}
+
+What can be seen from the abstract classes and framework is that none of the code
+mentions the exact type of problem to be solved. This means the code can be used
+to model any problem that has an iteratively progressing scheme.
+
+\section{A*}
+The assignment description models an A* search as follows:
+\begin{enumerate}
+    \item pop the currently most promising state.
+    \item generate all possbile successor states
+    \item if a successor state has a similar index value or position:
+        \begin{enumerate}
+            \item if the successor state is better:
+                \begin{enumerate}
+                    \item set the remembered state to this index such that future
+                        discoveries point to this successor
+                \end{enumerate}
+            \item 
+        \end{enumerate}
+\end{enumerate}
+
+All states need a method to be indexed. This index should be similar between
+states at the same point. This means that the heuristic function returns the same
+value. The objective function, however, usually measured as the depth, can be
+different. In general we want the shortest path, so whenever two states
+have the same index, the one with the shortes ancestor tree is remembered
+as the state for the index, and the other is forgotten.
+In our case, the index value (assumed to be an integer) is stored in a dictionary.
+The lookup, and insertions are $O(1)$.
+
+Since each successor will need to have an objective value, we use the objective
+function \textit{attach-and-eval} whenever generating a successor. Similar to 
+the A*-code given in the assignment text, we do not actually evaluate the 
+state until it is popped off the queue.
+
+\section{Generating successor states}
+In a classical problem like search, we cannot generate completely random
+states. This would essentially be forking the problem in two: instead of only
+looking for the goal, we are now also looking for a path to the start.
+Other situations, does not necessarily require that you find an optimal path,
+e.g.\ the 8-queens puzzle. Here, you could make random choices and easilier
+find a valid solution.
+
+Since the generation of successor states seems to depend on the problem, we
+opted with saying that the implementation of \textit{genSuccessors} should be done
+for each problem. We could say that an A* search should just reason 
+with its states and ``state-children'', but we felt this would clutter
+more than help.
+
+To keep it general, the generation of successor states is kept
+
+
+
+\section{Comparison of heuristic functions}
+In this assignment, we were supposed to find the shortest path
+from a point $S$ to a point $D$ on 2D-grid. This topic is widely discussed in other
+literature, so I will not elaborate.
+
+A common heuristic function is the \textit{manhattan distance}, which measures the 
+distance from a point $P: (x_{i},y_{i})$ to $D: (x_{j},y_{j})$, by taking the difference
+between $x_i, x_j$ summed with the difference between $y_i, y_j$. Here, $x_j,y_j$ is 
+the goal we are trying to reach, and $x_i, y_i$  is the current point of the A*
+search.
+The downside of the manhattan distance is that it does not circumfere obstacles.
+Consider figure \autoref{fig:manhattansucks}
+
+\begin{figure}[Hb]
+\centering
+\includegraphics[height=5cm,keepaspectratio,width=2.5in]{fig/problem.png}%
+\caption{Case where the manhattan algorithm does not fare well.}
+\label{fig:manhattansucks}
+\end{figure}
+
+Other common heuristics, also used
+
+
 
 
 \begin{figure}[Hb]
