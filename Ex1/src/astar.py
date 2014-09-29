@@ -5,6 +5,8 @@ from heapq import heappush, heappop
 from ipdb import set_trace
 from time import sleep
 
+""" Local search using A*
+"""
 def astar(network, problem, Q, D):
     numNodes = 0
     lenPath = 0

@@ -11,7 +11,7 @@ from time import sleep
 
 from astar import State, Problem, astar
 
-K = 3 # trivial initial example, later it should be integer 2..10
+K = 4 # trivial initial example, later it should be integer 2..10
 
 # If the color scheme is wrong, there will be runtimeerrors.. just saying
 color_pool = {  "black"     : [0, 0, 0, 1],
