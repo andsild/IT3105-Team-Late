@@ -23,7 +23,6 @@ def astar(network, problem, Q, D):
     # D holds CLOSED
 
     if Q:
-        problem.updateStates(Q[0][1], None)
         _, curState = heappop(Q)
         if curState.isGoal():
             problem.destructor(Q)
@@ -32,18 +31,33 @@ def astar(network, problem, Q, D):
 
         numNodes += 1
         # All nodes run "attach-and-eval" in neighbour generation
-        for n in problem.genNeighbour(curState):
-            if n.index in D: # seen before. 
-                state = D[n.index]
-                if not state.betterThanOther(n): # better?
-                    # state.pred = curState
-                    propagate_path_improvements(state, curState) # S = state, curState = X
-                continue
-            D[n.index] = n
-            # print "\t see feasible neighbour: " + str(n)
-            heappush(Q, (n.cost_to_goal, n))
+        travQ = [curState]
+        print 
+        print 
 
-        sleep(0.1)
+        while travQ:
+            cur = travQ.pop()
+            if cur.pred:
+                print cur
+                travQ.append(cur.pred)
+        print cur
+        for succ in problem.genNeighbour(curState):
+            if succ.index in D: # seen before. 
+                old_state = D[succ.index]
+                if not old_state.betterThanOther(succ): # better?
+                    # old_state.pred = curold_state
+                    # problem.updateStates(succ, old_state)
+                    # set_trace()
+                    # problem.updateStates(curState, old_state)
+                    propagate_path_improvements(old_state, succ) # S = old_state, curold_state = X
+                continue
+            D[succ.index] = succ
+            # print "\t see feasible neighbour: " + str(succ)
+            heappush(Q, (succ.cost_to_goal, succ))
+
+        # problem.updateStates(curState, Q[0][1])
+        problem.updateStates(Q[0][1], curState)
+        sleep(0.4)
         return True
     # while curState.pred:
     #     curState = curState.pred

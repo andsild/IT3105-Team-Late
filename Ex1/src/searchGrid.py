@@ -39,11 +39,14 @@ def f_search(p, depth, goal):
 class SearchState(State):
     def __init__(self, pos, goal_index, pred, depth):
         super(SearchState, self).__init__(pos, pred,
-                                    f_search, (pos, 0, goal_index))
+                                    f_search, (pos, depth, goal_index))
         self.goal_index = goal_index
 
     def isGoal(self):
         return self.index == self.goal_index
+
+    def __str__(self):
+        return "State at pos %s and depth %d" % (str(self.index), self.depth)
 
 """ A problem class for search that can be used by a local search
 """
@@ -53,8 +56,7 @@ class Search(Problem):
         self.start = start
         self.goal = goal
         self.width, self.height = dim
-        """ The obstacle coordinates
-        """
+        """ The obstacle coordinates  """
         self.O = O
 
         network.paint_node(network.cordDict[self.goal[0], self.goal[1]],
@@ -69,6 +71,7 @@ class Search(Problem):
 
         Q = [(start_state.cost_to_goal, start_state)]
         D = { self.start : Q[0][1] }
+
         return astar, self, self.network, Q, D
 
     """ Generate neighbours from the current state
@@ -98,13 +101,12 @@ class Search(Problem):
         # If the new state is a direct successor of the previous state,
         # the paint job is simple: only paint one more node
         # otherwise, traverse back, "unpaint", and add the new path
-        if cur and new.pred != cur:
+        if new.pred != cur:
             # Clear old path
             travQ = [cur]
             while travQ:
                 s = travQ.pop()
-                set_trace()
-                if s.pred:
+                if s and s.pred:
                     travQ = [s.pred]
                     self.network.states[g.vertex(
                         self.network.cordDict[s.index[0], s.index[1]])] \

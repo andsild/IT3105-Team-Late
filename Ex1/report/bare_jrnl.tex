@@ -82,7 +82,7 @@
 % can use linebreaks \\ within to get better formatting as desired
 \title{Report A*}
 
-\author{Anders Sildnes, Andrej Leitner ~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
+\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
 }% \thanks{Utsendt 2014}}
 
 % The paper headers
@@ -124,7 +124,7 @@ In the \textit{Problem} class, the network
     \item[network] is a reference to the (currently) cartesian
     plane of vertices and edges. 
     \item[Destructor] is invoked after the queue of states is exhausted (clean-up and animation).
-        We included this since some animations will e.g. paint the goal node as
+        We included this since some animations will e.g.\ paint the goal node as
         a part of a path rather than a final state, etc.
     \item[genNeighbour()] will genereate all possible successor states
         from the current state
@@ -158,6 +158,7 @@ In \autoref{fig:UMLstate}, you will find the following:
 \label{fig:UMLstate}
 \end{figure}
 
+
 % An example of a double column floating figure using two subfigures.
 %\begin{figure*}[!t]
 %\centerline{\subfloat[Case I]\includegraphics[width=2.5in]{subfigcase1}%
@@ -175,24 +176,47 @@ In \autoref{fig:UMLstate}, you will find the following:
 % \footnotesize as IEEE normally uses this smaller font for tables.
 % The \label must come after \caption as always.
 %
-%\begin{table}[!t]
-%% increase table row spacing, adjust to taste
-%\renewcommand{\arraystretch}{1.3}
+\begin{table}[!t]
+% increase table row spacing, adjust to taste
+\renewcommand{\arraystretch}{1.3}
 % if using array.sty, it might be a good idea to tweak the value of
 % \extrarowheight as needed to properly center the text within the cells
-%\caption{An Example of a Table}
-%\label{table_example}
-%\centering
-%% Some packages, such as MDW tools, offer better commands for making tables
-%% than the plain LaTeX2e tabular which is used here.
-%\begin{tabular}{|c||c|}
-%\hline
-%One & Two\\
-%\hline
-%Three & Four\\
-%\hline
-%\end{tabular}
-%\end{table}
+\caption{Comparison of nodes generated}
+\label{table_example}
+\centering
+% Some packages, such as MDW tools, offer better commands for making tables
+% than the plain LaTeX2e tabular which is used here.
+\begin{tabular}{|c|ccc|}
+\hline
+DFS & 1 & 100 & 110 \\
+\hline
+BFS & 9123 & 123 & daw \\
+\hline
+BeFS & 9123 & 123 &* dwa \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+% increase table row spacing, adjust to taste
+\renewcommand{\arraystretch}{1.3}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+\caption{Lengths of solution paths}
+\label{table_example}
+\centering
+% Some packages, such as MDW tools, offer better commands for making tables
+% than the plain LaTeX2e tabular which is used here.
+\begin{tabular}{|c|ccc|}
+\hline
+DFS & 1 & 100 & 110 \\
+\hline
+BFS & 9123 & 123 & daw \\
+\hline
+BeFS & 9123 & 123 &* dwa \\
+\hline
+\end{tabular}
+\end{table}
 
 
 \begin{IEEEbiographynophoto}{Anders Sildnes,}
