@@ -11,7 +11,7 @@ def astar(network, problem, Q, D):
     numNodes = 0
     lenPath = 0
 
-    if Q and not Q[0][0] == -1:
+    if Q and not Q[0][1].isGoal():
         problem.updateStates(Q[0][1], None)
         _, curState = heappop(Q)
         # print "I am at " + str(curState)
@@ -42,7 +42,7 @@ class Problem(object):
         raise NotImplementedError("abstract class")
     def genNeighbour(self, state):
         raise NotImplementedError("abstract class")
-    def destructor(self):
+    def destructor(self, Q):
         raise NotImplementedError("abstract class")
     def updateStates(self, new, cur):
         raise NotImplementedError("abstract class")

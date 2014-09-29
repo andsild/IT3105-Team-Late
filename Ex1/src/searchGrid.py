@@ -38,8 +38,12 @@ def f_search(p, depth, goal):
 """
 class SearchState(State):
     def __init__(self, pos, goal_index, pred, depth):
-        super(SearchState, self).__init__(pos, pred, depth,
+        super(SearchState, self).__init__(pos, pred,
                                     f_search, (pos, 0, goal_index))
+        self.goal_index = goal_index
+
+    def isGoal(self):
+        return self.index == self.goal_index
 
 """ A problem class for search that can be used by a local search
 """
@@ -80,7 +84,7 @@ class Search(Problem):
 
     """ The function to be invoked at the end of a search
     """
-    def destructor(self):
+    def destructor(self, Q=None):
         self.network.paint_node(
             self.network.cordDict[self.goal[0], self.goal[1]], colors["goal"])
         self.network.update()
@@ -94,11 +98,12 @@ class Search(Problem):
         # If the new state is a direct successor of the previous state,
         # the paint job is simple: only paint one more node
         # otherwise, traverse back, "unpaint", and add the new path
-        if new.pred != cur:
+        if cur and new.pred != cur:
             # Clear old path
             travQ = [cur]
             while travQ:
                 s = travQ.pop()
+                set_trace()
                 if s.pred:
                     travQ = [s.pred]
                     self.network.states[g.vertex(
