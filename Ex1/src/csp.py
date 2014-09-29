@@ -219,38 +219,4 @@ class CSPColoring(Problem):
             # self.network.paint_node(*new.getLatestAddition())
         # self.network.update()
 
-    def solve(self):
-        for e in self.network.g.edges():
-            print self.network.domains[e.source()]
-
-        start_node, start_color = self.assume()
-        self.network.paint_node(start_node, start_color)
-
-        Q = [start_node]
-
-        while Q:
-            cur = Q.pop()
-            for e in start_node.out_edges():
-                c = self.getColor(cur, e.target())
-                if c:
-                    self.network.states[e.target()] = self.colors[c]
-                    self.network.update()
-                Q.append(e.target())
-
-            return True
-        return False
-
-    def getColor(self, src, dest):
-        if self.network.domains[dest] \
-        and self.network.states[dest] not in self.network.domains[src]:
-            return self.network.domains[dest] \
-                    [np.random.randint(low=0,
-                                       high=len(self.network.domains[dest]))]
-        return None
-
-
-
-    def assume(self):
-        pass
-
 #EOF

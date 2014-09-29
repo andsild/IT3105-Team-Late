@@ -44,10 +44,33 @@
 \documentclass[journal]{IEEEtran}
 
 
-\usepackage{caption,
-            eurosym,
+\usepackage{amsmath,
+            amssymb,
+            amsthm,
+            atbegshi,
+            caption,
+            subcaption,
+            epigraph,
+            etoolbox,
+            enumitem,
+            fancyhdr,
+            geometry,
             graphicx,
-            subfig}
+            hyperref,
+            kpfonts,
+            lipsum,
+            longtable,
+            natbib,
+            tabulary,
+            thmtools,
+            tikz,
+            tikzpagenodes,
+            titletoc,
+            titlesec,
+            tocloft,
+            url,
+            wrapfig
+}
 \usepackage[utf8]{inputenc}
 
 % correct bad hyphenation here
@@ -58,26 +81,82 @@
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
 \title{Report A*}
-Report A*%
 
-\author{Anders Sildnes~\IEEEmembership{student}% <-this % stops a space. jobtitle in memberkj
+\author{Anders Sildnes, Andrej Leitner ~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
 }% \thanks{Utsendt 2014}}
 
 % The paper headers
 \markboth{A* stuff}%
-{}
+{h}
 
 % make the title area
 \maketitle
 
-% \begin{abstract}
-% The abstract goes here.
-% \end{abstract}
+\begin{abstract}
+    This text answers assignment 1
+\end{abstract}
 
 \begin{IEEEkeywords}
     Stuff
 \end{IEEEkeywords}
-\IEEEPARstart{U}{tlandensopphold} har lenge stått på listen over ting jeg
+\IEEEPARstart{A*}{} is a local search algorithm. It is similar to DFS and BFS,
+except that when choosing a new node, it always chooses a node based on an 
+index value. 
+
+\section{Method}
+Since A* always chooses either the lowest or highest cost for a node, we desided
+to implement the queue with a heap. All heaps have the property that the root
+node has a consistenly higher or a lower value than all of its children. In addition,
+insertions are $\log{n}$, so maintaining such a queue is relatively fast. A 
+regular list would cost at least $n \log{n}$ for sorting.
+
+A* star is a method that should work equally on all \textit{problems}. A problem needs
+to maintain a list of \textit{states}. Since problem and states is the only 
+variying input, we decided to model these using different classed and objects.
+
+While python does not have the strict notion of abstract classes, we created
+a superclass ``Problem'' and an abstract superclass ``State''. These have
+general methods to be used in A*. The methods are listed in \autoref{fig:UMLproblem}.
+Explanation:
+
+In the \textit{Problem} class, the network 
+\begin{description}
+    \item[network] is a reference to the (currently) cartesian
+    plane of vertices and edges. 
+    \item[Destructor] is invoked after the queue of states is exhausted (clean-up and animation).
+        We included this since some animations will e.g. paint the goal node as
+        a part of a path rather than a final state, etc.
+    \item[genNeighbour()] will genereate all possible successor states
+        from the current state
+    \item[triggerstart] generates a starting state to be used in A*
+    \item[updateStates] paints and animates the next state. In the next state
+        is a direct successor, we often dont need to paint every other state.
+\end{description}
+
+\begin{figure}[Hb]
+\centering
+\includegraphics[height=5cm,keepaspectratio,width=2.5in]{fig/problem.png}%
+\caption{UML Class diagram for a problem instance}
+\label{fig:UMLproblem}
+\end{figure}
+
+In \autoref{fig:UMLstate}, you will find the following:
+\begin{description}
+    \item[func,funcargs:] when propagating and updating old states, I found it
+        useful if all states had some knowledge of their own function and arguments.
+        This is redundant (since often the function is the same in all states),
+        but easier to read.
+    \item[betterThanOther] is the function equivalent of the \textless operator,
+        used to compare states.
+\end{description}
+
+
+\begin{figure}[Hb]
+\centering
+\includegraphics[height=5cm,keepaspectratio,width=2.5in]{fig/state.png}%
+\caption{UML Class diagram for a state instance}
+\label{fig:UMLstate}
+\end{figure}
 
 % An example of a double column floating figure using two subfigures.
 %\begin{figure*}[!t]
@@ -119,7 +198,7 @@ Report A*%
 \begin{IEEEbiographynophoto}{Anders Sildnes,}
     4.års student, master informatikk, NTNU.\
 \end{IEEEbiographynophoto}
-\begin{IEEEbiographynophoto}{Andrej Sildnes,}
+\begin{IEEEbiographynophoto}{Andrej Leitner,}
     4.års student, master informatikk, NTNU.\
 \end{IEEEbiographynophoto}
 

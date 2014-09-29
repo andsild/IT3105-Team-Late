@@ -1,0 +1,5 @@
+digraph "classes_No_Name" {
+charset="utf-8"
+rankdir=BT
+"1" [label="{State|cost_to_goal\ldepth : int\lfunc\lfuncArgs\lindex\lpred : State\l|betterThanOther()\leval()\lisEqual()\lsetNewParent()\l}", shape="record"];
+}
