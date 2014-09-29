@@ -47,6 +47,9 @@ class CSPState(State):
             super(CSPState, self).__init__(id(self), pred,
                                            f_csp, (0, domains))
         self.newPaint = newPaint
+
+    def isGoal(self):
+        return self.cost_to_goal == -1
     
     def genRandomVertex(self):
         #TODO: make random
