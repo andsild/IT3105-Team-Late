@@ -54,7 +54,8 @@ class CNET(object):
             self.constraints[int(var)].append(c) # redundant set of pointers,
                                               # but fast lookup
     def getRootState(self):
-        return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
+        return CSPState(None, [li.copy() for li in self.domains], None, None)
+        # return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
         if type(index) == Constraint:
@@ -118,7 +119,7 @@ class VertexInstance(object):
         return self.cnet[self.index]
 
     def makeAssumption(self, domainIndex):
-        self.domain = [deepcopy(self.cnet[self.index].domain[domainIndex])]
+        self.domain = [self.cnet[self.index].domain[domainIndex]]
 
 class Constraint(object):
     """ This is the CI relative to the assignment text
@@ -160,6 +161,7 @@ class Constraint(object):
 def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
+    print "reducing %d" % (variable.index)
     for value in variable.domain:
         # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
         variable.makeAssumption(value)
@@ -173,17 +175,28 @@ def revise(variable, constraint, state):
 def AC_3(cnet, state, vertex):
     # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
+    D = set()
+    print "Beginning reudctions from %d" % (vertex)
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state):
             Q.append((vi, c))
+            # D.add(c)
+    total = len(Q)
     while Q:
+        print total
         v, c = Q.pop()
+        # D.remove(c)
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-            # will currently never be invoked, since we always reduce to singleton
             for neighbour in c.getAdjacent(v, state):
-                Q += [(neighbour,c) for c in cnet.getConstraint(neighbour.index)]
+                # print "adding %s" % str(neighbour)
+                Q.append( (neighbour, c))
+                total += 1
+                # for con in cnet.getConstraint(neighbour.index):
+                #     if con is not c and con not in D:
+                #         Q.append((neighbour, con))
+                #         D.add(con)
     return True
 
 #EOF

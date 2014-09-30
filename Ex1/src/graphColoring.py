@@ -48,6 +48,7 @@ class Coloring(Problem):
         """
         new_vertex = state.getUnassigned_Nonrandom() # just the index
         # new_vertex = self.network[state.newPaint.index]
+
         for value in state[new_vertex].domain:
             new_state = state.copy()
             # set_trace()

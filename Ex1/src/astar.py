@@ -40,7 +40,7 @@ def astar(network, problem, Q, D):
             heappush(Q, (succ.cost_to_goal, succ))
         # problem.updateStates(curState, Q[0][1])
         problem.updateStates(Q[0][1], curState)
-        sleep(0.4)
+        sleep(0.01)
         return True
     problem.destructor(None)
     return False

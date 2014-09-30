@@ -35,7 +35,7 @@ class Network(object):
 
     def paint_node(self, src_index, color):
         self.states[self.g.vertex(src_index)] = color
-        self.update()
+        # self.update()
 
     def update(self):
         self.widget.regenerate_surface(lazy=False)
