@@ -55,6 +55,7 @@ class SearchState(State):
     def __init__(self, pos, goal_index, pred, depth, mode):
         global nodes_count
         nodes_count += 1
+        print pos
         if mode == "depth":
             super(SearchState, self).__init__(pos, pred,
                                     dfs, ())
@@ -104,9 +105,14 @@ class Search(Problem):
     def genNeighbour(self, state):
         global ADJ_OP
         x, y = state.index
+        if state.pred:
+            px,py = state.pred.index
+        else:
+            px,py = -1,-1
         return [ SearchState((x+i,y+j), self.goal, state, state.depth+1, self.mode) \
                 for i,j in ADJ_OP \
                     if x+i > -1 and y+j > -1 \
+                    if x+i is not px and y+i is not py \
                     and x+i < self.width and y+j < self.height \
                     and (x+i, y+j) not in self.O]
 

@@ -15,9 +15,20 @@ def propagate_path_improvements(old_bad, new_better):
             old_parent = cur.setNewParent(new_better)
             travQ.append(old_parent)
 
+def find_path_length(curS):
+    global path_lenght
+    travQ = [curS]
+    while travQ:
+        acc = pathQ.pop()
+        if acc.pred:
+            travQ.append(acc.pred)
+            path_lenght += 1
+    print "Path length --->",path_lenght
+
 """ Local search using A*
 """
 def astar(network, problem, Q, D):
+
 
     # Q holds OPEN
     # D holds CLOSED
@@ -26,15 +37,8 @@ def astar(network, problem, Q, D):
     if Q:
         _, curState = heappop(Q)
         if curState.isGoal():
-            global path_lenght
             print "valid finish"
-            pathQ = [curState]
-            while pathQ:
-                acc = pathQ.pop()
-                if acc.pred:
-                    pathQ.append(acc.pred)
-                    path_lenght += 1
-            print "Path length --->",path_lenght
+            find_path_lenght(curState)
             problem.destructor(curState)
             return False
         # All nodes run "attach-and-eval" in neighbour generation
@@ -49,9 +53,12 @@ def astar(network, problem, Q, D):
             # print "\t see feasible neighbour: " + str(succ)
             heappush(Q, (succ.cost_to_goal, succ))
         # problem.updateStates(curState, Q[0][1])
-        problem.updateStates(Q[0][1], curState)
+        if Q:
+            problem.updateStates(Q[0][1], curState)
         sleep(0.1)
         return True
+    print "goal not found"
+    #find_path_length(curState)
     problem.destructor(None)
     return False
 
