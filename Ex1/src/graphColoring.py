@@ -16,16 +16,18 @@ color_pool = {  "black"     : [0, 0, 0, 1],
             "blue"      : [0, 0, 1, 1],
             "yellow"    : [1, .75, 0, 1],
             "lightblue" : [0, 1, .75, 1],
+            "brown"     : [0.66, 0.38, 0.18, 1],
+            "purple"    : [0.66, 0, 1, 1],
+            "orange"    : [1, 0.56, 0, 1],
+            "pink"      : [1, 0, 0.8, 1],
+            "grey"      : [0.5, 0.5, 0.5, 1],
         }
 
-COLORS = [ x for x in color_pool.values() \
-          if x is not color_pool["black"] and x is not color_pool["white"]][:K]
-
-
 class Coloring(Problem):
-    def __init__(self, network, cnet):
+    def __init__(self, network, cnet, COLORS):
         super(Coloring, self).__init__(network)
         self.cnet = cnet
+        self.colors = COLORS
         # self.solver = CSPSolver(constraints)
 
     def triggerStart(self):
@@ -65,13 +67,13 @@ class Coloring(Problem):
         if final_state:
             for vi in final_state.domains:
                 if len(vi.domain) == 1:
-                    self.network.paint_node(vi.index, COLORS[vi.domain[0]])
+                    self.network.paint_node(vi.index, self.colors[vi.domain[0]])
         print "FINISHED"
 
     def updateStates(self, new, cur):
         for vi in new.domains:
             if len(vi.domain) == 1:
-                self.network.paint_node(vi.index, COLORS[vi.domain[0]])
+                self.network.paint_node(vi.index, self.colors[vi.domain[0]])
             else:
                 self.network.paint_node(vi.index, color_pool["black"])
         self.network.update()
