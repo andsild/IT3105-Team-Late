@@ -25,7 +25,7 @@ def find_path_length(curS):
         acc = travQ.pop()
         if acc.pred:
             travQ.append(acc.pred)
-           path_lenght += 1
+            path_lenght += 1
     print "Path length --->",path_lenght
 
 """ Local search using A*

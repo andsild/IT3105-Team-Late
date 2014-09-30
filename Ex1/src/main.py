@@ -115,17 +115,17 @@ if __name__ == "__main__":
             widget1, problem1 = searchParams(sys.argv[2], "best")
             widget2, problem2 = searchParams(sys.argv[2], "depth")
             widget3, problem3 = searchParams(sys.argv[2], "breadth")
+
+            gui1 = genWindow(widget1, problem1)
+            gui2 = genWindow(widget2, problem2)
+            gui3 = genWindow(widget3, problem3)
+            gtk.main()
+            exit(0)
     else:
         print "Unsupported function.."
         exit(1)
 
-    if len(sys.argv) > 3:
-        gui = genWindow(widget, problem)
-    else:
-        gui1 = genWindow(widget1, problem1)
-        gui2 = genWindow(widget2, problem2)
-        gui3 = genWindow(widget3, problem3)
-
+    gui = genWindow(widget, problem)
     gtk.main()
 
 # EOF
