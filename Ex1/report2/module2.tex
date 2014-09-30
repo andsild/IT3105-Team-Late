@@ -42,6 +42,7 @@
 %%*************************************************************************
 
 \documentclass[journal]{IEEEtran}
+\newcommand{\subparagraph}{}
 
 
 \usepackage{amsmath,
@@ -49,6 +50,7 @@
             amsthm,
             atbegshi,
             caption,
+            color,
             subcaption,
             epigraph,
             etoolbox,
@@ -59,6 +61,7 @@
             hyperref,
             kpfonts,
             lipsum,
+            listings,
             longtable,
             natbib,
             tabulary,
@@ -72,6 +75,42 @@
             wrapfig
 }
 \usepackage[utf8]{inputenc}
+
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  firstnumber=1,
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numberfirstline=true,
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
 
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -101,11 +140,102 @@
 % \begin{IEEEkeywords}
 %     Stuff
 % \end{IEEEkeywords}
-\IEEEPARstart{A*}{} is a local search algorithm. It is similar to DFS and BFS,
-except that when choosing a new node, it always chooses a node based on an 
-index value. 
+\IEEEPARstart{M}{odeling} problems as CSP has multiple benefits.
+The goal is to assign each object a value from a finite domain,
+without violating a set of constraints. In this document,
+we explain our implementation of CSP modeled as a search problem.
+Each node in our graph corresponds to a temporary assigment
+to a subset of objects $o \subset O$. If $o$  is complete, that is, every object
+has an assigned value, the problem is considered sjolved.
+
+\section{Initializing the CNET}
+The Constraint Network is modeled as a class object called \textit{CNET}.
+It initializes a set of variable instances (\textit{VI}), each with
+a domain a complete domain. Each domain is currently assumed
+to be a list of integers. This can e.g.\ correspond to indexes in a list of 
+colors (as used in this assignment), such that the domain denotes
+what colors of all availible colors are availible.
+
+The CNET is also responsible for reading (canonical) constraints.
+First, it takes in a line of input. These are currently in the form
+of integers, where each integer maps to one variable in the domain.
+If then creates a function. Currently it is assumed that non-equality
+is desired; to extend the source code you would need to read an operator
+in the constraint and map it to the type of function.
+
+The function is created using sympy. To create a function, you first create
+symbols. The symbols represent objects that can take on any value.
+You then use symbols to create functions. In this assignment, all 
+functions take form $x != y$. The current procedure is shown in Listing \autoref{lst:constraint}.
+
+\begin{lstinputlisting}[caption="Creation of constraint",language=Python]{example.py}
+    \label{lst:constraint}
+\end{lstinputlisting}
+
+\begin{description}
+    \item[sym\_to\_variable] maps each variable to its position in the
+        constraint. E.g. for $x < y$, the position of the variables matters, so the 
+        dicitionary will later assist in evaluation the constraint.
+        This is mapped in the for loop
+    \item[c], the \textit{CI} is created once. In the CNET, it is then passed
+        on to a list of constraints. This list is indexed by variable;
+        such that each variable has a list of constraints it occurs in.
+        This means that a constraint with two variables will occur
+        twice in the list of constraints. This is to make lookups easier.
+\end{description}
+
+The way the constraint reader works now, it should be easy to extend
+to more advanced constraints. You would have to read in the type of function
+from \textit{line} (from Listing \autoref{lst:constraint}), and map it in 
+the call to \textit{lambdify}. The rest should more or less work itself.
+
+\section{Iterating from CNET to a valid solution}
+As in the previous assignment, our A* implementation works with \textit{state} and 
+\textit{problems}. From the CNET, you generate an initial state, which is a complete
+copy of the CNET's domains and variables. This means that the initial state
+is independent of the CNET.
+
+The initial state makes an assumption: it takes a random object $o$, and reduces
+the domain to the singleton set. Then, from the CNET, 
+it retrieves all the constraints associated with $o$. Each constraint is
+then checked as in Listing \autoref{lst:enforce}. 
+
+Before entering this function, it 
+temporarily reducing another variable, $v != o$, in the constraint,
+to a singleton set. In the case of binary constrains, this means
+that it will compare the singleton set of $o$ and its opposing object.
+If the constraint is not satisfied, can\_revise is False, and the value
+from the domain of $v$ is taken away.
+
+\begin{lstinputlisting}[caption="Checking constraint",language=Python]{satisfy.py}
+    \label{lst:enforce}
+\end{lstinputlisting}
+
+In Listing \autoref{lst:enforce}, each \textit{tup} is one possible assignment
+of all domain variables. As soon as one possible assignment is valid,
+it is returned that the current assignment to all objects is valid.
+In the case 
 
 \section{Generality of A*}
+The provided source code provides both assignment 1 and assignment 2
+as inputs to the same A*. The only difference is that the CSP and navigation
+have different subclasses of \textit{Problem} and \textit{State}. Here the \textit{state} adds
+new states by using the method described in the previous paragraph, and assesses
+value of states by using the heuristic mentioned in the end of this text.
+
+\section{Generality of A*-GAC}
+The code we have provided gives \textit{csp} as its own file. 
+It is implemented so that only considers \textit{VIs} and \textit{CIs}.
+\section{Heuristic}
+For the A* algorithm, an index value to each node in the search tree is given.
+This is determined by $f(x) = g(x) + h(x)$, where $h(x)$ is a heuristical value \dots
+
+Our current heuristic is to count the size of all domains to each variable.
+The size is taken minus one, such that assigned objects (that has a domain
+of size 1) does not count in the value. This heuristic gu
+TODO: explain why this means that next chosen nodes are local and we avoid
+
+\section{CSP}
 The source code for A* and the general problem/state instances are given
 in one file. The \textit{entire} code for the CSP is given in file \textit{csp}.
 We have implemented CSP by subclassing the ``Problem'' and ``State'' class and
@@ -117,15 +247,9 @@ Figure \autoref{fig:UMLconstraint} shows a constraint class.
 It stores a set of 
 The class 
 
-\section{Generality of A*-GAC}
-Ooooh fuck.
 
 \section{Code Generation}
 I use sympy teehee
-
-
-
-
 
 
 \begin{IEEEbiographynophoto}{Anders Sildnes,}

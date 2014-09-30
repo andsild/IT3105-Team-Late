@@ -33,9 +33,7 @@ def astar(network, problem, Q, D):
                     D[succ.index] = succ
                 continue
             D[succ.index] = succ
-            # print "\t see feasible neighbour: " + str(succ)
             heappush(Q, (succ.cost_to_goal, succ))
-        # problem.updateStates(curState, Q[0][1])
         problem.updateStates(Q[0][1], curState)
         sleep(0.01)
         return True

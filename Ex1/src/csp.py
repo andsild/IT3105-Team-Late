@@ -41,11 +41,9 @@ class CNET(object):
         alphabet = list(lowercase)
         symvars = symbols(' '.join([alphabet.pop() for x in variables]))
         D = dict()
-
         lambdafunc = lambdify(symvars, Ne(*symvars))
         for symv,v in zip(symvars, variables):
             D[symv] = int(v)
-
         c = Constraint(lambdafunc,
                        [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
@@ -127,7 +125,7 @@ class Constraint(object):
     def __init__(self, function, vi_list, sym_to_variable, caller):
         """ Pointer to VI """
         self.vi_list = vi_list
-        """ Pointer to CNET constraint """
+        """ Pointer to CNET """
         self.function = function   
         self.sym_to_variable = sym_to_variable
 
@@ -147,11 +145,7 @@ class Constraint(object):
     def canSatisfy(self, state):
         self.addState(state)
         can_satisfy = False
-
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
-
-        #TODO: this currently only works if position is not relevant
-        # a constraint like x + 2y < 10 would not work because x,y is not different
         for tup in product(*arg_list):
             if self.function(*tup):
                 can_satisfy = True

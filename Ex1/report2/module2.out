@@ -1,7 +1,11 @@
-\BOOKMARK [1][-]{section.1}{Generality of A*}{}% 1
-\BOOKMARK [1][-]{section.2}{Generality of CSP}{}% 2
-\BOOKMARK [1][-]{section.3}{Generality of A*-GAC}{}% 3
-\BOOKMARK [1][-]{section.4}{Code Generation}{}% 4
-\BOOKMARK [1][-]{IEEEbiography.0}{Biographies}{}% 5
-\BOOKMARK [2][-]{IEEEbiography.1}{Anders Sildnes,}{IEEEbiography.0}% 6
-\BOOKMARK [2][-]{IEEEbiography.2}{Andrej Leitner,}{IEEEbiography.0}% 7
+\BOOKMARK [1][-]{section.1}{Initializing the CNET}{}% 1
+\BOOKMARK [1][-]{section.2}{Iterating from CNET to a valid solution}{}% 2
+\BOOKMARK [1][-]{section.3}{Generality of A*}{}% 3
+\BOOKMARK [1][-]{section.4}{Generality of A*-GAC}{}% 4
+\BOOKMARK [1][-]{section.5}{Heuristic}{}% 5
+\BOOKMARK [1][-]{section.6}{CSP}{}% 6
+\BOOKMARK [1][-]{section.7}{Generality of CSP}{}% 7
+\BOOKMARK [1][-]{section.8}{Code Generation}{}% 8
+\BOOKMARK [1][-]{IEEEbiography.0}{Biographies}{}% 9
+\BOOKMARK [2][-]{IEEEbiography.1}{Anders Sildnes,}{IEEEbiography.0}% 10
+\BOOKMARK [2][-]{IEEEbiography.2}{Andrej Leitner,}{IEEEbiography.0}% 11
