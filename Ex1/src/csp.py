@@ -41,11 +41,9 @@ class CNET(object):
         alphabet = list(lowercase)
         symvars = symbols(' '.join([alphabet.pop() for x in variables]))
         D = dict()
-
         lambdafunc = lambdify(symvars, Ne(*symvars))
         for symv,v in zip(symvars, variables):
             D[symv] = int(v)
-
         c = Constraint(lambdafunc,
                        [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
@@ -54,7 +52,8 @@ class CNET(object):
             self.constraints[int(var)].append(c) # redundant set of pointers,
                                               # but fast lookup
     def getRootState(self):
-        return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
+        return CSPState(None, [li.copy() for li in self.domains], None, None)
+        # return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
         if type(index) == Constraint:
@@ -118,7 +117,7 @@ class VertexInstance(object):
         return self.cnet[self.index]
 
     def makeAssumption(self, domainIndex):
-        self.domain = [deepcopy(self.cnet[self.index].domain[domainIndex])]
+        self.domain = [self.cnet[self.index].domain[domainIndex]]
 
 class Constraint(object):
     """ This is the CI relative to the assignment text
@@ -126,7 +125,7 @@ class Constraint(object):
     def __init__(self, function, vi_list, sym_to_variable, caller):
         """ Pointer to VI """
         self.vi_list = vi_list
-        """ Pointer to CNET constraint """
+        """ Pointer to CNET """
         self.function = function   
         self.sym_to_variable = sym_to_variable
 
@@ -146,11 +145,7 @@ class Constraint(object):
     def canSatisfy(self, state):
         self.addState(state)
         can_satisfy = False
-
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
-
-        #TODO: this currently only works if position is not relevant
-        # a constraint like x + 2y < 10 would not work because x,y is not different
         for tup in product(*arg_list):
             if self.function(*tup):
                 can_satisfy = True
@@ -169,7 +164,6 @@ def revise(variable, constraint, state):
     variable.domain = copy_domain
     return revised
 
-
 def AC_3(cnet, state, vertex):
     # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
@@ -181,9 +175,8 @@ def AC_3(cnet, state, vertex):
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-            # will currently never be invoked, since we always reduce to singleton
             for neighbour in c.getAdjacent(v, state):
-                Q += [(neighbour,c) for c in cnet.getConstraint(neighbour.index)]
+                Q.append( (neighbour, c))
     return True
 
 #EOF
