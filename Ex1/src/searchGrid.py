@@ -38,7 +38,6 @@ def f_search(p, depth, goal):
 '''
 def bfs():
     global breadth_value
-    print breadth_value
     breadth_value += 1
     return  breadth_value
 ''' The simple function for depth first search
@@ -52,13 +51,13 @@ def dfs():
     A* does not, in this implementation need any more properties than its superclass.
 """
 class SearchState(State):
-    def __init__(self, pos, goal_index, pred, depth,mode):
-        if mode is "depth":
+    def __init__(self, pos, goal_index, pred, depth, mode):
+        if mode == "depth":
             super(SearchState, self).__init__(pos, pred,
-                                    dfs, (pos, depth, goal_index))
-        elif mode is "breadth":
+                                    dfs, ())
+        elif mode == "breadth":
             super(SearchState, self).__init__(pos, pred,
-                                    bfs, (pos, depth, goal_index))
+                                    bfs, ())
         else:
             super(SearchState, self).__init__(pos, pred,
                                     f_search, (pos, depth, goal_index))
@@ -100,7 +99,7 @@ class Search(Problem):
     """ Generate neighbours from the current state
     """
     def genNeighbour(self, state):
-        global ADJ_OP 
+        global ADJ_OP
         x, y = state.index
         return [ SearchState((x+i,y+j), self.goal, state, state.depth+1, self.mode) \
                 for i,j in ADJ_OP \

@@ -29,7 +29,7 @@ def astar(network, problem, Q, D):
             return False
         # All nodes run "attach-and-eval" in neighbour generation
         for succ in problem.genNeighbour(curState):
-            if succ.index in D: # seen before. 
+            if succ.index in D: # seen before.
                 old_state = D[succ.index]
                 if not old_state.betterThanOther(succ): # better?
                     propagate_path_improvements(old_state, succ) # S = old_state, curold_state = X
@@ -40,7 +40,7 @@ def astar(network, problem, Q, D):
             heappush(Q, (succ.cost_to_goal, succ))
         # problem.updateStates(curState, Q[0][1])
         problem.updateStates(Q[0][1], curState)
-        sleep(0.4)
+        sleep(1)
         return True
     problem.destructor(None)
     return False

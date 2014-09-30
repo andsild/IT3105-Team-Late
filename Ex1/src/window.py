@@ -25,7 +25,7 @@ class Handler:
 
     def btnStart(self, *args):
         func, problem, network, Q, D = self.inter_object.triggerStart()
-        GObject.idle_add(func, network, problem, Q, D) 
+        GObject.idle_add(func, network, problem, Q, D)
 
 def genWindow(widget, inter_object):
     builder = gtk.Builder()
@@ -36,6 +36,7 @@ def genWindow(widget, inter_object):
 
     win = builder.get_object("window1")
     win.set_title("Rendering a-star on graph...")
+    win.set_default_size(600,600)
     win.connect("delete_event", gtk.main_quit)
     win.show_all()
 
