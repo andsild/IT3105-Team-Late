@@ -21,6 +21,7 @@ ADJ_OP = [ (0, -1), (-1, 0),
            (0, 1), (1, 0)]
 breadth_value = 0
 depth_value = 0
+nodes_count = 0
 
 """ The heuristic for 2d grid search
     Currently, itertools the manhattan distance from the current cartesian point
@@ -52,6 +53,8 @@ def dfs():
 """
 class SearchState(State):
     def __init__(self, pos, goal_index, pred, depth, mode):
+        global nodes_count
+        nodes_count += 1
         if mode == "depth":
             super(SearchState, self).__init__(pos, pred,
                                     dfs, ())
@@ -110,6 +113,8 @@ class Search(Problem):
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
+        global nodes_count
+        print "Nodes generated --->",nodes_count
         self.network.paint_node(
             self.network.cordDict[self.goal[0], self.goal[1]], colors["goal"])
         self.network.update()

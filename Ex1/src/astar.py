@@ -5,6 +5,8 @@ from heapq import heappush, heappop
 from ipdb import set_trace
 from time import sleep
 
+path_lenght = 0
+
 def propagate_path_improvements(old_bad, new_better):
     travQ = [old_bad]
     while travQ:
@@ -24,7 +26,15 @@ def astar(network, problem, Q, D):
     if Q:
         _, curState = heappop(Q)
         if curState.isGoal():
+            global path_lenght
             print "valid finish"
+            pathQ = [curState]
+            while pathQ:
+                acc = pathQ.pop()
+                if acc.pred:
+                    pathQ.append(acc.pred)
+                    path_lenght += 1
+            print "Path length --->",path_lenght
             problem.destructor(curState)
             return False
         # All nodes run "attach-and-eval" in neighbour generation
@@ -40,7 +50,7 @@ def astar(network, problem, Q, D):
             heappush(Q, (succ.cost_to_goal, succ))
         # problem.updateStates(curState, Q[0][1])
         problem.updateStates(Q[0][1], curState)
-        sleep(1)
+        sleep(0.1)
         return True
     problem.destructor(None)
     return False
