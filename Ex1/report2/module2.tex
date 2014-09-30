@@ -1,0 +1,167 @@
+%% bare_jrnl.tex
+%% V1.3
+%% 2007/01/11
+%% by Michael Shell
+%% see http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.7 or later) with an IEEE journal paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%
+%% File list of work: IEEEtran.cls, IEEEtran_HOWTO.pdf, bare_adv.tex,
+%%                    bare_conf.tex, bare_jrnl.tex, bare_jrnl_compsoc.tex
+%%*************************************************************************
+
+\documentclass[journal]{IEEEtran}
+
+
+\usepackage{amsmath,
+            amssymb,
+            amsthm,
+            atbegshi,
+            caption,
+            subcaption,
+            epigraph,
+            etoolbox,
+            enumitem,
+            fancyhdr,
+            geometry,
+            graphicx,
+            hyperref,
+            kpfonts,
+            lipsum,
+            longtable,
+            natbib,
+            tabulary,
+            thmtools,
+            tikz,
+            tikzpagenodes,
+            titletoc,
+            titlesec,
+            tocloft,
+            url,
+            wrapfig
+}
+\usepackage[utf8]{inputenc}
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{CSP-solver, Assignment 2 IT3105}
+
+\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
+}% \thanks{Utsendt 2014}}
+
+% The paper headers
+\markboth{Report IT3105: Assignment 2}%
+{h}
+
+% make the title area
+\maketitle
+
+\begin{abstract}
+    This text answers assignment 2
+    this is some more text that I can probably fill in somehow.
+    Hello my name is alfred.
+\end{abstract}
+
+% \begin{IEEEkeywords}
+%     Stuff
+% \end{IEEEkeywords}
+\IEEEPARstart{A*}{} is a local search algorithm. It is similar to DFS and BFS,
+except that when choosing a new node, it always chooses a node based on an 
+index value. 
+
+\section{Generality of A*}
+The source code for A* and the general problem/state instances are given
+in one file. The \textit{entire} code for the CSP is given in file \textit{csp}.
+We have implemented CSP by subclassing the ``Problem'' and ``State'' class and
+implementing the methods given in these superclasses. Apart from specificly
+interpreting the input and GUI, the entire CSP logic is in its own ``csp.py'' file.
+
+\section{Generality of CSP}
+Figure \autoref{fig:UMLconstraint} shows a constraint class.
+It stores a set of 
+The class 
+
+\section{Generality of A*-GAC}
+Ooooh fuck.
+
+\section{Code Generation}
+I use sympy teehee
+
+
+
+
+
+
+\begin{IEEEbiographynophoto}{Anders Sildnes,}
+    4.års student, master informatikk, NTNU.\
+\end{IEEEbiographynophoto}
+\begin{IEEEbiographynophoto}{Andrej Leitner,}
+    4.års student, master informatikk, NTNU.\
+\end{IEEEbiographynophoto}
+
+    
+% if have a single appendix: %\appendix[Proof of the Zonklar Equations]
+% or
+%\appendix  % for no appendix heading
+% do not use \section anymore after \appendix, only \section*
+% is possibly needed
+% \appendices
+% \section{Proof of the First Zonklar Equation}
+% Appendix one text goes here.
+%\bibliographystyle{IEEEtran}
+%\bibliography{IEEEabrv,../bib/paper}
+%
+% \begin{thebibliography}{1}
+%
+% \bibitem{IEEEhowto:kopka}
+% H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
+%   0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%
+% \end{thebibliography}
+% biography section
+% 
+% If you have an EPS/PDF photo (graphicx package needed) extra braces are
+% needed around the contents of the optional argument to biography to prevent
+% the LaTeX parser from getting confused when it sees the complicated
+% \includegraphics command within an optional argument. (You could create
+% your own custom macro containing the \includegraphics command to make things
+% simpler here.)
+%\begin{biography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
+% or if you just want to reserve a space for a photo:
+\end{document}

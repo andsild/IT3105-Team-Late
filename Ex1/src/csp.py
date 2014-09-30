@@ -54,7 +54,7 @@ class CSPState(State):
     def genRandomVertex(self):
         #TODO: make random
         ret = [ index for index,dom in enumerate(self.domains) \
-                if len(dom) > 1 ]
+               if len(dom) > 1 ]
         if not ret:
             # return None
             return np.random.randint(low=0, high=len(self.domains))
@@ -128,8 +128,6 @@ class CSPColoring(Problem):
             print " residuals are " + str(color_trans)
         return True
 
-
-
     def AC_3(self, state, new_vertex):
         for val in state.domains[new_vertex]:
             dom_copy = [ deepcopy(li) for li in state.domains]
@@ -152,7 +150,6 @@ class CSPColoring(Problem):
                 print "setting terminating condition true pre-emptive"
                 new_state.cost_to_goal = -1
             yield new_state
-
 
     def triggerStart(self):
         self.network.clear()
