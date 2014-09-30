@@ -16,11 +16,8 @@ def propagate_path_improvements(old_bad, new_better):
 """ Local search using A*
 """
 def astar(network, problem, Q, D):
-
     # Q holds OPEN
     # D holds CLOSED
-    print "(iteration)"
-
     if Q:
         _, curState = heappop(Q)
         if curState.isGoal():

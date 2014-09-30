@@ -161,7 +161,6 @@ class Constraint(object):
 def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
-    print "reducing %d" % (variable.index)
     for value in variable.domain:
         # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
         variable.makeAssumption(value)
@@ -171,32 +170,19 @@ def revise(variable, constraint, state):
     variable.domain = copy_domain
     return revised
 
-
 def AC_3(cnet, state, vertex):
     # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
-    D = set()
-    print "Beginning reudctions from %d" % (vertex)
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state):
             Q.append((vi, c))
-            # D.add(c)
-    total = len(Q)
     while Q:
-        print total
         v, c = Q.pop()
-        # D.remove(c)
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
             for neighbour in c.getAdjacent(v, state):
-                # print "adding %s" % str(neighbour)
                 Q.append( (neighbour, c))
-                total += 1
-                # for con in cnet.getConstraint(neighbour.index):
-                #     if con is not c and con not in D:
-                #         Q.append((neighbour, con))
-                #         D.add(con)
     return True
 
 #EOF
