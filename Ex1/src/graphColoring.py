@@ -4,7 +4,7 @@ import numpy as np
 from time import sleep
 
 from astar import State, Problem, astar
-from csp import CSPSolver, CSPState
+from csp import *
 
 K = 4 # trivial initial example, later it should be integer 2..10
 
@@ -45,7 +45,13 @@ class Coloring(Problem):
             of size > 1 to the singleton set
 
         """
-        new_vertex = state.genRandomVertex()
+        new_vertex = state.genRandomVertex() # just the index
+        set_trace()
+        for value in new_vertex.domain:
+            new_state = state.copy()
+            new_state[new_vertex].makeAssumption(value)
+            AC_3(cnet, new_state, new_vertex)
+
         print "picking %s as new for neigh" % (str(new_vertex))
         if new_vertex is not None:
             return self.solver.AC_3(state, new_vertex)
