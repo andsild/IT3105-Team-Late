@@ -1,34 +1,18 @@
 #!/usr/bin/python
-
+from string import lowercase
 from copy import deepcopy
-from heapq import heappop
 from ipdb import set_trace
 import numpy as np
+from sympy import *
 from itertools import product
-from string import ascii_lowercase
 
-from time import sleep
-
-from astar import State, Problem, astar
-
-K = 4 # trivial initial example, later it should be integer 2..10
-
-# If the color scheme is wrong, there will be runtimeerrors.. just saying
-color_pool = {  "black"     : [0, 0, 0, 1],
-            "white"     : [1, 1, 1, 1],
-            "red"       : [1, 0, 0, 1],
-            "green"     : [.0, 1, .0, 1],
-            "blue"      : [0, 0, 1, 1],
-            "yellow"    : [1, .75, 0, 1],
-            "lightblue" : [0, 1, .75, 1],
-        }
-
-COLORS = [ x for x in color_pool.values() \
-          if x is not color_pool["black"] and x is not color_pool["white"]][:K]
+from astar import State, Problem
 
 def f_csp(depth, domains):
     return depth + h_csp(domains)
 
+""" Size of domain -1, summed together
+"""
 def h_csp(domains):
     assigned = len(list(x for x in domains if len(x) == 1))
     promise = sum(len(x) for x in domains)
@@ -36,8 +20,41 @@ def h_csp(domains):
 
     return promise - assigned -  violated
 
+class CNET(object):
+    def __init__(self, num_vars, init_domain):
+        self.domains = [ VertexInstance(index, [x for x in init_domain]) \
+                                for index in range(num_vars)]
+        # self.variables = range(len(domains))
+        self.constraints = [ [] for _ in range(num_vars) ]
+
+    def getConstraint(self, vertex, caller):
+        ret = self.constraints[vertex]
+        ret.addVI(caller)
+        return ret
+
+
+    def readCanonical(self, line):
+        variables = line.split()
+        mapped_vars = [ index for index,_ in enumerate(variables) ]
+        alphabet = list(lowercase)
+        symvars = symbols(' '.join([alphabet.pop() for x in variables]))
+
+        lambdafunc = lambdify(symvars, Ne(*symvars))
+
+        for var in mapped_vars:
+            self.constraints[var].append(lambdafunc)
+
+    # def addConstraint(self, function, variable_indexes):
+    #     c = Constraint(l, [self.domains[i] for i in variable_indexes])
+    #
+    #     for i in variable_indexes:
+    #         self.domains[i].append(
+
+
 
 class CSPState(State):
+    """ This will be the VI per the assignment text
+    """
     def __init__(self, pred, domains, newPaint):
         self.domains = domains
         if pred:
@@ -63,12 +80,29 @@ class CSPState(State):
     def getLatestAddition(self):
         return self.newPaint
 
-class Constraint(object):
-    def __init__(self, function, variables):
-        self.variables = variables
-        self.function = function
+class VertexInstance(object):
+    def __init__(self, index, domain):
+        self.index = index
+        self.domain = domain
 
-    def revise(self, domains):
+    def copy(self):
+        return VertexInstance(self.index, [v for v in domain])
+
+class Constraint(object):
+    """ This is the CI relative to the assignment text
+    """
+    def __init__(self, function, variables):
+        """ Pointer to VI """
+        self.variables = variables 
+        """ Pointer to CNET constraint """
+        self.function = function   
+
+        self.list_vi = []
+
+    def addVI(self, vi):
+        self.list_vi.append(vi)
+
+    def revise(self, vi):
         #TODO: there is a difference between when the domain has been
         # changed and when there is no valid solution
         # e.g. you might fail a test because the sizes of the domains
@@ -77,7 +111,7 @@ class Constraint(object):
         # Hence, I support the idea of making domains a class, with "haschanged"
         # or something.. could return two boolean flags
 
-        domain_list = [ domains[var] for var in self.variables ]
+        domain_list = [ vi.domains[var] for var in self.variables ]
         can_confine = False
 
         setme = [ index for index,x in enumerate(domain_list) if len(x) == 1 ]
@@ -102,11 +136,9 @@ class Constraint(object):
         print domain_list
         return confined
 
-class CSPColoring(Problem):
-    def __init__(self, network, colors, constraints):
-        super(CSPColoring, self).__init__(network)
+class CSPSolver(object):
+    def __init__(self, constraints):
         self.constraints = constraints
-        self.colors = colors
 
     def rec_narrow(self, new_vertex, dom_copy):
         Q = [new_vertex]
@@ -150,70 +182,5 @@ class CSPColoring(Problem):
                 print "setting terminating condition true pre-emptive"
                 new_state.cost_to_goal = -1
             yield new_state
-
-    def triggerStart(self):
-        self.network.clear()
-        node_index = np.random.randint(low=0, high=self.network.g.num_vertices())
-        # XXX
-        color_index = np.random.randint(low=0, high=len(self.colors))
-        # XXX:
-        node_index = 1
-        color_index = 0
-        print "Starting with vertex %d  as color %s" % (node_index, "blue")
-
-        start_node = self.network.g.vertex(node_index)
-        start_color = self.colors[color_index]
-
-        init_domains = [ [c for c in range(len(self.colors))] \
-                            for v in self.network.g.vertices()]
-
-        start_state = CSPState(None, init_domains, (start_node, start_color))
-
-        init_domains[node_index] = [color_index]
-        self.AC_3(start_state, node_index)
-
-        #TODO: this Q is similar in all "problem" classes
-        Q = [(start_state.cost_to_goal, start_state)]
-        D = dict()
-        D[start_state.index] = start_state
-
-        # self.network.update()
-        self.network.paint_node(start_node, start_color)
-
-        return astar, self, self.network, Q, D
-
-    def genNeighbour(self, state):
-        """ A neighbour is a state S from the current state,
-            where the domain of a variable has been reduced from a domain
-            of size > 1 to the singleton set
-
-        """
-        new_vertex = state.genRandomVertex()
-        print "picking %s as new for neigh" % (str(new_vertex))
-        if new_vertex is not None:
-            return self.AC_3(state, new_vertex)
-        return []
-
-    def destructor(self, Q):
-        if Q:
-            _, state = heappop(Q)
-            for index,dom in enumerate(state.domains):
-                if len(dom) == 1:
-                    self.network.paint_node(index, COLORS[dom[0]])
-        print "FINISHED"
-
-    def updateStates(self, new, cur):
-        if new.pred == cur:
-            self.network.paint_node(*new.getLatestAddition())
-        else:
-            # TODO: re-check EVERYTHING
-            for index,dom in enumerate(new.domains):
-                if len(dom) == 1:
-                    self.network.paint_node(index, COLORS[dom[0]])
-                else:
-                    self.network.paint_node(index, color_pool["black"])
-
-            # self.network.paint_node(*new.getLatestAddition())
-        # self.network.update()
 
 #EOF

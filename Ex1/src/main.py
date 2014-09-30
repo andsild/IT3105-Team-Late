@@ -2,12 +2,12 @@
 
 from ipdb import set_trace
 import numpy as np
-from sympy import *
 
 from searchGrid import *
+from graphColoring import COLORS
 from csp import *
+from graphColoring import *
 from network import *
-
 
 def searchParams(filename):
     def retMarks(obs_cords):
@@ -75,25 +75,20 @@ def CSPParams(filename):
         _, x, y = line.split()
         xCords[index] = float(x)
         yCords[index] = float(y)
-    edgeMap =  [ [int(x) for x in line.split()] for line in inData[nv+1:]]
 
+    edgeMap =  [ [int(x) for x in line.split()] for line in inData[nv+1:]]
     network = NetworkCSP(np.array([xCords, yCords]), edgeMap,
                          range(len(COLORS) -1))
 
 
-    def checkEdge(src_index, src_li, dst_index, dst_li):
-        return src_li[src_index] * -1 + dst_li[dst_index] * -1 < 0
-
     constraints = [ [] for _ in range(nv) ]
 
-    for e in edgeMap:
-        dom_1, dom_2 = symbols("d1 d2")
-        l = lambdify((dom_1, dom_2), Ne(dom_1, dom_2))
-        c = Constraint(l, e)
-        constraints[e[0]].append(c)
-        constraints[e[1]].append(c)
+    cnet = CNET(network.g.num_vertices(), COLORS)
+
+    for e in inData[nv+1:]:
+        cnet.readCanonical(e)
         
-    s = CSPColoring(network, COLORS, constraints)
+    s = Coloring(network, COLORS, cnet)
 
     return network.widget, s
 
