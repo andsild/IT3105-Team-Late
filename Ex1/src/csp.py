@@ -14,15 +14,14 @@ def f_csp(depth, domains):
 """ Size of domain -1, summed together
 """
 def h_csp(domains):
-    assigned = len(list(x for x in domains if len(x) == 1))
-    promise = sum(len(x) for x in domains)
-    violated = len(list(x for x in domains if len(x) == 0))
+    promise = sum(len(vi.domain)-1 for vi in domains)
+    # violated = len(list(x for x in domains if len(x) == 0))
 
-    return promise - assigned -  violated
+    return promise
 
 class CNET(object):
-    def __init__(self, num_vars, init_domain):
-        self.domains = [ VertexInstance(index, [x for x in init_domain], self) \
+    def __init__(self, num_vars, size_domain):
+        self.domains = [ VertexInstance(index, range(size_domain), self) \
                                 for index in range(num_vars)]
         # self.variables = range(len(domains))
         self.constraints = [ [] for _ in range(num_vars) ]
@@ -45,10 +44,10 @@ class CNET(object):
 
         lambdafunc = lambdify(symvars, Ne(*symvars))
         for symv,v in zip(symvars, variables):
-            D[symv] = v
+            D[symv] = int(v)
 
         c = Constraint(lambdafunc,
-                       [ (symv, v) for (symv, v) in zip(symvars, variables)], 
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
 
         for var in variables:
@@ -59,7 +58,6 @@ class CNET(object):
         # domain = np.random.randint(low=0, high=self.getDomainSize())
         # variable.makeAssumption(domain)
 
-        set_trace()
         return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
@@ -74,7 +72,6 @@ class CSPState(State):
     def __init__(self, pred, domains, constraints, newPaint):
         self.domains = domains
         self.constraints = constraints
-        set_trace()
         if pred:
             super(CSPState, self).__init__(id(self), pred,
                                            f_csp, (pred.depth + 1, domains))
@@ -84,20 +81,26 @@ class CSPState(State):
         self.newPaint = newPaint
 
     def isGoal(self):
-        return self.cost_to_goal == -1
+        assigned = [ len(vi.domain) == 1 for vi in self.domains]
+        return all(assigned)
     
     def genRandomVertex(self):
         #TODO: make random
-        unassigned = [ index for index,dom in enumerate(self.domains) \
-               if len(dom) > 1 ]
-        return ret[np.randint(0, len(unassigned))]
+        unassigned = [ index for index,vi in enumerate(self.domains) \
+               if len(vi.domain) > 1 ]
+        if len(unassigned) > 0:
+            return unassigned[np.random.randint(0, len(unassigned))]
         if not ret:
             # return None
             return np.random.randint(low=0, high=len(self.domains))
         return ret[0]
     def copy(self):
-        return CSPState(self, [ deepcopy(var) for var in domains ],
-                        [ c for c in constraints], None)
+        doms = self.domains or []
+        cons = self.constraints or []
+
+        return CSPState(self, [ var.copy() for var in doms ],
+                        [ c for c in cons], None)
+
     def __getitem__(self, index):
         return self.domains[index]
 
@@ -109,13 +112,13 @@ class VertexInstance(object):
         self.cnet = caller
 
     def copy(self):
-        return VertexInstance(self.index, [v for v in domain])
+        return VertexInstance(self.index, [v for v in self.domain], self.cnet)
 
     def getCnetSelf(self):
         return self.cnet[self.index]
 
-    def makeAssumption(self, index):
-        self.domain = [self.domain[index]]
+    def makeAssumption(self, domainIndex):
+        self.domain = [deepcopy(self.cnet[self.index].domain[domainIndex])]
 
 class Constraint(object):
     """ This is the CI relative to the assignment text
@@ -140,11 +143,11 @@ class Constraint(object):
         self.addState(state)
         can_satisfy = False
 
-        arg_list = [ state[self.symToVariableMap[k]] for symv,_ in self.vi_list ]
+        arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
 
         #TODO: this currently only works if position is not relevant
         # a constraint like x + 2y < 10 would not work because x,y is not different
-        for tup in zip(repeat([vi.domain[0]],product(*domain_list))):
+        for tup in product(*arg_list):
             if self.function(*tup):
                 can_satisfy = True
         return can_satisfy
@@ -178,7 +181,8 @@ def revise(variable, constraint, state):
     revised = False
     for value in variable.domain:
         # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
-        variable.makeAssumption(variable, value)
+
+        variable.makeAssumption(value)
         if not constraint.narrow(state):
                 variable.domain.remove(value)
                 revised = True
@@ -186,15 +190,16 @@ def revise(variable, constraint, state):
 
 
 def AC_3(cnet, state, vertex):
-    Q = [(v,c) for c in cnet.getConstraint(vertex)]
+    Q = [(state[vertex],c) for c in cnet.getConstraint(vertex)]
     while Q:
         v, c = Q.pop()
         # Now all I have to do is to check the domain of v
         if revise(v, c, state):
             if len(v.domain) == 0:
-                return 
+                return False
             for neighbours in v.getN:
                 Q += [(neighbours,c) for c in cnet.getConstraint(neighbours)]
+    return True
 
     # def AC_3(self, state, new_vertex):
     #     for val in state.domains[new_vertex]:

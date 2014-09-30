@@ -80,10 +80,9 @@ def CSPParams(filename):
     network = NetworkCSP(np.array([xCords, yCords]), edgeMap,
                          range(len(COLORS) -1))
 
-
     constraints = [ [] for _ in range(nv) ]
 
-    cnet = CNET(network.g.num_vertices(), COLORS)
+    cnet = CNET(network.g.num_vertices(), K)
 
     for e in inData[nv+1:]:
         cnet.readCanonical(e)

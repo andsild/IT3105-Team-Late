@@ -46,35 +46,37 @@ class Coloring(Problem):
 
         """
         new_vertex = state.genRandomVertex() # just the index
-        set_trace()
-        for value in new_vertex.domain:
+        for value in state[new_vertex].domain[1:]:
             new_state = state.copy()
+            # set_trace()
             new_state[new_vertex].makeAssumption(value)
-            AC_3(cnet, new_state, new_vertex)
+            if AC_3(self.cnet, new_state, new_vertex):
+                yield new_state
 
-        print "picking %s as new for neigh" % (str(new_vertex))
-        if new_vertex is not None:
-            return self.solver.AC_3(state, new_vertex)
-        return []
+        # print "picking %s as new for neigh" % (str(new_vertex))
+        # if new_vertex is not None:
+        #     return self.solver.AC_3(state, new_vertex)
+        # return []
 
     def destructor(self, Q):
         if Q:
             _, state = heappop(Q)
-            for index,dom in enumerate(state.domains):
-                if len(dom) == 1:
-                    self.network.paint_node(index, COLORS[dom[0]])
+            for vi in state.domains:
+                if len(vi.domain) == 1:
+                    self.network.paint_node(vi.index, COLORS[vi.domain[0]])
         print "FINISHED"
 
     def updateStates(self, new, cur):
         if new.pred == cur:
-            self.network.paint_node(*new.getLatestAddition())
+            if new.newPaint:
+                self.network.paint_node(*new.newPaint())
         else:
             # TODO: re-check EVERYTHING
-            for index,dom in enumerate(new.domains):
-                if len(dom) == 1:
-                    self.network.paint_node(index, COLORS[dom[0]])
+            for vi in new.domains:
+                if len(vi.domain) == 1:
+                    self.network.paint_node(vi.index, COLORS[vi.domain[0]])
                 else:
-                    self.network.paint_node(index, color_pool["black"])
+                    self.network.paint_node(vi.index, color_pool["black"])
 
             # self.network.paint_node(*new.getLatestAddition())
         # self.network.update()
