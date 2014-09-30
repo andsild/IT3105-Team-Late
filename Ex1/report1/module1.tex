@@ -93,9 +93,9 @@
 \maketitle
 
 \begin{abstract}
-    This text answers assignment 1
-    this is some more text that I can probably fill in somehow.
-    Hello my name is alfred.
+    This text answers assignment 1: Implementing and Testing the A* algorithm.
+    The A*-method is intended to be written general enough to be used in later
+    projects. This text elabortes on the choises made and the working of A*.
 \end{abstract}
 
 % \begin{IEEEkeywords}
@@ -103,25 +103,42 @@
 % \end{IEEEkeywords}
 \IEEEPARstart{A*}{} is a local search algorithm. It is similar to DFS and BFS,
 except that when choosing a new node, it always chooses a node based on an 
-index value. 
+index value, rather than considering the time of which the node was spotted.
+The index value is supposed to estimate how far away from a given goal
+the current state is, and also how far away from start the state is.
+Thus, higher index values are not preferred. Each iteration in an A*-search is referred to as a state. 
 
 \section{Method}
-Since A* always chooses either the lowest or highest cost for a node, we desided
-to implement the queue with a heap. All heaps have the property that the root
-node has a consistenly higher or a lower value than all of its children. In addition,
-insertions are $\log{n}$, so maintaining such a queue is relatively fast. A 
-regular list would cost at least $n \log{n}$ for sorting.
+Since A* always chooses either the lowest or highest cost for a node, we
+implemented the A*-agenda with a minimum-heap. Heaps have the property that the root
+node has a consistenly higher or a lower value than all of its children.
+Thus, the next state on the agenda is the one with the lowest objective value,
+and hopefully nearest the goal. Also,
+insertions are $\log{n}$, so heaps for agendas are quite fast (at least compared
+to regular lists that cost at least $n \log{n}$ for sorting).
 
-A* star is a method that should work equally on all \textit{problems}. A problem needs
-to maintain a list of \textit{states}. Since problem and states is the only 
-variying input, we decided to model these using different classed and objects.
+A problem that is solvable in A* must have the following properties:
+\begin{itemize}
+    \item Iterative, such that a problem during solving can be stored in a state
+    \item An ability to find an objective value for a state
+    \item An ability to generate (multiple) successors from a state
+    \item Assessing whether or not a state is at the goal
+\end{itemize}
+Notably, all of these properties are related mostly to the problem itself, not
+the A*-method. Therefore, we wrote a single A*-method without the notion of class.
+Its reqirement is that its input is an agenda with states, and a method
+to assess these states. Since a lot of states are generated, we did not want
+to store all the information in the states. Therefore we also implemented
+a class ``Problem'' that has the ability to assess states and generate successors.
 
 While python does not have the strict notion of abstract classes, we created
-a superclass ``Problem'' and an abstract superclass ``State''. These have
-general methods to be used in A*. The methods are listed in \autoref{fig:UMLproblem}.
-Explanation:
+``Problem'' and ``State'' as abstract superclasses. Then,
+to create a problem, you need to create one subclasses for each, and implement
+the abstract methods. This can be done without consulting the code for A*,
+just consulting the docstring for the abstract methods. Hence we would like
+to claim that our A*-method is general.
 
-In the \textit{Problem} class, the network 
+~\autoref{fig:UMLproblem} shows the ``Problem class'':
 \begin{description}
     \item[network] is a reference to the (currently) cartesian
     plane of vertices and edges. 
@@ -131,8 +148,9 @@ In the \textit{Problem} class, the network
     \item[genNeighbour()] will genereate all possible successor states
         from the current state
     \item[triggerstart] generates a starting state to be used in A*
-    \item[updateStates] paints and animates the next state. In the next state
-        is a direct successor, we often dont need to paint every other state.
+    \item[updateStates] paints and animates the canvas (animation-logic). 
+        We wanted to include this method in this class because we felt the
+        animation-logic varies from problem to problem.
 \end{description}
 
 \begin{figure}[Hb]
@@ -142,45 +160,51 @@ In the \textit{Problem} class, the network
 \label{fig:UMLproblem}
 \end{figure}
 
-In \autoref{fig:UMLstate}, you will find the following:
+In \autoref{fig:UMLstate}, there is the ``State'' class:
 \begin{description}
-    \item[func,funcargs:] when propagating and updating old states, I found it
-        useful if all states had some knowledge of their own function and arguments.
-        This is redundant (since often the function is the same in all states),
-        but easier to read.
-    \item[betterThanOther] is the function equivalent of the \textless operator,
-        used to compare states.
+    \item[func,funcargs:] is the objective function and the arguments
+        to be used in the function. Its currently the same in every state,
+        but now the program can be modified such that in the future, a state
+        and its predecessors can change function when propagating and updating
+        old states.
+    \item[betterThanOther] is the function equivalent of the \textless{} operator,
+        used to compare states. It is used to compare two states with
+        similar values. If one state has a shorter or longer ancestor tree than the
+        other, ``betterthanother'' returns true or false, respectively.
 \end{description}
 
-What can be seen from the abstract classes and framework is that none of the code
-mentions the exact type of problem to be solved. This means the code can be used
-to model any problem that has an iteratively progressing scheme.
 
 \section{A*}
-The assignment description models an A* search as follows:
+Our A*-implementation is intended to be the same as in the assignment text.
+Below is our attempt at an explanation. By \textit{index} we mean that two states
+are similar except that their ancestor tree is different.
 \begin{enumerate}
     \item pop the currently most promising state.
     \item generate all possbile successor states
-    \item if a successor state has a similar index value or position:
+    \item assign an objective value to each successor
+    \item if a successor state has a similar index as a previously generate state:
         \begin{enumerate}
             \item if the successor state is better:
                 \begin{enumerate}
                     \item set the remembered state to this index such that future
                         discoveries point to this successor
+                    \item propagate back along the ancestor tree of the old state,
+                        and ensure that if using the new states' path to get 
+                        to an ancestor is better, this will be preffered in the 
+                        future.
                 \end{enumerate}
-            \item 
         \end{enumerate}
 \end{enumerate}
 
-All states need a method to be indexed. This index should be similar between
-states at the same point. This means that the heuristic function returns the same
-value. The objective function, however, usually measured as the depth, can be
-different. In general we want the shortest path, so whenever two states
-have the same index, the one with the shortes ancestor tree is remembered
-as the state for the index, and the other is forgotten.
-In our case, the index value (assumed to be an integer) is stored in a dictionary.
-The lookup, and insertions are $O(1)$.
-
+% All states need a method to be indexed. This index should be similar between
+% states at the same point. This means that the heuristic function returns the same
+% value. The objective function, however, usually measured as the depth, can be
+% different. In general we want the shortest path, so whenever two states
+% have the same index, the one with the shortes ancestor tree is remembered
+% as the state for the index, and the other is forgotten.
+% In our case, the index value (assumed to be an integer) is stored in a dictionary.
+% The lookup, and insertions are $O(1)$.
+%
 Since each successor will need to have an objective value, we use the objective
 function \textit{attach-and-eval} whenever generating a successor. Similar to 
 the A*-code given in the assignment text, we do not actually evaluate the 

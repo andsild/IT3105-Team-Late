@@ -33,7 +33,6 @@ def find_path_length(curS):
 """ Local search using A*
 """
 def astar(network, problem, Q, D):
-
     # Q holds OPEN
     # D holds CLOSED
     if Q:
