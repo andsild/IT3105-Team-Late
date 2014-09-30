@@ -5,8 +5,6 @@ from heapq import heappush, heappop
 from ipdb import set_trace
 from time import sleep
 
-path_lenght = 0
-
 """ The function for forgetting unnecessary points
     from path if there is shorter way
 """
@@ -21,7 +19,7 @@ def propagate_path_improvements(old_bad, new_better):
 """ The function for counting the path length
 """
 def find_path_length(curS):
-    global path_lenght
+    path_lenght = 0
     travQ = [curS]
     while travQ:
         acc = travQ.pop()
@@ -35,9 +33,14 @@ def find_path_length(curS):
 def astar(network, problem, Q, D):
     # Q holds OPEN
     # D holds CLOSED
+<<<<<<< HEAD
+=======
+
+>>>>>>> 92009282ef63efb84ad05a0beac6ee6e2337f866
     if Q:
         _, curState = heappop(Q)
         if curState.isGoal():
+            print "---\nMode:",problem.mode
             print "valid finish"
             find_path_length(curState)
             problem.destructor(curState)
@@ -52,16 +55,12 @@ def astar(network, problem, Q, D):
                 continue
             D[succ.index] = succ
             heappush(Q, (succ.cost_to_goal, succ))
-<<<<<<< HEAD
-        problem.updateStates(Q[0][1], curState)
-        sleep(0.01)
-=======
         # problem.updateStates(curState, Q[0][1])
         if Q:
             problem.updateStates(Q[0][1], curState)
         sleep(0.1)
->>>>>>> 5ee6da3d4f1aa1b6dda36f742ea78f98d2a58fd0
         return True
+    print "---\nMode:",problem.mode
     print "goal not found"
     #find_path_length(curState)
     problem.destructor(None)
