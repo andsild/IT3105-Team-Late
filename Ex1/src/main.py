@@ -9,7 +9,7 @@ from csp import *
 from graphColoring import *
 from network import *
 
-def searchParams(filename):
+def searchParams(filename, mode):
     def retMarks(obs_cords):
         for line in obs_cords:
             start_x, start_y, width, height = line
@@ -41,7 +41,7 @@ def searchParams(filename):
     cords = np.array( [ list(y for x in range(height) for y in range(width)),
                         list(x for x in range(height-1, -1, -1) for y in range(width))]
                     )
-    
+
     for (xCords, yCords) in retMarks(obs_cords):
         for (x,y) in zip(xCords, yCords):
             O.add((x,y))
@@ -56,7 +56,7 @@ def searchParams(filename):
     cords = np.array( [xLine, yLine] )
 
     network = Network2D(cords)
-    s = Search(network, (startX, startY), (goalX, goalY), inData[0], O)
+    s = Search(network, (startX, startY), (goalX, goalY), inData[0], O, mode)
 
     return network.widget, s
 
@@ -86,7 +86,7 @@ def CSPParams(filename):
 
     for e in inData[nv+1:]:
         cnet.readCanonical(e)
-        
+
     s = Coloring(network, cnet)
 
     return network.widget, s
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     if type_of_func == "CSP":
         widget, problem = CSPParams(sys.argv[2])
     elif type_of_func == "SEARCH":
-        widget, problem = searchParams(sys.argv[2])
+        widget, problem = searchParams(sys.argv[2], sys.argv[3])
     else:
         print "Unsupported function.."
         exit(1)

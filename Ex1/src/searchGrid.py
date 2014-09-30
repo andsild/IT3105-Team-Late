@@ -19,26 +19,48 @@ colors = { "unused"     : [0, 0, 0, 1],
 
 ADJ_OP = [ (0, -1), (-1, 0),
            (0, 1), (1, 0)]
+breadth_value = 0
+depth_value = 0
 
 """ The heuristic for 2d grid search
-    Currently, its the manhattan distance from the current cartesian point
-    to the goal.
+    Currently, itertools the manhattan distance from the current cartesian point
+    to The global.
 """
 def h(p, goal):
     return abs(goal[0] - p[0]) + abs(goal[1] - p[1])
 
 """ The evaluation function for a given state in A* 2D-search.
-    It takes a heuristic function and adds the depth
+    It try_Try_Except_Finallykes a heuristic function and adds the depth
 """
 def f_search(p, depth, goal):
     return depth + h(p, goal)
+''' The simple function for breadth firs search
+'''
+def bfs():
+    global breadth_value
+    print breadth_value
+    breadth_value += 1
+    return  breadth_value
+''' The simple function for depth first search
+'''
+def dfs():
+    global depth_value
+    depth_value -= 1
+    return depth_value
 
 """ A state, per A*, to be used in search
     A* does not, in this implementation need any more properties than its superclass.
 """
 class SearchState(State):
-    def __init__(self, pos, goal_index, pred, depth):
-        super(SearchState, self).__init__(pos, pred,
+    def __init__(self, pos, goal_index, pred, depth,mode):
+        if mode is "depth":
+            super(SearchState, self).__init__(pos, pred,
+                                    dfs, (pos, depth, goal_index))
+        elif mode is "breadth":
+            super(SearchState, self).__init__(pos, pred,
+                                    bfs, (pos, depth, goal_index))
+        else:
+            super(SearchState, self).__init__(pos, pred,
                                     f_search, (pos, depth, goal_index))
         self.goal_index = goal_index
 
@@ -51,11 +73,12 @@ class SearchState(State):
 """ A problem class for search that can be used by a local search
 """
 class Search(Problem):
-    def __init__(self, network, start, goal, dim, O):
+    def __init__(self, network, start, goal, dim, O,mode):
         super(Search, self).__init__(network)
         self.start = start
         self.goal = goal
         self.width, self.height = dim
+        self.mode = mode
         """ The obstacle coordinates  """
         self.O = O
 
@@ -67,7 +90,7 @@ class Search(Problem):
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
-        start_state = SearchState(self.start, self.goal, None, 0)
+        start_state = SearchState(self.start, self.goal, None, 0, self.mode)
 
         Q = [(start_state.cost_to_goal, start_state)]
         D = { self.start : Q[0][1] }
@@ -79,7 +102,7 @@ class Search(Problem):
     def genNeighbour(self, state):
         global ADJ_OP 
         x, y = state.index
-        return [ SearchState((x+i,y+j), self.goal, state, state.depth+1) \
+        return [ SearchState((x+i,y+j), self.goal, state, state.depth+1, self.mode) \
                 for i,j in ADJ_OP \
                     if x+i > -1 and y+j > -1 \
                     and x+i < self.width and y+j < self.height \
