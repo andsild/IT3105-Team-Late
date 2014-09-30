@@ -25,36 +25,17 @@ COLORS = [ x for x in color_pool.values() \
 class Coloring(Problem):
     def __init__(self, network, cnet):
         super(Coloring, self).__init__(network)
-        self.colors = range(len(cnet.domains[0]))
         self.cnet = cnet
         # self.solver = CSPSolver(constraints)
 
     def triggerStart(self):
         self.network.clear()
-        node_index = np.random.randint(low=0, high=self.network.g.num_vertices())
-        color_index = np.random.randint(low=0, high=len(self.colors))
-        # XXX:
-        # node_index = 1
-        # color_index = 0
-        print "Starting with vertex %d  as color %s" % (node_index, "blue")
 
-        start_node = self.network.g.vertex(node_index)
-        start_color = self.colors[color_index]
-
-        init_domains = [ deepcopy(li) for li in cnet.domains]
-        init_domains[node_index] = [color_index]
-
-        start_state = CSPState(None, init_domains, (start_node, start_color))
-
+        start_state = self.cnet.getRootState()
         # self.solver.AC_3(start_state, node_index)
-
-        #TODO: this Q is similar in all "problem" classes
         Q = [(start_state.cost_to_goal, start_state)]
         D = dict()
         D[start_state.index] = start_state
-
-        # self.network.update()
-        self.network.paint_node(start_node, start_color)
 
         return astar, self, self.network, Q, D
 
@@ -92,3 +73,4 @@ class Coloring(Problem):
             # self.network.paint_node(*new.getLatestAddition())
         # self.network.update()
 
+# EOF

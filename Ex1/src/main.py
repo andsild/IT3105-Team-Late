@@ -88,7 +88,7 @@ def CSPParams(filename):
     for e in inData[nv+1:]:
         cnet.readCanonical(e)
         
-    s = Coloring(network, COLORS, cnet)
+    s = Coloring(network, cnet)
 
     return network.widget, s
 

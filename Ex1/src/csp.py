@@ -22,7 +22,7 @@ def h_csp(domains):
 
 class CNET(object):
     def __init__(self, num_vars, init_domain):
-        self.domains = [ VertexInstance(index, [x for x in init_domain]) \
+        self.domains = [ VertexInstance(index, [x for x in init_domain], self) \
                                 for index in range(num_vars)]
         # self.variables = range(len(domains))
         self.constraints = [ [] for _ in range(num_vars) ]
@@ -32,29 +32,40 @@ class CNET(object):
         ret.addVI(caller)
         return ret
 
+    def getDomainSize(self):
+        if self.domains:
+            if len(self.domains) > 0:
+                return len(self.domains[0].domain)
+        return -1
 
     def readCanonical(self, line):
         variables = line.split()
-        mapped_vars = [ index for index,_ in enumerate(variables) ]
+        mapped_vars = [ (index,x) for index,x in enumerate(variables) ]
         alphabet = list(lowercase)
         symvars = symbols(' '.join([alphabet.pop() for x in variables]))
 
         lambdafunc = lambdify(symvars, Ne(*symvars))
 
-        for var in mapped_vars:
-            self.constraints[var].append(lambdafunc)
+        for index, var in mapped_vars:
+            c = Constraint(lambdafunc, var, self)
+            self.constraints[index].append(c) # redundant set of pointers,
+                                              # but fast lookup
+    def getRootState(self):
+        variable = self.domains[np.random.randint(low=0, high=len(self.domains))]
+        # domain = np.random.randint(low=0, high=self.getDomainSize())
+        # variable.makeAssumption(domain)
 
-    # def addConstraint(self, function, variable_indexes):
-    #     c = Constraint(l, [self.domains[i] for i in variable_indexes])
-    #
-    #     for i in variable_indexes:
-    #         self.domains[i].append(
+        return CSPState(None, [deepcopy(li) for li in self.domains], None)
 
-
+    def __getitem__(self, index):
+        if type(index) == Constraint:
+            for c in self.constraints:
+                if c == self.constraints:
+                    return c
+            return None
+        return self.domains[index]
 
 class CSPState(State):
-    """ This will be the VI per the assignment text
-    """
     def __init__(self, pred, domains, newPaint):
         self.domains = domains
         if pred:
@@ -81,26 +92,38 @@ class CSPState(State):
         return self.newPaint
 
 class VertexInstance(object):
-    def __init__(self, index, domain):
+    def __init__(self, index, domain, caller):
         self.index = index
         self.domain = domain
+        self.cnet = caller
 
     def copy(self):
         return VertexInstance(self.index, [v for v in domain])
 
+    def getCnetSelf(self):
+        return self.cnet[self.index]
+
+    def makeAssumption(self, index):
+        self.domain = [self.domain[index]]
+
 class Constraint(object):
     """ This is the CI relative to the assignment text
     """
-    def __init__(self, function, variables):
+    def __init__(self, function, variables, caller):
         """ Pointer to VI """
         self.variables = variables 
         """ Pointer to CNET constraint """
         self.function = function   
 
+        self.cnet = caller
+
         self.list_vi = []
 
     def addVI(self, vi):
         self.list_vi.append(vi)
+
+    def getCnetSelf(self):
+        return self.cnet[self]
 
     def revise(self, vi):
         #TODO: there is a difference between when the domain has been
