@@ -83,6 +83,13 @@ class CSPState(State):
     def isGoal(self):
         assigned = [ len(vi.domain) == 1 for vi in self.domains]
         return all(assigned)
+
+    def genNotSoRandomVertex(self):
+        unassigned = [ index for index,vi in enumerate(self.domains) \
+               if len(vi.domain) > 1 ]
+        if len(unassigned) > 0:
+            return unassigned[0]
+        return self.genRandomVertex()
     
     def genRandomVertex(self):
         #TODO: make random
@@ -90,10 +97,7 @@ class CSPState(State):
                if len(vi.domain) > 1 ]
         if len(unassigned) > 0:
             return unassigned[np.random.randint(0, len(unassigned))]
-        if not ret:
-            # return None
-            return np.random.randint(low=0, high=len(self.domains))
-        return ret[0]
+
     def copy(self):
         doms = self.domains or []
         cons = self.constraints or []
@@ -139,6 +143,11 @@ class Constraint(object):
     def getCnetSelf(self):
         return self.cnet[self]
 
+    def getAdjacent(self, vertex, state):
+        set_trace()
+        return [ [state[v.index]] for v in state.domains \
+                if v.index not in [ val for (_,val) in self.vi_list ] ]
+
     def narrow(self, state):
         self.addState(state)
         can_satisfy = False
@@ -179,13 +188,14 @@ class Constraint(object):
 
 def revise(variable, constraint, state):
     revised = False
+    orig_domain = [x for x in variable.domain]
     for value in variable.domain:
         # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
-
         variable.makeAssumption(value)
         if not constraint.narrow(state):
-                variable.domain.remove(value)
-                revised = True
+            orig_domain.remove(value)
+            revised = True
+    variable.domain = orig_domain
     return revised
 
 
@@ -196,8 +206,9 @@ def AC_3(cnet, state, vertex):
         # Now all I have to do is to check the domain of v
         if revise(v, c, state):
             if len(v.domain) == 0:
+                print "REDUCED"
                 return False
-            for neighbours in v.getN:
+            for neighbours in c.getAdjacent(v, state):
                 Q += [(neighbours,c) for c in cnet.getConstraint(neighbours)]
     return True
 

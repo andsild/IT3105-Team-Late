@@ -45,12 +45,14 @@ class Coloring(Problem):
             of size > 1 to the singleton set
 
         """
-        new_vertex = state.genRandomVertex() # just the index
-        for value in state[new_vertex].domain[1:]:
+        # new_vertex = state.genRandomVertex() # just the index
+        new_vertex = state.genNotSoRandomVertex()
+        for value in state[new_vertex].domain:
             new_state = state.copy()
             # set_trace()
             new_state[new_vertex].makeAssumption(value)
             if AC_3(self.cnet, new_state, new_vertex):
+                print "yield"
                 yield new_state
 
         # print "picking %s as new for neigh" % (str(new_vertex))
@@ -58,10 +60,9 @@ class Coloring(Problem):
         #     return self.solver.AC_3(state, new_vertex)
         # return []
 
-    def destructor(self, Q):
-        if Q:
-            _, state = heappop(Q)
-            for vi in state.domains:
+    def destructor(self, final_state):
+        if final_state:
+            for vi in final_state.domains:
                 if len(vi.domain) == 1:
                     self.network.paint_node(vi.index, COLORS[vi.domain[0]])
         print "FINISHED"

@@ -87,7 +87,7 @@ class Search(Problem):
 
     """ The function to be invoked at the end of a search
     """
-    def destructor(self, Q=None):
+    def destructor(self, final_state=None):
         self.network.paint_node(
             self.network.cordDict[self.goal[0], self.goal[1]], colors["goal"])
         self.network.update()

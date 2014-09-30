@@ -25,13 +25,15 @@ def astar(network, problem, Q, D):
     if Q:
         _, curState = heappop(Q)
         if curState.isGoal():
-            problem.destructor(Q)
+            print "valid finish"
+            problem.destructor(curState)
             return False
+        print curState.cost_to_goal, Q
         numNodes += 1
         # All nodes run "attach-and-eval" in neighbour generation
         for succ in problem.genNeighbour(curState):
             if succ.index in D: # seen before. 
-                raise poop
+                raise WHAAAAT
                 old_state = D[succ.index]
                 if not old_state.betterThanOther(succ): # better?
                     propagate_path_improvements(old_state, succ) # S = old_state, curold_state = X
@@ -44,7 +46,7 @@ def astar(network, problem, Q, D):
         # problem.updateStates(curState, Q[0][1])
         problem.updateStates(Q[0][1], curState)
         return True
-    problem.destructor(Q)
+    problem.destructor(None)
     return False
 
 class Problem(object):
