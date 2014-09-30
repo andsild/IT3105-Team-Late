@@ -4,7 +4,6 @@ from ipdb import set_trace
 import numpy as np
 
 from searchGrid import *
-from graphColoring import COLORS
 from csp import *
 from graphColoring import *
 from network import *
@@ -66,8 +65,9 @@ def searchParams(filename, mode):
 
 """ The function resolving parameters for CSP problem
 """
-def CSPParams(filename):
-    global COLORS
+def CSPParams(filename,n_colors):
+    COLORS = [ x for x in color_pool.values() \
+          if x is not color_pool["black"] and x is not color_pool["white"]][:int(n_colors)]
     inData = open(filename)
     inData = inData.read().split("\n")
     inData.pop()
@@ -93,7 +93,7 @@ def CSPParams(filename):
     for e in inData[nv+1:]:
         cnet.readCanonical(e)
 
-    s = Coloring(network, cnet)
+    s = Coloring(network, cnet, COLORS)
 
     return network.widget, s
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     widget, problem = None, None
     type_of_func = sys.argv[1].upper()
     if type_of_func == "CSP":
-        widget, problem = CSPParams(sys.argv[2])
+        widget, problem = CSPParams(sys.argv[2], sys.argv[3])
     elif type_of_func == "SEARCH":
         if len(sys.argv) > 3:
             widget, problem = searchParams(sys.argv[2], sys.argv[3])
