@@ -133,7 +133,7 @@
     This text answers assignment 2: combining CSP with best first search.
     The assignment builds from the A* implemented in the previous assignment.
     In this document,
-    we explain our implementation of CSP modelled as a search problem.
+    we explain our implementation of CSP modeled as a search problem.
 
 \end{abstract}
 
@@ -143,14 +143,14 @@
 \IEEEPARstart{M}{odeling} problems as CSP has multiple benefits.
 The goal is to assign each object a value from a finite domain,
 without violating a set of constraints. 
-Each node in our graph corresponds to a temporary assignment
+Each node in our graph corresponds to a temporary assigment
 to a subset of objects $o \subset O$. If $o$  is complete, that is, every object
-has an assigned value, the problem is considered solved.
+has an assigned value, the problem is considered sjolved.
 
-\section{Initialising the VENT}
-The Constraint Network is modelled as a class object called \textit{NET}.
-It initialises a set of variable instances (\textit{VI}), each with
-a complete domain. The domains are modelled as 1D standard lists with integers.
+\section{Initializing the CNET}
+The Constraint Network is modeled as a class object called \textit{CNET}.
+It initializes a set of variable instances (\textit{VI}), each with
+a complete domain. The domains are modeled as 1D standard lists with integers.
 This can e.g.\ correspond to indexes in a list of 
 colors (as used in this assignment), such that the domain denotes
 indexes in a (global) list of colors.
@@ -162,13 +162,13 @@ any number \textgreater{} 2. Each number (integer) maps to one variable in the
 domain. 
 
 First a general function is created. Currently, it is always assumed
-to be a non-equality constraint (to modify this, the input line would need
+to be a non-equlity constraint (to modify this, the input line would need
 to be checked for an operator and find a corresponding mapping, which should
 be a trivial task). The non-equality constraint does not consider domains
 or assignments, it will have general form $x != y$, for any x and y to
 be specified later. Here, it is important to map each symbol
 to the index of a VI in a state. To do this, only the index of the VI
-if stored, and we can lookup the domain from state during invocation. Listing \autoref{lst:constraint}
+if stored, and we can lookup the domain from state during invokation. Listing \autoref{lst:constraint}
 shows a shorter version of creating a constraint:
 \begin{lstinputlisting}[caption="Creation of constraint",language=Python]{example.py}
     \label{lst:constraint}
@@ -177,7 +177,7 @@ shows a shorter version of creating a constraint:
 \begin{description}
     \item[sym\_to\_variable] maps each variable to its position in the
         constraint. E.g. for $x < y$, the position of the variables matters, so the 
-        dictionary maps a symbol to a variable.
+        dicitionary maps a symbol to a variable.
     \item[c], the \textit{CI} is created once. In the CNET, it is then passed
         on to a list of constraints. This list is indexed by variable;
         such that each variable has a list of constraints it occurs in.
@@ -187,7 +187,7 @@ shows a shorter version of creating a constraint:
 
 The way the constraint reader works now, it should be easy to extend
 to more advanced constraints. Apart from the mapping from type of constraint
-to code, the rest of the code is written using list comprehensions and Cartesian
+to code, the rest of the code is written using list comprehensions and cartesian
 product mappings which should be able to test constraints for any number
 of variables.
 
@@ -200,7 +200,7 @@ is independent to the memory address of the CNET.
 From the initial state there is an assumption: it takes a random object $o$, and reduces
 the domain to the singleton set. Then, from the CNET, 
 it retrieves all the constraints associated with $o$. Each constraint is
-then checked using arc-consistency algorithms. The AC-method 
+then checked using arc-consitency algorithms. The AC-method 
 queses constraint-checks for all variables affected by the assumption.
 If at any point a constraint forces a domain to become empty, ``False''
 is returned and the assumption is left alone.
@@ -221,7 +221,7 @@ new states by using the method described in the previous paragraph, and assesses
 value of states by using the heuristic mentioned in the end of this text.
 
 In other words, to implement the CSP you do need to know anything about A*, you
-just need to define a state, a success-full termination and how to progress from
+just need to define a state, a successfull termination and how to progress from
 a state.
 
 \section{Generality of A*-GAC}
@@ -235,7 +235,7 @@ To solve a problem in A*-GAC, you implement your own subclass of
 \textit{Problem}. From the CNET you get the initial state. We have set
 the generation of neighbours to be specific for each problem. This is because
 some problems have different properties. For example, we felt that
-propagating from two different random points in the graph was not beneficial.
+propagating from two different random points in the graph was not benefitial.
 
 \section{Generality of CNET}
 The root nodes startes by making a deep copy from the original CNET.
@@ -244,7 +244,7 @@ Hence, the CNET is separated from each VI and CI.
 
 \section{Heuristic}
 For the A* algorithm, an index value to each node in the search tree is given.
-This is determined by $f(x) = g(x) + h(x)$, where $h(x)$ is a objective value \dots
+This is determined by $f(x) = g(x) + h(x)$, where $h(x)$ is a heuristical value \dots
 
 Our current heuristic is to count the size of all domains to each variable.
 The size is taken minus one, such that assigned objects (that has a domain
