@@ -33,7 +33,6 @@ def find_path_length(curS):
 """ Local search using A*
 """
 def astar(network, problem, Q, D):
-
     # Q holds OPEN
     # D holds CLOSED
     if Q:
@@ -53,10 +52,15 @@ def astar(network, problem, Q, D):
                 continue
             D[succ.index] = succ
             heappush(Q, (succ.cost_to_goal, succ))
+<<<<<<< HEAD
+        problem.updateStates(Q[0][1], curState)
+        sleep(0.01)
+=======
         # problem.updateStates(curState, Q[0][1])
         if Q:
             problem.updateStates(Q[0][1], curState)
         sleep(0.1)
+>>>>>>> 5ee6da3d4f1aa1b6dda36f742ea78f98d2a58fd0
         return True
     print "goal not found"
     #find_path_length(curState)

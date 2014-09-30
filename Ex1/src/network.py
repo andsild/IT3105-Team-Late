@@ -3,6 +3,9 @@
 from graph_tool.all import *
 from ipdb import set_trace
 
+""" Options for adjacent cells
+    Currently horizontal and vertical direction, not diagonal
+"""
 colors = { "unused"     : [0, 0, 0, 1],
            "seen"       : [.0, 1, .0, 1],
            "obstacle"   : [1, 1, 1, 1],
