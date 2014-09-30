@@ -7,6 +7,9 @@ from time import sleep
 
 path_lenght = 0
 
+""" The function for forgetting unnecessary points
+    from path if there is shorter way
+"""
 def propagate_path_improvements(old_bad, new_better):
     travQ = [old_bad]
     while travQ:
@@ -15,11 +18,13 @@ def propagate_path_improvements(old_bad, new_better):
             old_parent = cur.setNewParent(new_better)
             travQ.append(old_parent)
 
+""" The function for counting the path length
+"""
 def find_path_length(curS):
     global path_lenght
     travQ = [curS]
     while travQ:
-        acc = pathQ.pop()
+        acc = travQ.pop()
         if acc.pred:
             travQ.append(acc.pred)
             path_lenght += 1
@@ -29,7 +34,6 @@ def find_path_length(curS):
 """
 def astar(network, problem, Q, D):
 
-
     # Q holds OPEN
     # D holds CLOSED
     print "(iteration)"
@@ -38,7 +42,7 @@ def astar(network, problem, Q, D):
         _, curState = heappop(Q)
         if curState.isGoal():
             print "valid finish"
-            find_path_lenght(curState)
+            find_path_length(curState)
             problem.destructor(curState)
             return False
         # All nodes run "attach-and-eval" in neighbour generation
@@ -62,6 +66,9 @@ def astar(network, problem, Q, D):
     problem.destructor(None)
     return False
 
+""" General class for a problem
+    for both - search,CSP
+"""
 class Problem(object):
     def __init__(self, network):
         self.network = network
@@ -74,6 +81,9 @@ class Problem(object):
     def updateStates(self, new, cur):
         raise NotImplementedError("abstract class")
 
+""" General class for a state
+    for both - search,CSP
+"""
 class State(object):
     def __init__(self, index, pred, func, funcArgs):
         self.index = index
@@ -87,10 +97,13 @@ class State(object):
             depth = 0
         self.depth = depth
         self.eval()
+
     def betterThanOther(self, other):
         return self.depth < other.depth
+
     def eval(self):
         self.cost_to_goal = self.func(*self.funcArgs)
+
     def __str__(self):
         return str(self.index) + "\t " + str(self.cost_to_goal)
 

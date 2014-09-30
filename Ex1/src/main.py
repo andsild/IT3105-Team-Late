@@ -9,7 +9,11 @@ from csp import *
 from graphColoring import *
 from network import *
 
+""" The function resolving parameters for search problem
+"""
 def searchParams(filename, mode):
+    """ Method for transformation of obsatcles to points
+    """
     def retMarks(obs_cords):
         for line in obs_cords:
             start_x, start_y, width, height = line
@@ -60,6 +64,8 @@ def searchParams(filename, mode):
 
     return network.widget, s
 
+""" The function resolving parameters for CSP problem
+"""
 def CSPParams(filename):
     global COLORS
     inData = open(filename)
@@ -91,6 +97,8 @@ def CSPParams(filename):
 
     return network.widget, s
 
+""" Main, it all starts here
+"""
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Did you forget params?"

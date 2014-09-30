@@ -9,6 +9,8 @@ import sys
 from astar import *
 from window import *
 
+""" Colors for objects in the grid
+"""
 colors = { "unused"     : [0, 0, 0, 1],
            "seen"       : [.0, 1, .0, 1],
            "obstacle"   : [1, 1, 1, 1],
@@ -16,33 +18,41 @@ colors = { "unused"     : [0, 0, 0, 1],
            "goal"       : [1, 0, 0, 1],
           }
 
-
+""" Options for adjacent cells
+    Currently horizontal and vertical direction, not diagonal
+"""
 ADJ_OP = [ (0, -1), (-1, 0),
            (0, 1), (1, 0)]
+
 breadth_value = 0
 depth_value = 0
 nodes_count = 0
 
 """ The heuristic for 2d grid search
-    Currently, itertools the manhattan distance from the current cartesian point
-    to The global.
+    Currently, its the manhattan distance from the current cartesian point to the global.
 """
 def h(p, goal):
     return abs(goal[0] - p[0]) + abs(goal[1] - p[1])
 
-""" The evaluation function for a given state in A* 2D-search.
-    It try_Try_Except_Finallykes a heuristic function and adds the depth
+""" The evaluation functions for a given state in A* 2D-search.
+    ---
+    The function for the best first search
+    It takes a heuristic function and adds the depth
 """
 def f_search(p, depth, goal):
-    return depth + h(p, goal)
-''' The simple function for breadth firs search
-'''
+    return 2*depth + h(p, goal)
+
+""" The function for breadth first search
+    Simply evaluating new one with higher number
+"""
 def bfs():
     global breadth_value
     breadth_value += 1
     return  breadth_value
-''' The simple function for depth first search
-'''
+
+""" The function for depth first search
+    Simply evaluating new one with lower number
+"""
 def dfs():
     global depth_value
     depth_value -= 1
@@ -112,7 +122,7 @@ class Search(Problem):
         return [ SearchState((x+i,y+j), self.goal, state, state.depth+1, self.mode) \
                 for i,j in ADJ_OP \
                     if x+i > -1 and y+j > -1 \
-                    if x+i is not px and y+i is not py \
+                    #if (x+i != px and y+j != py) \
                     and x+i < self.width and y+j < self.height \
                     and (x+i, y+j) not in self.O]
 
