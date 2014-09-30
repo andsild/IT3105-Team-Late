@@ -109,12 +109,23 @@ if __name__ == "__main__":
     if type_of_func == "CSP":
         widget, problem = CSPParams(sys.argv[2])
     elif type_of_func == "SEARCH":
-        widget, problem = searchParams(sys.argv[2], sys.argv[3])
+        if len(sys.argv) > 3:
+            widget, problem = searchParams(sys.argv[2], sys.argv[3])
+        else:
+            widget1, problem1 = searchParams(sys.argv[2], "best")
+            widget2, problem2 = searchParams(sys.argv[2], "depth")
+            widget3, problem3 = searchParams(sys.argv[2], "breadth")
     else:
         print "Unsupported function.."
         exit(1)
 
-    gui = genWindow(widget, problem)
+    if len(sys.argv) > 3:
+        gui = genWindow(widget, problem)
+    else:
+        gui1 = genWindow(widget1, problem1)
+        gui2 = genWindow(widget2, problem2)
+        gui3 = genWindow(widget3, problem3)
+
     gtk.main()
 
 # EOF

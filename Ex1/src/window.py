@@ -21,7 +21,8 @@ class Handler:
             self.btnStart()
 
     def onDeleteWindow(self, *args):
-        gtk.main_quit(args)
+        args[0].destroy()
+        #gtk.main_quit(args)
 
     def btnStart(self, *args):
         func, problem, network, Q, D = self.inter_object.triggerStart()
@@ -30,14 +31,15 @@ class Handler:
 def genWindow(widget, inter_object):
     builder = gtk.Builder()
     builder.add_from_file("src/gui.glade")
-    builder.connect_signals(Handler(inter_object))
+    h = Handler(inter_object)
+    builder.connect_signals(h)
 
     builder.get_object("alignment1").add(widget)
 
     win = builder.get_object("window1")
     win.set_title("Rendering a-star on graph...")
     win.set_default_size(600,600)
-    win.connect("delete_event", gtk.main_quit)
+    win.connect("delete_event", h.onDeleteWindow)
     win.show_all()
 
     return win
