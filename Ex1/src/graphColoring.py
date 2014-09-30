@@ -32,6 +32,7 @@ class Coloring(Problem):
         self.network.clear()
 
         start_state = self.cnet.getRootState()
+        start_state.newPaint = start_state[start_state.getUnassigned()]
         # self.solver.AC_3(start_state, node_index)
         Q = [(start_state.cost_to_goal, start_state)]
         D = dict()
@@ -45,14 +46,13 @@ class Coloring(Problem):
             of size > 1 to the singleton set
 
         """
-        # new_vertex = state.genRandomVertex() # just the index
-        new_vertex = state.genNotSoRandomVertex()
+        new_vertex = state.getUnassigned_Nonrandom() # just the index
+        # new_vertex = self.network[state.newPaint.index]
         for value in state[new_vertex].domain:
             new_state = state.copy()
             # set_trace()
             new_state[new_vertex].makeAssumption(value)
             if AC_3(self.cnet, new_state, new_vertex):
-                print "yield"
                 yield new_state
 
         # print "picking %s as new for neigh" % (str(new_vertex))
@@ -68,18 +68,11 @@ class Coloring(Problem):
         print "FINISHED"
 
     def updateStates(self, new, cur):
-        if new.pred == cur:
-            if new.newPaint:
-                self.network.paint_node(*new.newPaint())
-        else:
-            # TODO: re-check EVERYTHING
-            for vi in new.domains:
-                if len(vi.domain) == 1:
-                    self.network.paint_node(vi.index, COLORS[vi.domain[0]])
-                else:
-                    self.network.paint_node(vi.index, color_pool["black"])
-
-            # self.network.paint_node(*new.getLatestAddition())
-        # self.network.update()
+        for vi in new.domains:
+            if len(vi.domain) == 1:
+                self.network.paint_node(vi.index, COLORS[vi.domain[0]])
+            else:
+                self.network.paint_node(vi.index, color_pool["black"])
+        self.network.update()
 
 # EOF

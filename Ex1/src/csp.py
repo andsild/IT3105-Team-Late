@@ -54,10 +54,6 @@ class CNET(object):
             self.constraints[int(var)].append(c) # redundant set of pointers,
                                               # but fast lookup
     def getRootState(self):
-        variable = self.domains[np.random.randint(low=0, high=len(self.domains))]
-        # domain = np.random.randint(low=0, high=self.getDomainSize())
-        # variable.makeAssumption(domain)
-
         return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
@@ -84,14 +80,14 @@ class CSPState(State):
         assigned = [ len(vi.domain) == 1 for vi in self.domains]
         return all(assigned)
 
-    def genNotSoRandomVertex(self):
+    def getUnassigned_Nonrandom(self):
         unassigned = [ index for index,vi in enumerate(self.domains) \
                if len(vi.domain) > 1 ]
         if len(unassigned) > 0:
             return unassigned[0]
         return self.genRandomVertex()
     
-    def genRandomVertex(self):
+    def getUnassigned(self):
         #TODO: make random
         unassigned = [ index for index,vi in enumerate(self.domains) \
                if len(vi.domain) > 1 ]
@@ -103,7 +99,7 @@ class CSPState(State):
         cons = self.constraints or []
 
         return CSPState(self, [ var.copy() for var in doms ],
-                        [ c for c in cons], None)
+                        [ c for c in cons], self.newPaint)
 
     def __getitem__(self, index):
         return self.domains[index]
@@ -144,11 +140,10 @@ class Constraint(object):
         return self.cnet[self]
 
     def getAdjacent(self, vertex, state):
-        set_trace()
-        return [ [state[v.index]] for v in state.domains \
-                if v.index not in [ val for (_,val) in self.vi_list ] ]
+        return [ state[index] for (_,index) in self.vi_list \
+                if index is not vertex]
 
-    def narrow(self, state):
+    def canSatisfy(self, state):
         self.addState(state)
         can_satisfy = False
 
@@ -159,104 +154,36 @@ class Constraint(object):
         for tup in product(*arg_list):
             if self.function(*tup):
                 can_satisfy = True
+                break
         return can_satisfy
-
-# # domain_list = [ vi. for var in vi.variables ]
-#
-#         setme = [ index for index,x in enumerate(domain_list) if len(x) == 1 ]
-#         if len(setme) == 0:
-#             return []
-#         use_node = setme[0]
-#
-#         confined = []
-#
-#         print self.variables
-#         print domain_list
-#         print "set use_node to %d" % (use_node) 
-#         for tup in product(*domain_list): # all possible domain mappings
-#             indexes = range(len(tup))
-#             if not self.function(*tup):
-#                 for mapped_index, index in enumerate(self.variables):
-#                     if mapped_index is use_node: continue
-#                     confined.append(index)
-#                     domain_list[mapped_index].remove(tup[mapped_index])
-#                     can_confine = True
-#
-#         print domain_list
-#         return confined
-
 
 def revise(variable, constraint, state):
     revised = False
-    orig_domain = [x for x in variable.domain]
+    copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
         variable.makeAssumption(value)
-        if not constraint.narrow(state):
-            orig_domain.remove(value)
+        if not constraint.canSatisfy(state):
+            copy_domain.remove(value)
             revised = True
-    variable.domain = orig_domain
+    variable.domain = copy_domain
     return revised
 
 
 def AC_3(cnet, state, vertex):
-    Q = [(state[vertex],c) for c in cnet.getConstraint(vertex)]
+    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
+    Q = []
+    for c in cnet.getConstraint(vertex):
+        for vi in c.getAdjacent(vertex, state):
+            Q.append((vi, c))
     while Q:
         v, c = Q.pop()
-        # Now all I have to do is to check the domain of v
         if revise(v, c, state):
             if len(v.domain) == 0:
-                print "REDUCED"
                 return False
-            for neighbours in c.getAdjacent(v, state):
-                Q += [(neighbours,c) for c in cnet.getConstraint(neighbours)]
+            # will currently never be invoked, since we always reduce to singleton
+            for neighbour in c.getAdjacent(v, state):
+                Q += [(neighbour,c) for c in cnet.getConstraint(neighbour.index)]
     return True
 
-    # def AC_3(self, state, new_vertex):
-    #     for val in state.domains[new_vertex]:
-    #         dom_copy = [ deepcopy(li) for li in state.domains]
-    #         dom_copy[new_vertex] = [val]
-    #         color_trans = [ [ k for x in LIST for k,v in color_pool.iteritems() \
-    #                          if v == COLORS[x] ] for LIST in dom_copy ]
-    #         print "Doing vertex %d with %s" % (new_vertex, color_trans[new_vertex][0])
-    #
-    #         # if any(c.revise(new_vertex, dom_copy) for c in constraints):
-    #         #     # check if we fucked any domain to zero
-    #
-    #         if not self.rec_narrow(new_vertex, dom_copy):
-    #             continue
-    #         print " PASSED, residuals are " + str(color_trans)
-    #
-    #         # We know we constrained the domain, but did a valid solution remain?
-    #
-    #         new_state = CSPState(state, dom_copy, (new_vertex, COLORS[val]))
-    #         if all( [len(x) == 1 for x in dom_copy] ):
-    #             print "setting terminating condition true pre-emptive"
-    #             new_state.cost_to_goal = -1
-    #         yield new_state
-    #
-    #
-# class CSPSolver(object):
-#     def __init__(self, constraints):
-#         self.constraints = constraints
-#
-#     def rec_narrow(self, new_vertex, dom_copy):
-#         Q = [new_vertex]
-#         color_trans = [ [ k for x in LIST for k,v in color_pool.iteritems() \
-#                         if v == COLORS[x] ] for LIST in dom_copy ]
-#         while Q:
-#             new_vertex = Q.pop()
-#             print "\t checking %d ..." % (new_vertex),
-#             print " residuals are " + str(color_trans)
-#             constraints = self.constraints[new_vertex]
-#             Q += [ node for revised_list in \
-#                     [c.revise(dom_copy) for c in constraints] \
-#                     for node in revised_list]
-#             color_trans = [ [ k for x in LIST for k,v in color_pool.iteritems() \
-#                             if v == COLORS[x] ] for LIST in dom_copy ]
-#             if any(list(len(x) == 0 for x in dom_copy)):
-#                 print " FAILED, residuals are " + str(color_trans)
-#                 return False
-#             print " residuals are " + str(color_trans)
-#         return True
 #EOF
