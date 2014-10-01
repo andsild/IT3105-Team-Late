@@ -88,7 +88,7 @@ def CSPParams(filename,n_colors):
 
     constraints = [ [] for _ in range(nv) ]
 
-    cnet = CNET(network.g.num_vertices(), K)
+    cnet = CNET(network.g.num_vertices(), int(n_colors))
 
     for e in inData[nv+1:]:
         cnet.readCanonical(e)
@@ -107,7 +107,10 @@ if __name__ == "__main__":
     widget, problem = None, None
     type_of_func = sys.argv[1].upper()
     if type_of_func == "CSP":
-        widget, problem = CSPParams(sys.argv[2], sys.argv[3])
+        if len(sys.argv) > 3:
+            widget, problem = CSPParams(sys.argv[2], sys.argv[3])
+        else:
+            exit(1)
     elif type_of_func == "SEARCH":
         if len(sys.argv) > 3:
             widget, problem = searchParams(sys.argv[2], sys.argv[3])

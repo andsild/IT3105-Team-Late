@@ -27,7 +27,8 @@ class Coloring(Problem):
     def __init__(self, network, cnet, COLORS):
         super(Coloring, self).__init__(network)
         self.cnet = cnet
-        self.colors = COLORS
+        self.colors = [x for x in COLORS]
+        self.mode = "VC"
         # self.solver = CSPSolver(constraints)
 
     def triggerStart(self):
@@ -55,13 +56,9 @@ class Coloring(Problem):
             new_state = state.copy()
             # set_trace()
             new_state[new_vertex].makeAssumption(value)
+            x = [s.domain for s in new_state]
             if AC_3(self.cnet, new_state, new_vertex):
                 yield new_state
-
-        # print "picking %s as new for neigh" % (str(new_vertex))
-        # if new_vertex is not None:
-        #     return self.solver.AC_3(state, new_vertex)
-        # return []
 
     def destructor(self, final_state):
         if final_state:

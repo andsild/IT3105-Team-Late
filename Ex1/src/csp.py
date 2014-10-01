@@ -1,4 +1,7 @@
 #!/usr/bin/python
+""" THIS FILE IS MODIFIED SINCE AFTER THE DEADLINE
+
+"""
 from string import lowercase
 from copy import deepcopy
 from ipdb import set_trace
@@ -156,7 +159,6 @@ def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
-        # vi_copy = VertexInstance(variable.index, [ value ], variable.cnet)
         variable.makeAssumption(value)
         if not constraint.canSatisfy(state):
             copy_domain.remove(value)
@@ -172,11 +174,25 @@ def AC_3(cnet, state, vertex):
             Q.append((vi, c))
     while Q:
         v, c = Q.pop()
+        origDomain = v.domain
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-            for neighbour in c.getAdjacent(v, state):
-                Q.append( (neighbour, c))
+            # for neighbour in c.getAdjacent(v, state):
+            #     Q.append( (neighbour, c))
+
+            ### 
+            ### ADDED AFTER DEADLINE
+            ### 
+            # WHAT HAS BEEN DONE
+            # Commented out the for loop above:
+            # instead of *just* adding the reverse constraint
+            # (x != y --> y != x), we now also add for all constraintst that x
+            # occurs in
+
+            for c in cnet.getConstraint(v.index):
+                for vi in c.getAdjacent(v.index, state):
+                    Q.append((vi, c))
     return True
 
 #EOF
