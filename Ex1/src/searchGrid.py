@@ -39,7 +39,7 @@ def h(p, goal):
     It takes a heuristic function and adds the depth
 """
 def f_search(p, depth, goal):
-    return 2*depth + h(p, goal)
+    return 0*depth + h(p, goal)
 
 """ The function for breadth first search
     Simply evaluating new one with higher number

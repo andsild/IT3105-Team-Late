@@ -178,14 +178,16 @@ def AC_3(cnet, state, vertex):
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-            # for neighbour in c.getAdjacent(v, state):
-            #     Q.append( (neighbour, c))
 
             ### 
             ### ADDED AFTER DEADLINE
             ### 
+
             # WHAT HAS BEEN DONE
-            # Commented out the for loop above:
+            # for neighbour in c.getAdjacent(v, state):
+            #     Q.append( (neighbour, c))
+
+            # Commented out the for loop above.
             # instead of *just* adding the reverse constraint
             # (x != y --> y != x), we now also add for all constraintst that x
             # occurs in
