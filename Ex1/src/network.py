@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from graph_tool.all import *
+import numpy as np
 from ipdb import set_trace
 
 """ Options for adjacent cells
@@ -51,6 +52,11 @@ class Network(object):
 class Network2D(Network):
     def __init__(self, cords):
         super(Network2D, self).__init__(cords)
+
+class NetworkTree(Network):
+    def __init__(self):
+        cords = np.array([ [0], [0] ])
+        super(NetworkTree, self).__init__(cords)
 
 class NetworkCSP(Network):
     def __init__(self, cords, edgemap, domain):

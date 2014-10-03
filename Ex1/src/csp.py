@@ -1,13 +1,11 @@
 #!/usr/bin/python
-""" THIS FILE IS MODIFIED SINCE AFTER THE DEADLINE
-
-"""
 from string import lowercase
 from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
-from itertools import product, repeat
+from itertools import chain, product, repeat
+from operator import add
 
 from astar import State, Problem
 
@@ -22,12 +20,27 @@ def h_csp(domains):
 
     return promise
 
+OPERATORS = {
+    "+"  : add,
+    ">=" : GreaterThan,
+    "<=" : LessThan,
+    ">"  : StrictGreaterThan,
+    "<"  : StrictLessThan,
+}
+
 class CNET(object):
     def __init__(self, num_vars, size_domain):
         self.domains = [ VertexInstance(index, range(size_domain), self) \
                                 for index in range(num_vars)]
         # self.variables = range(len(domains))
         self.constraints = [ [] for _ in range(num_vars) ]
+
+        symbol_list = [ x for x in chain(lowercase,
+                                [ x+y for (x,y) in \
+                                product(lowercase, (str(x) for x in range(10)))])] \
+                                [:num_vars]
+        self.symvars = symbols(' '.join(symbol_list))
+
 
     def getConstraint(self, vertex):
         ret = self.constraints[vertex]
@@ -38,6 +51,10 @@ class CNET(object):
             if len(self.domains) > 0:
                 return len(self.domains[0].domain)
         return -1
+    def readLP(self, line):
+        objects = line.split()
+        set_trace()
+
 
     def readCanonical(self, line):
         variables = line.split()

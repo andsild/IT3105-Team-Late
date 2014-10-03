@@ -7,6 +7,7 @@ from searchGrid import *
 from csp import *
 from graphColoring import *
 from network import *
+from LP import *
 
 """ The function resolving parameters for search problem
 """
@@ -97,6 +98,28 @@ def CSPParams(filename,n_colors):
 
     return network.widget, s
 
+def LPParams(filename):
+    inData = open(filename)
+    inData = inData.read().split("\n")
+    inData.pop()
+
+    network = NetworkTree()
+
+    ob_func    = inData[0].split()
+    num_vars   = len(ob_func) / 2
+    max_or_min = ob_func[0]
+    dom_size   = len(inData[-1].split()) - 1
+
+    cnet = CNET(num_vars, dom_size)
+
+    constraints = inData[1:-1]
+    for c in inData[1:-1]:
+        cnet.readLP(c)
+
+    prob = LPSolver(network, cnet)
+
+    return n.widget, prob
+
 """ Main, it all starts here
 """
 if __name__ == "__main__":
@@ -124,6 +147,8 @@ if __name__ == "__main__":
             gui3 = genWindow(widget3, problem3)
             gtk.main()
             exit(0)
+    elif type_of_func == "LP":
+        widget, problem = LPParams(sys.argv[2])
     else:
         print "Unsupported function.."
         exit(1)

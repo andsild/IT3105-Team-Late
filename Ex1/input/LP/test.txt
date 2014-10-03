@@ -1,0 +1,5 @@
+min 5a + 6b + 7c + 8d + 9e
+3a - b + c + d - 2e >= 2
+a + 3b - c - 2d + e >= 0
+-1a - b + 3c + d + e >= 1
+dom 0 1
