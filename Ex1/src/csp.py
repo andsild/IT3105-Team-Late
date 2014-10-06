@@ -4,10 +4,14 @@ from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
-from itertools import chain, product, repeat
+from itertools import chain, product, repeat, izip
 from operator import add
 
 from astar import State, Problem
+
+def pairwise(iterable):
+    a = iter(iterable)
+    return izip(a,a)
 
 def f_csp(depth, domains):
     return depth + h_csp(domains)
@@ -41,9 +45,10 @@ class CNET(object):
                                 [:num_vars]
         self.symvars = symbols(' '.join(symbol_list))
         self.sym_dict = dict()
-        for s in self.symvars:
+        self.sym_to_index = dict()
+        for index,s in enumerate(self.symvars):
             self.sym_dict[str(s)] = s
-
+            self.sym_to_index[str(s)] = index
 
     def getConstraint(self, vertex):
         ret = self.constraints[vertex]
@@ -54,15 +59,16 @@ class CNET(object):
             if len(self.domains) > 0:
                 return len(self.domains[0].domain)
         return -1
+
     def readLP(self, line):
         objects = line.split()
-        operators = [ OPERATORS[var] for var in objects if var in OPERATORS ]
+        operators = [ ] 
 
         symbol_in_func = []
         fval = 0
         for word in objects:
             if word in OPERATORS:
-                operators.append(word)
+                operators.append(OPERATORS[word])
                 continue
             for letter in word:
                 # if letter is a number
@@ -75,12 +81,19 @@ class CNET(object):
                 fval = constant
 
 
-        set_trace()
+        lhs = None
+        if len(operators) < 2:
+            lhs = symbol_in_func[0]
+        else:
+            op_list = [ op(pair_var) for (pair_var,op) in zip(pairwise(symbol_in_func), operators)]
+            lhs = op_list[0]
+            for expr in op_list[:1]:
+                lhs += expr
 
-        c = Constraint(lambdafunc,
-                       [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
-                       D, self)
+        lhs_sym, rhs_sym = symbols("lhs rhs")
+        rhs = lambdify( (lhs_sym, rhs_sym), operators[-1](lhs_sym, rhs_sym))
 
+        lc = LPConstraint(lhs, rhs, symbol_in_func, self)
 
     def readCanonical(self, line):
         variables = line.split()
@@ -107,6 +120,8 @@ class CNET(object):
                 if c == self.constraints:
                     return c
             return None
+        if type(index) == str:
+            return self.sym_to_index[index]
         return self.domains[index]
 
 class CSPState(State):
@@ -123,6 +138,7 @@ class CSPState(State):
 
     def isGoal(self):
         assigned = [ len(vi.domain) == 1 for vi in self.domains]
+        print assigned
         return all(assigned)
 
     def getUnassigned_Nonrandom(self):
@@ -147,7 +163,10 @@ class CSPState(State):
                         [ c for c in cons], self.newPaint)
 
     def __getitem__(self, index):
+        if type(index) == Symbol:
+            return self.domains[self.cnet[str(index)]]
         return self.domains[index]
+
 
 
 class VertexInstance(object):
@@ -206,10 +225,13 @@ class LPConstraint(Constraint):
     """
     def __init__(self, lhs_func, rhs_func, vi_list, caller):
         self.lhs_func = lhs_func
-        super(LPConstraint, rhs_func, vi_list, None, caller)
+        super(LPConstraint, self).__init__(rhs_func, vi_list, None, caller)
 
     def canSatisfy(self, state):
-        self.
+        self.addState(state)
+        can_satisfy = False
+        arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
+
 
 def revise(variable, constraint, state):
     revised = False
@@ -223,7 +245,6 @@ def revise(variable, constraint, state):
     return revised
 
 def AC_3(cnet, state, vertex):
-    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state):
@@ -234,19 +255,6 @@ def AC_3(cnet, state, vertex):
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-
-            ### 
-            ### ADDED AFTER DEADLINE
-            ### 
-
-            # WHAT HAS BEEN DONE
-            # for neighbour in c.getAdjacent(v, state):
-            #     Q.append( (neighbour, c))
-
-            # Commented out the for loop above.
-            # instead of *just* adding the reverse constraint
-            # (x != y --> y != x), we now also add for all constraintst that x
-            # occurs in
 
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):

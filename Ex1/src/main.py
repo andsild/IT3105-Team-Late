@@ -118,7 +118,7 @@ def LPParams(filename):
 
     prob = LPSolver(network, cnet)
 
-    return n.widget, prob
+    return network.widget, prob
 
 """ Main, it all starts here
 """

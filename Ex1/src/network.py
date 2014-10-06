@@ -17,7 +17,7 @@ colors = { "unused"     : [0, 0, 0, 1],
 class Network(object):
     def __init__(self, cords, directed=False):
         self.g = Graph(directed=directed)
-        pos_map = self.g.new_vertex_property("vector<double>")
+        self.pos_map = self.g.new_vertex_property("vector<double>")
         self.states = self.g.new_vertex_property("vector<double>")
         self.cordDict = dict()
 
@@ -26,9 +26,9 @@ class Network(object):
             self.states[v] = colors["unused"]
             self.cordDict[(x,y)] = v
 
-        pos_map.set_2d_array( cords )
+        self.pos_map.set_2d_array( cords )
 
-        self.widget = GraphWidget(self.g, pos_map,
+        self.widget = GraphWidget(self.g, self.pos_map,
                     vertex_fill_color=self.states,
                     vertex_text = self.g.vertex_index,
                     vprops={"shape": "square",
@@ -57,6 +57,13 @@ class NetworkTree(Network):
     def __init__(self):
         cords = np.array([ [0], [0] ])
         super(NetworkTree, self).__init__(cords)
+        self.latest = self.g.vertex(self.g.num_vertices() - 1)
+
+    def insertVertex(self, pos):
+        v = self.g.add_vertex()
+        self.pos_map[v] =  pos
+        self.states[v] = colors["unused"]
+        self.g.add_edge(self.latest, v)
 
 class NetworkCSP(Network):
     def __init__(self, cords, edgemap, domain):
