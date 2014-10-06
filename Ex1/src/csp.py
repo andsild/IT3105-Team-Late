@@ -40,6 +40,9 @@ class CNET(object):
                                 product(lowercase, (str(x) for x in range(10)))])] \
                                 [:num_vars]
         self.symvars = symbols(' '.join(symbol_list))
+        self.sym_dict = dict()
+        for s in self.symvars:
+            self.sym_dict[str(s)] = s
 
 
     def getConstraint(self, vertex):
@@ -53,7 +56,30 @@ class CNET(object):
         return -1
     def readLP(self, line):
         objects = line.split()
+        operators = [ OPERATORS[var] for var in objects if var in OPERATORS ]
+
+        symbol_in_func = []
+        fval = 0
+        for word in objects:
+            if word in OPERATORS:
+                operators.append(word)
+                continue
+            for letter in word:
+                # if letter is a number
+                constant = 1
+                if ord(letter) > 48 and ord(letter) < 58:
+                    constant = int(letter)
+                if letter in self.sym_dict:
+                    symbol_in_func.append(constant * self.sym_dict[letter])
+                    continue
+                fval = constant
+
+
         set_trace()
+
+        c = Constraint(lambdafunc,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
+                       D, self)
 
 
     def readCanonical(self, line):
@@ -171,6 +197,19 @@ class Constraint(object):
                 can_satisfy = True
                 break
         return can_satisfy
+
+class LPConstraint(Constraint):
+    """ Similar to the other constraint except that in order to evaluate
+        the constraint you will need to evaluate two expressions.
+        E.g. to evalute "a + b <= 1", you need to evaluate both "a + b" and 
+        "lhs <= rhs"
+    """
+    def __init__(self, lhs_func, rhs_func, vi_list, caller):
+        self.lhs_func = lhs_func
+        super(LPConstraint, rhs_func, vi_list, None, caller)
+
+    def canSatisfy(self, state):
+        self.
 
 def revise(variable, constraint, state):
     revised = False
