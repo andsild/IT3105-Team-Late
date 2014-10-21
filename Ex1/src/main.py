@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from ipdb import set_trace
+from gi.repository import Gtk as gtk
 import numpy as np
 
 from searchGrid import *
@@ -8,6 +9,8 @@ from csp import *
 from graphColoring import *
 from network import *
 from LP import *
+from flowPuzzle import *
+from window import genWindow
 
 """ The function resolving parameters for search problem
 """
@@ -42,9 +45,6 @@ def searchParams(filename, mode):
     obs_cords = inData[3:]
 
     O = set()
-    cords = np.array( [ list(y for x in range(height) for y in range(width)),
-                        list(x for x in range(height-1, -1, -1) for y in range(width))]
-                    )
 
     for (xCords, yCords) in retMarks(obs_cords):
         for (x,y) in zip(xCords, yCords):
@@ -75,7 +75,9 @@ def CSPParams(filename,n_colors):
 
     nv, ne = [int(x) for x in inData[0].split()]
 
-    indexMap = np.array([ np.array([float(x) for x in line.split()][1:]) for line in inData[1:nv+1]])
+    indexMap = np.array([ np.array([float(x) \
+                                    for x in line.split()][1:]) \
+                         for line in inData[1:nv+1]])
     xCords, yCords = [float(0)] * nv, [float(0)] * nv
 
     for index,line in enumerate(inData[1:nv+1]):
@@ -120,6 +122,49 @@ def LPParams(filename):
 
     return n.widget, prob
 
+def flowParams(filename):
+    in_data = open(filename)
+    in_data = [map(int, line.split()) for line in in_data.read().split("\n")]
+    in_data.pop()
+
+    positions = []
+    xLine = []
+    yLine = []
+
+    width, height = in_data[0]
+
+    for _,start_x,start_y,end_x,end_y in in_data[1:]:
+        positions.append((start_x, start_y, end_x, end_y))
+
+    for y in range(height):
+        for x in range(width):
+            xLine.append(x)
+            yLine.append(y)
+    cords = np.array( [xLine, yLine] )
+
+    cords = np.array( [xLine, yLine] )
+    n = Network2D(cords)
+    # cnet = CNET(n.g.num_vertices(), len(positions))
+    cnet = CNET(n.g.num_vertices(), 4)
+    prob = FlowPuz(n, cnet, positions, (width,height))
+
+    for i in range(1,width):
+        cnet.readCons(i,i-1)
+    for i in range(width, n.g.num_vertices(), width):
+        cnet.readCons,i,i-width)
+        for w in range(i+1, width-1):
+            use = i + w
+            cnet.readCons(use, use-1, use-width,use-width+1)
+        cnet.readCons(use,use-1,use-width)
+
+
+
+        
+
+
+    
+    return n.widget, prob
+
 """ Main, it all starts here
 """
 if __name__ == "__main__":
@@ -149,6 +194,9 @@ if __name__ == "__main__":
             exit(0)
     elif type_of_func == "LP":
         widget, problem = LPParams(sys.argv[2])
+    elif type_of_func == "FLOWPUZ":
+        widget, problem = flowParams(sys.argv[2])
+
     else:
         print "Unsupported function.."
         exit(1)

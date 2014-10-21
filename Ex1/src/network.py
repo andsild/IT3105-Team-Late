@@ -46,7 +46,7 @@ class Network(object):
         self.widget.queue_draw()
 
     def clear(self):
-        for v in self.g.vertices():
+       for v in self.g.vertices():
             self.states[v] = colors["unused"]
 
 class Network2D(Network):

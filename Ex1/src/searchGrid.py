@@ -7,7 +7,6 @@ import numpy as np
 import sys
 
 from astar import *
-from window import *
 
 """ Colors for objects in the grid
 """

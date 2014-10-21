@@ -110,7 +110,7 @@ class CNET(object):
         return self.domains[index]
 
 class CSPState(State):
-    def __init__(self, pred, domains, constraints, newPaint):
+    def __init__(self, pred, domains, constraints, new_paint):
         self.domains = domains
         self.constraints = constraints
         if pred:
@@ -119,7 +119,7 @@ class CSPState(State):
         else:
             super(CSPState, self).__init__(id(self), pred,
                                            f_csp, (0, domains))
-        self.newPaint = newPaint
+        self.new_paint = new_paint
 
     def isGoal(self):
         assigned = [ len(vi.domain) == 1 for vi in self.domains]
@@ -144,7 +144,7 @@ class CSPState(State):
         cons = self.constraints or []
 
         return CSPState(self, [ var.copy() for var in doms ],
-                        [ c for c in cons], self.newPaint)
+                        [ c for c in cons], self.new_paint)
 
     def __getitem__(self, index):
         return self.domains[index]
@@ -208,8 +208,8 @@ class LPConstraint(Constraint):
         self.lhs_func = lhs_func
         super(LPConstraint, rhs_func, vi_list, None, caller)
 
-    def canSatisfy(self, state):
-        self.
+    # def canSatisfy(self, state):
+    #     self.
 
 def revise(variable, constraint, state):
     revised = False
