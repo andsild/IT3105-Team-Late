@@ -56,7 +56,6 @@ class Coloring(Problem):
             new_state = state.copy()
             # set_trace()
             new_state[new_vertex].makeAssumption(value)
-            x = [s.domain for s in new_state]
             if AC_3(self.cnet, new_state, new_vertex):
                 yield new_state
 

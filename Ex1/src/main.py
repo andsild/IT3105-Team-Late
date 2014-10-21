@@ -120,7 +120,7 @@ def LPParams(filename):
 
     prob = LPSolver(network, cnet)
 
-    return n.widget, prob
+    return network.widget, prob
 
 def flowParams(filename):
     in_data = open(filename)
