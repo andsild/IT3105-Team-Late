@@ -110,7 +110,7 @@ class CNET(object):
         return self.domains[index]
 
 class CSPState(State):
-    def __init__(self, pred, domains, constraints, new_paint):
+    def __init__(self, pred, domains, constraints, new_paint, f_csp=f_csp):
         self.domains = domains
         self.constraints = constraints
         if pred:

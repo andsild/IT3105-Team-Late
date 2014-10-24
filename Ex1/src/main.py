@@ -120,7 +120,7 @@ def LPParams(filename):
 
     prob = LPSolver(network, cnet)
 
-    return network.widget, prob
+    return n.widget, prob
 
 def flowParams(filename):
     in_data = open(filename)
@@ -148,16 +148,58 @@ def flowParams(filename):
     cnet = CNET(n.g.num_vertices(), 4)
     prob = FlowPuz(n, cnet, positions, (width,height))
 
-    for i in range(1,width):
-        cnet.readCons(i,i-1)
-    for i in range(width, n.g.num_vertices(), width):
-        cnet.readCons,i,i-width)
-        for w in range(i+1, width-1):
-            use = i + w
-            cnet.readCons(use, use-1, use-width,use-width+1)
-        cnet.readCons(use,use-1,use-width)
+    # for i in range(1,width):
+    #     cnet.readCons(i,i-1)
+    # for i in range(width, n.g.num_vertices(), width):
+    #     cnet.readCons,i,i-width)
+    #     for w in range(i+1, width-1):
+    #         use = i + w
+    #         cnet.readCons(use, use-1, use-width,use-width+1)
+    #     cnet.readCons(use,use-1,use-width)
+    #
 
-
+# func tryConnection(paper *Paper, pos1 int, dirs int) bool {
+#     // Extract the (last) bit which we will process in this call
+#     dir := dirs & -dirs
+#     pos2 := pos1 + paper.Vctr[dir]
+#     end1, end2 := paper.end[pos1], paper.end[pos2]
+#
+#     // Check different sources arent connected
+#     if paper.Table[end1] != EMPTY && paper.Table[end2] != EMPTY &&
+#         paper.Table[end1] != paper.Table[end2] {
+#         return false
+#     }
+#     // No loops
+#     if end1 == pos2 && end2 == pos1 {
+#         return false
+#     }
+#     // No tight corners (Just an optimization)
+#     if paper.Con[pos1] != 0 {
+#         dir2 := paper.Con[pos1+paper.Vctr[paper.Con[pos1]]]
+#         dir3 := paper.Con[pos1] | dir
+#         if DIAG[dir2] && DIAG[dir3] && dir2&dir3 != 0 {
+#             return false
+#         }
+#     }
+#
+#     // Add the connection and a backwards connection from pos2
+#     old1, old2 := paper.Con[pos1], paper.Con[pos2]
+#     paper.Con[pos1] |= dir
+#     paper.Con[pos2] |= MIR[dir]
+#     // Change states of ends to connect pos1 and pos2
+#     old3, old4 := paper.end[end1], paper.end[end2]
+#     paper.end[end1] = end2
+#     paper.end[end2] = end1
+#
+#     // Remove the done bit and recurse if nessecary
+#     dir2 := dirs &^ dir
+#     res := false
+#     if dir2 == 0 {
+#         res = chooseConnection(paper, paper.next[pos1])
+#     } else {
+#         res = tryConnection(paper, pos1, dir2)
+#     }
+#
 
         
 

@@ -29,7 +29,7 @@ class Coloring(Problem):
         self.cnet = cnet
         self.colors = [x for x in COLORS]
         self.mode = "VC"
-        # self.solver = CSPSolver(constraints)
+       # self.solver = CSPSolver(constraints)
 
     def triggerStart(self):
         self.network.clear()
