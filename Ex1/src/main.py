@@ -187,12 +187,8 @@ def ngramParams(filename):
 
     cords = np.array( [xLine, yLine] )
     network = Network2D(cords)
-    cnet = CNET(10, 10) #num_vars,dom_size
+    cnet = CNET(width*height, 2) #num_vars,dom_size
     prob = Ngram(network, cnet, rows, columns)
-
-    print width,height
-    print rows
-    print columns
 
     return network.widget, prob
 
@@ -231,7 +227,6 @@ if __name__ == "__main__":
         widget, problem = flowParams(sys.argv[2])
     elif type_of_func == "NGRAM":
         widget, problem = ngramParams(sys.argv[2])
-
     else:
         print "Unsupported function.."
         exit(1)

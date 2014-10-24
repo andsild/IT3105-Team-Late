@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 from ipdb import set_trace
-from astar import *
+from astar import State, Problem, astar
+from csp import *
 
 class Ngram(Problem):
     def __init__(self, network, cnet, rows, columns):
@@ -27,7 +28,8 @@ class Ngram(Problem):
     """ Generate neighbours from the current state
     """
     def genNeighbour(self, state):
-        pass
+        
+
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
