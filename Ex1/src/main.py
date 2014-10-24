@@ -10,6 +10,7 @@ from graphColoring import *
 from network import *
 from LP import *
 from flowPuzzle import *
+from NonoGrams import *
 from window import genWindow
 
 """ The function resolving parameters for search problem
@@ -151,7 +152,7 @@ def flowParams(filename):
     for i in range(1,width):
         cnet.readCons(i,i-1)
     for i in range(width, n.g.num_vertices(), width):
-        cnet.readCons,i,i-width)
+        cnet.readCons(i,i-width)
         for w in range(i+1, width-1):
             use = i + w
             cnet.readCons(use, use-1, use-width,use-width+1)
@@ -164,6 +165,38 @@ def flowParams(filename):
 
     
     return n.widget, prob
+
+""" The function resolving parameters for nonograms problem
+"""
+def ngramParams(filename):
+    inData = open(filename)
+    inData = inData.read().split("\n")
+    inData = [ [int(num) for num in x.split()] for x in inData]
+    inData.pop()
+
+    width, height = inData[0]
+
+    rows = inData[1:height+1]
+    columns = inData[height+1:]
+    xLine,yLine = [],[]
+
+    for y in range(height):
+        for x in range(width):
+            xLine.append(x)
+            yLine.append(y)
+
+    cords = np.array( [xLine, yLine] )
+    network = Network2D(cords)
+    cnet = CNET(10, 10) #num_vars,dom_size
+    prob = Ngram(network, cnet, rows, columns)
+
+    print width,height
+    print rows
+    print columns
+
+    return network.widget, prob
+
+
 
 """ Main, it all starts here
 """
@@ -196,6 +229,8 @@ if __name__ == "__main__":
         widget, problem = LPParams(sys.argv[2])
     elif type_of_func == "FLOWPUZ":
         widget, problem = flowParams(sys.argv[2])
+    elif type_of_func == "NGRAM":
+        widget, problem = ngramParams(sys.argv[2])
 
     else:
         print "Unsupported function.."
