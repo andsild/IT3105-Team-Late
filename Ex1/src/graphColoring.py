@@ -35,7 +35,7 @@ class Coloring(Problem):
         self.network.clear()
 
         start_state = self.cnet.getRootState()
-        start_state.newPaint = start_state[start_state.getUnassigned()]
+        start_state.new_paint = start_state[start_state.getUnassigned()]
         # self.solver.AC_3(start_state, node_index)
         Q = [(start_state.cost_to_goal, start_state)]
         D = dict()
@@ -46,11 +46,11 @@ class Coloring(Problem):
     def genNeighbour(self, state):
         """ A neighbour is a state S from the current state,
             where the domain of a variable has been reduced from a domain
-            of size > 1 to the singleton set
+           of size > 1 to the singleton set
 
         """
         new_vertex = state.getUnassigned_Nonrandom() # just the index
-        # new_vertex = self.network[state.newPaint.index]
+        # new_vertex = self.network[state.new_paint.index]
 
         for value in state[new_vertex].domain:
             new_state = state.copy()

@@ -20,8 +20,10 @@ def pairwise(iterable):
 
 
 class FlowPuz(Problem):
-    def __init__(self, network, cnet, positions, dim, mode="flowpuz"):
+    def __init__(self, network, cnet, positions, dim, COLORS, mode="flowpuz"):
         super(FlowPuz, self).__init__(network)
+        self.colors = [x for x in COLORS]
+
         self.width, self.height = dim
         self.mode = mode
         self.cnet = cnet
@@ -34,6 +36,7 @@ class FlowPuz(Problem):
             c = COLORS.pop()
             network.paint_node(network.cordDict[sx,sy], c)
             network.paint_node(network.cordDict[ex,ey], c)
+
         dim = self.width * self.height
         self.diag = [0] * ((dim / 2) + (self.width / 2))
         self.copy = [0] * dim
@@ -56,7 +59,7 @@ class FlowPuz(Problem):
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
-        self.network.clear()
+        # self.network.clear()
 
         start_state = self.cnet.getRootState()
         start_state.new_paint = start_state[0] # START AT ZERO
@@ -72,10 +75,18 @@ class FlowPuz(Problem):
 
     def genNeighbour(self, state):
         # check newpaint, generate next..
-        new_vertex = self.it_next[state.newpaint]
-        new_state = state.copy()
-
-        yield new_state
+        new_vertex = self.it_next[state.new_paint.index]
+        for value in state[new_vertex].domain:
+            new_state = state.copy()
+            new_state[new_vertex].makeAssumption(value)
+            new_state.new_paint = new_state[new_vertex]
+            print new_vertex
+            # new_state.new_paint = 
+            # if AC_3(self.cnet, new_state, new_vertex):
+            #     yield new_state
+            yield new_state
+            sleep(1.0)
+            break
 
     """ The function to be invoked at the end of a search
     """
@@ -90,38 +101,12 @@ class FlowPuz(Problem):
         @param cur is the state before param new
     """
     def updateStates(self, new, cur):
-        g = self.network.states.get_graph()
-        # If the new state is a direct successor of the previous state,
-        # the paint job is simple: only paint one more node
-        # otherwise, traverse back, "unpaint", and add the new path
-        if new.pred != cur:
-            # Clear old path
-            travQ = [cur]
-            while travQ:
-                s = travQ.pop()
-                if s and s.pred:
-                    travQ = [s.pred]
-                    self.network.states[g.vertex(
-                        self.network.cordDict[s.index[0], s.index[1]])] \
-                            = colors["unused"]
-            # Color new
-            travQ = [new]
-            while travQ:
-                s = travQ.pop()
-                if s.pred:
-                    travQ = [s.pred]
-                    self.network.states[g.vertex(
-                        self.network.cordDict[s.index[0], s.index[1]])] \
-                            = colors["seen"]
-        else:
-            self.network.states[g.vertex(
-                self.network.cordDict[new.index[0], new.index[1]])] \
-                    = colors["seen"]
+        for vi in new.domains:
+            if len(vi.domain) == 1:
+                self.network.paint_node(vi.index, self.colors[vi.domain[0]])
+            else:
+                self.network.paint_node(vi.index, color_pool["black"])
         self.network.update()
-
-
-
-
 
 def tryConnection(p1, p2):
     if outOfMap \

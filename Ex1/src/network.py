@@ -48,10 +48,13 @@ class Network(object):
     def clear(self):
        for v in self.g.vertices():
             self.states[v] = colors["unused"]
-
 class Network2D(Network):
-    def __init__(self, cords):
+    def __init__(self, cords, dim):
         super(Network2D, self).__init__(cords)
+        self.width, self.height = dim
+
+    def map2d1d(self, posx, posy):
+        return (self.width * posy) + posx
 
 class NetworkTree(Network):
     def __init__(self):

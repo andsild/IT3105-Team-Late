@@ -31,7 +31,7 @@ def searchParams(filename, mode):
 
             yield np.array( [ list(y for x in range(start_y, start_y + height) for y in range(start_x, start_x + width)),
                             list(x for x in range(start_y, start_y + height) for y in range(start_x, start_x + width))]
-                        )
+                       )
 
     inData = open(filename)
 
@@ -131,22 +131,29 @@ def flowParams(filename):
     xLine = []
     yLine = []
 
-    width, height = in_data[0]
+    width, height = in_data[0][::-1]
 
-    for _,start_x,start_y,end_x,end_y in in_data[1:]:
-        positions.append((start_x, start_y, end_x, end_y))
 
     for y in range(height):
         for x in range(width):
             xLine.append(x)
             yLine.append(y)
     cords = np.array( [xLine, yLine] )
+    COLORS = [ x for x in color_pool.values() \
+          if x is not color_pool["black"] and x is not color_pool["white"]]\
+        [:len(positions)]
 
     cords = np.array( [xLine, yLine] )
-    n = Network2D(cords)
+    n = Network2D(cords, (width, height))
     # cnet = CNET(n.g.num_vertices(), len(positions))
     cnet = CNET(n.g.num_vertices(), 4)
-    prob = FlowPuz(n, cnet, positions, (width,height))
+    for node,start_x,start_y,end_x,end_y in in_data[1:]:
+        positions.append((start_x, start_y, end_x, end_y))
+
+        if start_y > 0: # look back, ensure sum neighbors = (start_x-1, start_x-width-1)
+            cnet.read
+
+    prob = FlowPuz(n, cnet, positions, (width,height), COLORS)
 
     # for i in range(1,width):
     #     cnet.readCons(i,i-1)
