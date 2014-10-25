@@ -188,7 +188,7 @@ def ngramParams(filename):
     cords = np.array( [xLine, yLine] )
     network = Network2D(cords)
     cnet = CNET(width*height, 2) #num_vars,dom_size
-    prob = Ngram(network, cnet, rows, columns)
+    prob = Ngram(network, cnet, rows, columns, color_pool)
 
     return network.widget, prob
 
