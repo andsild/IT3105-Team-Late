@@ -134,10 +134,18 @@ def flowParams(filename):
     width, height = in_data[0][::-1]
 
 
+
+    tmp_D = set()
+    for node,start_x,start_y,end_x,end_y in in_data[1:]:
+        positions.append((start_x, start_y, end_x, end_y))
+        tmp_D.add((start_x,start_y))
+        tmp_D.add((end_x,end_y))
+
     for y in range(height):
         for x in range(width):
             xLine.append(x)
             yLine.append(y)
+
     cords = np.array( [xLine, yLine] )
     COLORS = [ x for x in color_pool.values() \
           if x is not color_pool["black"] and x is not color_pool["white"]]\
@@ -147,23 +155,36 @@ def flowParams(filename):
     n = Network2D(cords, (width, height))
     # cnet = CNET(n.g.num_vertices(), len(positions))
     cnet = CNET(n.g.num_vertices(), 4)
-    for node,start_x,start_y,end_x,end_y in in_data[1:]:
-        positions.append((start_x, start_y, end_x, end_y))
 
-        if start_y > 0: # look back, ensure sum neighbors = (start_x-1, start_x-width-1)
-            cnet.read
+    for y in range(1,height-1):
+        for x in range(width):
+            cells = [n.map2d1d(x,y) for x,y in \
+                        [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
+            if (x,y) not in tmp_D:
+                cnet.addCons(cells,  \
+                             "abs(A - B) - abs(abs(A-B)-1)"
+                              "+ abs(A - C) - abs(abs(A-C)-1)"
+                              "+ abs(A - D) - abs(abs(A-D)-1)"
+                              "+ abs(A - E) - abs(abs(A-E)-1)",
+                             0)
+            else:
+                cnet.addCons(cells,  \
+                             "abs(A - B) - abs(abs(A-B)-1)"
+                              "+ abs(A - C) - abs(abs(A-C)-1)"
+                              "+ abs(A - D) - abs(abs(A-D)-1)"
+                              "+ abs(A - E) - abs(abs(A-E)-1)",
+                             2)
+    for x in range(width):
+        cells = [n.map2d1d(x,y) for x,y in \
+                    [ (x,0), (x+1,0), (x-1,0)]]
+        cnet.addCons(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        1)
+
 
     prob = FlowPuz(n, cnet, positions, (width,height), COLORS)
-
-    # for i in range(1,width):
-    #     cnet.readCons(i,i-1)
-    # for i in range(width, n.g.num_vertices(), width):
-    #     cnet.readCons,i,i-width)
-    #     for w in range(i+1, width-1):
-    #         use = i + w
-    #         cnet.readCons(use, use-1, use-width,use-width+1)
-    #     cnet.readCons(use,use-1,use-width)
-    #
 
 # func tryConnection(paper *Paper, pos1 int, dirs int) bool {
 #     // Extract the (last) bit which we will process in this call

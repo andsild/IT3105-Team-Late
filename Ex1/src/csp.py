@@ -1,9 +1,10 @@
 #!/usr/bin/python
-from string import lowercase
+from string import lowercase, uppercase
 from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
+from sympy.parsing.sympy_parser import parse_expr
 from itertools import chain, product, repeat
 from operator import add
 
@@ -80,6 +81,21 @@ class CNET(object):
         c = Constraint(lambdafunc,
                        [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
+
+            
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(lambdafunc,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
 
 
     def readCanonical(self, line):
