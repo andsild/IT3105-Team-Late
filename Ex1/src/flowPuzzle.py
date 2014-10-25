@@ -38,7 +38,10 @@ class FlowPuz(Problem):
             network.paint_node(network.cordDict[ex,ey], c)
 
         dim = self.width * self.height
-        self.diag = [0] * ((dim / 2) + (self.width / 2))
+        if self.width % 2 == 0:
+            self.diag = [0] * ((dim / 2) + (self.width / 2))
+        else:
+            self.diag = [0] * ((dim / 2) + (self.width+1 / 2))
         self.copy = [0] * dim
         i = 1
         for w in range(1,self.width):
@@ -48,8 +51,8 @@ class FlowPuz(Problem):
                 self.diag[i] = w+(h * (self.width-1))
             i+= 1
 
-        self.diag += [35 - x for x in self.diag[:-self.width-1][::-1]]
-        self.it_next = [0] * dim
+        self.diag += [(dim-1) - x for x in self.diag[:-self.width-1][::-1]]
+        self.it_next = [0] * len(self.diag)
         for cur,nxt in pairwise(self.diag):
             self.it_next[cur] = nxt
         print self.diag

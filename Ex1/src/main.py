@@ -154,19 +154,62 @@ def flowParams(filename):
     cords = np.array( [xLine, yLine] )
     n = Network2D(cords, (width, height))
     # cnet = CNET(n.g.num_vertices(), len(positions))
-    cnet = CNET(n.g.num_vertices(), 4)
+    domain = [10,11,14,15] # 4
+    cnet = CNET2(n.g.num_vertices(), domain) # one for each possible direction
+    """ I make the strong assumption that the board if filled diagonally.
+        There are a finite amount of choises: you can come in from north or 
+        west. you can exit south or east. This gives four possible choises.
+
+        AXIS: X ---> OUTGOING
+        AXIS: Y |  INCOMING
+        * *  S   E
+     *  . .  2   3
+     *  . .  .   .
+     N  . . 10  11
+     W  . . 14  15
+     
+     In other words, choosing value 10 means that incoming is N, outgoing is S
+    """
+
+    # cons1 : < 0
+    # cons2 : > 0
+    cons1_horiz = "A % 4 - ((B + 1) * 4)"
+    cons2_horiz = "A % 4 - ((B) * 4)"
+    """ this states that the neighbouring cell (A is left-most, B is right-adjacent)
+        has to have the incoming degree respective to the left.
+        Is A is going out east, incoming W is filtered from the domain B
+    """
+
+    # cons1 : < 0
+    # cons2 : > 0
+    cons1_vert = "B - ((A % 4)+1)*4"
+    cons2_vert = "B - (A % 4)*4"
+    """ this states that the neighbouring cell (A is upper, B is lower)
+        has to have the incoming degree respective to the top
+        Is A is going out east, incoming S is filtered from the domain B
+    """
+
+    # cons1 : <= 0
+    cons1_diag = "(A % 4) - (B % 4) "
+    """ this states that the neighbouring cell (A is upper right, B is i-1,j-1)
+        cannot be such that both A and B direct flow to the same cell 
+    """
+
+    
+
 
     for y in range(1,height-1):
         for x in range(width):
             cells = [n.map2d1d(x,y) for x,y in \
                         [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
             if (x,y) not in tmp_D:
-                cnet.addCons(cells,  \
-                             "abs(A - B) - abs(abs(A-B)-1)"
-                              "+ abs(A - C) - abs(abs(A-C)-1)"
-                              "+ abs(A - D) - abs(abs(A-D)-1)"
-                              "+ abs(A - E) - abs(abs(A-E)-1)",
-                             0)
+               cnet.addCons(cells,  \
+                             "X - (Y+1) * 4", 0)
+                             # "abs(A - B) - abs(abs(A-B)-1)"
+                             #  "+ abs(A - C) - abs(abs(A-C)-1)"
+                             #  "+ abs(A - D) - abs(abs(A-D)-1)"
+                             #  "+ abs(A - E) - abs(abs(A-E)-1)",
+                             # 0)
             else:
                 cnet.addCons(cells,  \
                              "abs(A - B) - abs(abs(A-B)-1)"
@@ -174,14 +217,38 @@ def flowParams(filename):
                               "+ abs(A - D) - abs(abs(A-D)-1)"
                               "+ abs(A - E) - abs(abs(A-E)-1)",
                              2)
-    for x in range(width):
+    for x in range(1,width):
         cells = [n.map2d1d(x,y) for x,y in \
                     [ (x,0), (x+1,0), (x-1,0)]]
-        cnet.addCons(cells,  \
-                        "abs(A - B) - abs(abs(A-B)-1)"
-                        "+ abs(A - C) - abs(abs(A-C)-1)"
-                        "+ abs(A - D) - abs(abs(A-D)-1)",
-                        1)
+        if (x,0) not in tmp_D:
+            cnet.addcons(cells,  \
+                            "abs(a - b) - abs(abs(a-b)-1)"
+                            "+ abs(a - c) - abs(abs(a-c)-1)"
+                            "+ abs(a - d) - abs(abs(a-d)-1)",
+                            1)
+        else:
+            cnet.addCons(cells,  \
+                            "abs(A - B) - abs(abs(A-B)-1)"
+                            "+ abs(A - C) - abs(abs(A-C)-1)"
+                            "+ abs(A - D) - abs(abs(A-D)-1)"
+                            "+ abs(A - E) - abs(abs(A-E)-1)",
+                            2)
+        cells = [n.map2d1d(x,y) for x,y in \
+                    [ (x,height-1), (x+1,height-1), (x-1,height-1)]]
+        if (x,height-1) not in tmp_D:
+            cnet.addcons(cells,  \
+                            "abs(a - b) - abs(abs(a-b)-1)"
+                            "+ abs(a - c) - abs(abs(a-c)-1)"
+                            "+ abs(a - d) - abs(abs(a-d)-1)",
+                            1)
+        else:
+            cnet.addCons(cells,  \
+                            "abs(A - B) - abs(abs(A-B)-1)"
+                            "+ abs(A - C) - abs(abs(A-C)-1)"
+                            "+ abs(A - D) - abs(abs(A-D)-1)"
+                            "+ abs(A - E) - abs(abs(A-E)-1)",
+                            2)
+
 
 
     prob = FlowPuz(n, cnet, positions, (width,height), COLORS)

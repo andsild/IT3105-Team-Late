@@ -82,6 +82,22 @@ class CNET(object):
                        [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
 
+
+            
+    def addLessThan(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, LessThan(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(lambdafunc,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
+
             
     def addCons(self,vertexes, function, eval_value):
         use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
@@ -214,18 +230,22 @@ class Constraint(object):
                 break
         return can_satisfy
 
-class LPConstraint(Constraint):
-    """ Similar to the other constraint except that in order to evaluate
-        the constraint you will need to evaluate two expressions.
-        E.g. to evalute "a + b <= 1", you need to evaluate both "a + b" and 
-        "lhs <= rhs"
-    """
-    def __init__(self, lhs_func, rhs_func, vi_list, caller):
-        self.lhs_func = lhs_func
-        super(LPConstraint, rhs_func, vi_list, None, caller)
+class CNET2(CNET):
+    def __init__(self, num_vars, domain):
+        self.domains = [ VertexInstance(index, [x for x in domain], self) \
+                                for index in range(num_vars)]
+        # self.variables = range(len(domains))
+        self.constraints = [ [] for _ in range(num_vars) ]
 
-    # def canSatisfy(self, state):
-    #     self.
+        symbol_list = [ x for x in chain(lowercase,
+                                [ x+y for (x,y) in \
+                                product(lowercase, (str(x) for x in range(10)))])] \
+                                [:num_vars]
+        self.symvars = symbols(' '.join(symbol_list))
+        self.sym_dict = dict()
+        for s in self.symvars:
+            self.sym_dict[str(s)] = s
+
 
 def revise(variable, constraint, state):
     revised = False
@@ -242,7 +262,7 @@ def AC_3(cnet, state, vertex):
     # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
     for c in cnet.getConstraint(vertex):
-        for vi in c.getAdjacent(vertex, state):
+        for vi in c.getAdjacent(vertex, state): # this can be used, vertex is assumed
             Q.append((vi, c))
     while Q:
         v, c = Q.pop()
@@ -250,19 +270,6 @@ def AC_3(cnet, state, vertex):
         if revise(v, c, state):
             if len(v.domain) == 0:
                 return False
-
-            ### 
-            ### ADDED AFTER DEADLINE
-            ### 
-
-            # WHAT HAS BEEN DONE
-            # for neighbour in c.getAdjacent(v, state):
-            #     Q.append( (neighbour, c))
-
-            # Commented out the for loop above.
-            # instead of *just* adding the reverse constraint
-            # (x != y --> y != x), we now also add for all constraintst that x
-            # occurs in
 
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):
