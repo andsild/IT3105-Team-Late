@@ -13,6 +13,63 @@ from flowPuzzle import *
 from NonoGrams import *
 from window import genWindow
 
+def mapcord(x,y,width):
+    return y*width+x
+
+def generatePos(rule, width):
+    total_spaces = width - sum(rule)          # total spaces in row
+    seq_spaces = total_spaces - len(rule) + 2 # maximum sequential spaces
+    ngroups = len(rule)                       # number of groups
+
+    # For each sequence of spaces, there are many possible lengths
+    # There may be zero or more spaces on the ends, and 1 or more spaces between groups
+    space_ranges = [[0, seq_spaces+1]] + [[1, seq_spaces+1]] * (ngroups-1) + [[0, seq_spaces+1]]
+    outputs = []
+
+    # Do the generation of spaces in a function so I can do it recursively and 
+    # exit early as soon as the sum of spaces is greater than the total_spaces expected
+    def gen_spaces(group):
+        start, end = space_ranges[group]
+        for s in xrange(start, end):
+            ss[group] = s
+            if sum(ss) > total_spaces:
+                # there's now no point in continuing with this loop
+                # or any futher space_groups as we've already used too many
+                # spaces. so go back one group and try again
+                break
+            if group == ngroups:
+                # If we're looking at the final run of spaces,
+                # then if we have the right number of spaces then
+                # this is a valid sequence of space sizes to add to the output
+                if sum(ss)==total_spaces:
+                    outputs.append(ss[:])
+            else:
+                # If we reach here, then the number of spaces allocated so far does not 
+                # exceed the possible total, consider the next group
+                gen_spaces(group+1)
+       
+        # This set of spaces is exhausted or has failed.
+        # Zero-out the count for this and following groups and return to the
+        # previous group
+        for ii in xrange(group, len(ss)):
+            ss[ii] = 0
+
+    # ss = array of sizes of each of the space groups
+    ss = [0] * (ngroups + 1)
+    gen_spaces(group=0)
+
+    # Outputs = list( [spaces before group0, spaces after group1, spaces after group2, ... spaces after groupn] )
+    # Now convert to list of 0/1s as list of possible rows
+    possible_rows = []
+    for ss in outputs:
+        # Create the row by inter-mixing the zeros (from ss) and ones (from the rule)
+        row = [0] * ss[0] # leading zeros
+        for number_of_ones, number_of_zeros in zip(rule, ss[1:]):
+            row += [1] * number_of_ones + [0] * number_of_zeros
+        possible_rows.append(row)
+    
+    return possible_rows
+
 """ The function resolving parameters for search problem
 """
 def searchParams(filename, mode):
@@ -178,6 +235,9 @@ def ngramParams(filename):
 
     rows = inData[1:height+1]
     columns = inData[height+1:]
+    
+
+
     xLine,yLine = [],[]
 
     for y in range(height):
@@ -187,12 +247,42 @@ def ngramParams(filename):
 
     cords = np.array( [xLine, yLine] )
     network = Network2D(cords)
-    cnet = CNET(width*height, 2) #num_vars,dom_size
-    prob = Ngram(network, cnet, rows, columns, color_pool)
+
+    generated = []
+    possible_rows = []
+    possible_cols = []
+
+    for rule in rows:
+        generated.append(generatePos(rule,width))
+    for i in range(len(generated)):
+        poss = []
+        for j in generated[i]:
+            p = []
+            for k in range(len(j)):
+                if j[k] == 1:
+                    p.append(mapcord(k,i,width))
+            poss.append(p)
+        possible_rows.append(poss)
+
+    generated = []
+    for rule in columns:
+        generated.append(generatePos(rule,height))
+    
+    for i in range(len(generated)):
+        poss = []
+        for j in generated[i]:
+            p = []
+            for k in range(len(j)):
+                if j[k] == 1:
+                    p.append(mapcord(i,k,width))
+            poss.append(p)
+        possible_cols.append(poss)
+    
+
+    cnet = CNET3(possible_rows, possible_cols)
+    prob = Ngram(network, cnet, possible_rows, possible_cols, color_pool)
 
     return network.widget, prob
-
-
 
 """ Main, it all starts here
 """

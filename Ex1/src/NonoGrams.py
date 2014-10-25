@@ -5,12 +5,12 @@ from astar import State, Problem, astar
 from csp import *
 
 class Ngram(Problem):
-    def __init__(self, network, cnet, rows, columns, colors):
+    def __init__(self, network, cnet, p_rows, p_cols, colors):
         super(Ngram, self).__init__(network)
         self.cnet = cnet
         self.nodes_count = 0
-        self.rows = rows
-        self.columns = columns
+        self.p_rows = p_rows
+        self.p_cols = p_cols
         self.colors = colors
         self.mode = "Ngrams"
 
@@ -30,12 +30,12 @@ class Ngram(Problem):
     """ Generate neighbours from the current state
     """
     def genNeighbour(self, state):
-        new_vertex = state.getUnassigned_Nonrandom()
+        new_vertex = state.getUnassigned_Nonrandom() 
 
-        for value in state[new_vertex].domain:
+        for index,value in enumerate(state[new_vertex].domain):
             new_state = state.copy()
-            new_state[new_vertex].makeAssumption(value)
-            if AC_3(self.cnet, new_state, new_vertex):
+            new_state[new_vertex].makeAssumption(index)
+            if AC_3_NGRAM(self.cnet, new_state, new_vertex):
                 yield new_state
 
     """ The function to be invoked at the end of a search

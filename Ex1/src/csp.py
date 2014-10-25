@@ -1,12 +1,13 @@
 #!/usr/bin/python
-from string import lowercase
+from string import lowercase, uppercase
 from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
+from sympy import Set
+from sympy.parsing.sympy_parser import parse_expr
 from itertools import chain, product, repeat
 from operator import add
-
 from astar import State, Problem
 
 def f_csp(depth, domains):
@@ -82,6 +83,19 @@ class CNET(object):
                        D, self)
 
 
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set("ABCDE")))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+            c = Constraint(lambdafunc,[ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)],D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
+    
+
     def readCanonical(self, line):
         variables = line.split()
         alphabet = list(lowercase)
@@ -108,6 +122,34 @@ class CNET(object):
                     return c
             return None
         return self.domains[index]
+
+class CNET3(CNET):
+    def __init__(self, p_rows, p_cols):
+        self.domains = []
+        for index,item in enumerate(p_rows):
+            self.domains.append(VertexInstance(index,item,self))
+        
+        for index,item in enumerate(p_cols):
+            self.domains.append(VertexInstance(index+len(p_rows),item,self))
+
+        self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
+
+        func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
+        #func = "FiniteSet(A).intersect(FiniteSet(B)).is_EmptySet()"
+
+        for i in range(len(p_rows)):
+            for j in range(len(p_rows),len(p_rows)+len(p_cols)):
+                self.addCons([i,j],func,1)
+
+        symbol_list = [ x for x in chain(lowercase,
+                                [ x+y for (x,y) in \
+                                product(lowercase, (str(x) for x in range(10)))])] \
+                                [:len(p_rows)+len(p_cols)]
+        self.symvars = symbols(' '.join(symbol_list))
+        self.sym_dict = dict()
+        for s in self.symvars:
+            self.sym_dict[str(s)] = s
+
 
 class CSPState(State):
     def __init__(self, pred, domains, constraints, new_paint):
@@ -148,7 +190,6 @@ class CSPState(State):
 
     def __getitem__(self, index):
         return self.domains[index]
-
 
 class VertexInstance(object):
     def __init__(self, index, domain, caller):
@@ -232,6 +273,48 @@ def AC_3(cnet, state, vertex):
         v, c = Q.pop()
         origDomain = v.domain
         if revise(v, c, state):
+            if len(v.domain) == 0:
+                return False
+
+            ### 
+            ### ADDED AFTER DEADLINE
+            ### 
+
+            # WHAT HAS BEEN DONE
+            # for neighbour in c.getAdjacent(v, state):
+            #     Q.append( (neighbour, c))
+
+            # Commented out the for loop above.
+            # instead of *just* adding the reverse constraint
+            # (x != y --> y != x), we now also add for all constraintst that x
+            # occurs in
+
+            for c in cnet.getConstraint(v.index):
+                for vi in c.getAdjacent(v.index, state):
+                    Q.append((vi, c))
+    return True
+
+def revise_NGARM(variable, constraint, state):
+    revised = False
+    copy_domain = [x for x in variable.domain]
+    for index,value in enumerate(variable.domain):
+        variable.makeAssumption(index)
+        if not constraint.canSatisfy(state):
+            copy_domain.remove(value)
+            revised = True
+    variable.domain = copy_domain
+    return revised
+
+def AC_3_NGRAM(cnet, state, vertex):
+    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
+    Q = []
+    for c in cnet.getConstraint(vertex):
+        for vi in c.getAdjacent(vertex, state):
+            Q.append((vi, c))
+    while Q:
+        v, c = Q.pop()
+        origDomain = v.domain
+        if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
                 return False
 
