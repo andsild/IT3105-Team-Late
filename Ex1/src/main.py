@@ -154,7 +154,7 @@ def flowParams(filename):
     cords = np.array( [xLine, yLine] )
     n = Network2D(cords, (width, height))
     # cnet = CNET(n.g.num_vertices(), len(positions))
-    domain = [10,11,14,15] # 4
+    domain = [0,10,11,14,15] # 4
     cnet = CNET2(n.g.num_vertices(), domain) # one for each possible direction
     """ I make the strong assumption that the board if filled diagonally.
         There are a finite amount of choises: you can come in from north or 
@@ -163,39 +163,49 @@ def flowParams(filename):
         AXIS: X ---> OUTGOING
         AXIS: Y |  INCOMING
         * *  S   E
-     *  . .  2   3
+     *  0 .  2   3
      *  . .  .   .
      N  . . 10  11
      W  . . 14  15
      
      In other words, choosing value 10 means that incoming is N, outgoing is S
+
+     The endpoints only have one outgoing/incoming.
     """
 
     # cons1 : < 0
     # cons2 : > 0
-    cons1_horiz = "A % 4 - ((B + 1) * 4)"
-    cons2_horiz = "A % 4 - ((B) * 4)"
-    """ this states that the neighbouring cell (A is left-most, B is right-adjacent)
+    cons1_horiz = cons1_vert = "B - ((A % 4)+1)*4"
+    cons2_horiz = cons2_vert = "B - (A % 4)*4"
+    """ 
+          * * *
+        * . A B
+        * . . .
+        this states that the neighbouring cell (A is upper, B is lower)
+        has to have the incoming degree respective to the top
+        Is A is going out east, incoming S is filtered from the domain B
+    """
+    """ 
+          * * *
+        * . A .
+        * . B .
+    this states that the neighbouring cell (A is left-most, B is right-adjacent)
         has to have the incoming degree respective to the left.
         Is A is going out east, incoming W is filtered from the domain B
     """
 
-    # cons1 : < 0
-    # cons2 : > 0
-    cons1_vert = "B - ((A % 4)+1)*4"
-    cons2_vert = "B - (A % 4)*4"
-    """ this states that the neighbouring cell (A is upper, B is lower)
-        has to have the incoming degree respective to the top
-        Is A is going out east, incoming S is filtered from the domain B
-    """
-
     # cons1 : <= 0
     cons1_diag = "(A % 4) - (B % 4) "
-    """ this states that the neighbouring cell (A is upper right, B is i-1,j-1)
-        cannot be such that both A and B direct flow to the same cell 
     """
-
-    
+          * * *
+        * . . A
+        * . B .
+        this states that the neighbouring cell (A is upper right, B is i-1,j-1)
+        cannot be such that both A and B direct flow to the same cell.
+        In other words, prevent that when A % 4 == 2 (flow down), that 
+        B can choose a value s.t. B % 2 == 3. Therefore, we say that
+        B % 4 <= A % 4.
+    """
 
 
     for y in range(1,height-1):
