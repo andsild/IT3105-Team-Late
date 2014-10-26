@@ -4,7 +4,7 @@ from ipdb import set_trace
 
 from astar import *
 from graphColoring import color_pool
-from csp import AC_3
+from csp import *
 
 def f_numberlink(depth, domains):
     return depth + h_numberlink(domains)
@@ -35,12 +35,20 @@ def pairwise(iterable):
     next(b, None)
     return izip(a, b)
 
+def lookupColor(index):
+    colors = [ y for x,y in color_pool.iteritems() \
+            if y is not color_pool["black"] and y is not color_pool["white"]]
+    colors.sort()
+    for x,y in color_pool.iteritems():
+        if y is colors[index]:
+            return x
 
 class FlowPuz(Problem):
     def __init__(self, network, cnet, positions, dim, COLORS, mode="flowpuz"):
         super(FlowPuz, self).__init__(network)
         self.colors = [ x for x in color_pool.values() \
                 if x is not color_pool["black"] and x is not color_pool["white"]]
+        self.colors.sort()
 
         self.width, self.height = dim
         self.mode = mode
@@ -95,11 +103,11 @@ class FlowPuz(Problem):
 
     """ Generate neighbours from the current state
     """
-
     def genNeighbour(self, state):
         # check newpaint, generate next..
         new_vertex = self.it_next[state.new_paint.index]
         for value in state[new_vertex].domain:
+            print "vertex: %d\tassuming value %s " % (new_vertex, lookupColor(value))
             new_state = state.copy()
             new_state[new_vertex].makeAssumption(value, False)
             new_state.new_paint = new_state[new_vertex]

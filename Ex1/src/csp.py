@@ -212,11 +212,15 @@ def revise(variable, constraint, state):
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         variable.makeAssumption(value)
+        if variable.index == 0 and not constraint.canSatisfy(state):
+            set_trace()
         if not constraint.canSatisfy(state):
-            print "removing %d from %d" % (value, variable.index)
+            print "removing %s from %d" % (lookupColor(value), variable.index)
             sleep(0.1)
             copy_domain.remove(value)
             revised = True
+    if revised:
+        print "variable %d reduced to %s" % (variable.index, str(copy_domain))
     variable.domain = copy_domain
     return revised
 
@@ -225,17 +229,21 @@ def AC_3(cnet, state, vertex):
     Q = []
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state): # this can be used, vertex is assumed
+            # print "%d is considered adjacent to %d" % (vi.index, vertex)
             Q.append((vi, c))
     while Q:
         v, c = Q.pop()
         origDomain = v.domain
         if revise(v, c, state):
             if len(v.domain) == 0:
+                print "\tabandoning..."
                 return False
 
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):
                     Q.append((vi, c))
     return True
+
+from flowPuzzle import lookupColor
 
 #EOF
