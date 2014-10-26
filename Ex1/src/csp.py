@@ -212,11 +212,11 @@ def revise(variable, constraint, state):
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         variable.makeAssumption(value)
-        if variable.index == 0 and not constraint.canSatisfy(state):
-            set_trace()
+        # if variable.index == 0 and not constraint.canSatisfy(state):
+            # set_trace()
         if not constraint.canSatisfy(state):
             print "removing %s from %d" % (lookupColor(value), variable.index)
-            sleep(0.1)
+            # sleep(0.1)
             copy_domain.remove(value)
             revised = True
     if revised:

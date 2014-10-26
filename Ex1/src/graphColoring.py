@@ -20,7 +20,8 @@ color_pool = {  "black"     : [0, 0, 0, 1],
             "purple"    : [0.66, 0, 1, 1],
             "orange"    : [1, 0.56, 0, 1],
             "pink"      : [1, 0, 0.8, 1],
-            "grey"      : [0.5, 0.5, 0.5, 1],
+        "greenfud"      : [0.66, 0.39, 0.25, 1],
+            "life"      : [1, 0, 0.14, 1],
         }
 
 class Coloring(Problem):

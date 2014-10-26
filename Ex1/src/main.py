@@ -131,7 +131,9 @@ def flowParams(filename):
     xLine = []
     yLine = []
 
-    width, height = in_data[0][::-1]
+    # width, height = in_data[0][::-1]
+    # width, height = in_data[0]
+    height = width = in_data[0][0]
 
     tmp_D = set()
     for node,start_x,start_y,end_x,end_y in in_data[1:]:
