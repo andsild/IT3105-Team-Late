@@ -278,11 +278,6 @@ def ngramParams(filename):
             poss.append(p)
         possible_cols.append(poss)
 
-    A = [1, 2, 3]
-    B = [11, 21, 31]
-    print len(FiniteSet(A).intersect(FiniteSet(B)))
-    
-
     cnet = CNET3(possible_rows, possible_cols)
     prob = Ngram(network, cnet, possible_rows, possible_cols, color_pool)
 

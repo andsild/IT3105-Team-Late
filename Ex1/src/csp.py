@@ -75,8 +75,6 @@ class CNET(object):
                 fval = constant
 
 
-        set_trace()
-
         c = Constraint(lambdafunc,
                        [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
                        D, self)
@@ -132,7 +130,7 @@ class CNET3(CNET):
             self.domains.append(VertexInstance(index+len(p_rows),item,self))
 
         self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
-
+        
         func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
         #func = "FiniteSet(A).intersect(FiniteSet(B)).is_EmptySet()"
 
@@ -148,6 +146,18 @@ class CNET3(CNET):
         self.sym_dict = dict()
         for s in self.symvars:
             self.sym_dict[str(s)] = s
+
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set("ABCDE")))
+        symvars = symbols(' '.join(use_vars))
+        
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+            c = Constraint(lambda A,B: len(set(A).intersection(set(B))),[ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)],D, self)
+        for var in vertexes:
+            self.constraints[var].append(c)
 
 
 class CSPState(State):
@@ -233,7 +243,6 @@ class Constraint(object):
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
         for tup in product(*arg_list):
-            set_trace()
             if self.function(*tup):
                 can_satisfy = True
                 break
