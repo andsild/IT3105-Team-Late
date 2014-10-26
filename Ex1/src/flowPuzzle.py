@@ -109,8 +109,10 @@ class FlowPuz(Problem):
         for value in state[new_vertex].domain:
             print "vertex: %d\tassuming value %s " % (new_vertex, lookupColor(value))
             new_state = state.copy()
-            new_state[new_vertex].makeAssumption(value, False)
             new_state.new_paint = new_state[new_vertex]
+            if len(new_state[new_vertex].domain) == 1:
+                yield new_state
+            new_state[new_vertex].makeAssumption(value, False)
             if AC_3(self.cnet, new_state, new_vertex):
                 yield new_state
             # yield new_state

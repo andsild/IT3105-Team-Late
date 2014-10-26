@@ -197,6 +197,10 @@ class Constraint(object):
                 if index is not vertex]
 
     def canSatisfy(self, state):
+        #FIXME
+        """ if two variables have the same value as the center,
+        and their domain size is one, disconsider one of them...
+        """
         self.addState(state)
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
