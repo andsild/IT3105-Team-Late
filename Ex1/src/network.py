@@ -54,6 +54,8 @@ class Network2D(Network):
         self.width, self.height = dim
 
     def map2d1d(self, posx, posy):
+        if (self.width * posy) + posx < 0:
+            set_trace()
         return (self.width * posy) + posx
 
 class NetworkTree(Network):

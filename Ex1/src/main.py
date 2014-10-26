@@ -31,7 +31,7 @@ def searchParams(filename, mode):
 
             yield np.array( [ list(y for x in range(start_y, start_y + height) for y in range(start_x, start_x + width)),
                             list(x for x in range(start_y, start_y + height) for y in range(start_x, start_x + width))]
-                      )
+                     )
 
     inData = open(filename)
 
@@ -154,8 +154,8 @@ def flowParams(filename):
     cnet = CNET(n.g.num_vertices(), len(positions))
 
     for y in range(1,height-1):
-        for x in range(width):
-            cells = [n.map2d1d(x,y) for x,y in \
+        for x in range(1,width-1):
+            cells = [n.map2d1d(posx,posy) for posx,posy in \
                     [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
             if (x,y) not in tmp_D:
                 cnet.addLessThan(cells,  \
@@ -174,7 +174,7 @@ def flowParams(filename):
 
 
     for y in range(1,height-1):
-        cells = [n.map2d1d(x,y) for x,y in \
+        cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (0,y), (0,y+1), (0,y-1), (1,y)]]
         if (x,0) not in tmp_D:
             cnet.addLessThan(cells,  \
@@ -188,7 +188,7 @@ def flowParams(filename):
                         "+ abs(A - C) - abs(abs(A-C)-1)"
                         "+ abs(A - D) - abs(abs(A-D)-1)",
                         1)
-        cells = [n.map2d1d(x,y) for x,y in \
+        cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (width-1,y), (width-1,y+1), (width-1,y-1), (width-2,y)]]
         if (x,height-1) not in tmp_D:
             cnet.addLessThan(cells,  \
@@ -204,7 +204,7 @@ def flowParams(filename):
                         1)
 
     for x in range(1,width-1):
-        cells = [n.map2d1d(x,y) for x,y in \
+        cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (x,0), (x+1,0), (x-1,0), (x,1)]]
         if (x,0) not in tmp_D:
             cnet.addLessThan(cells,  \
@@ -218,7 +218,7 @@ def flowParams(filename):
                         "+ abs(A - C) - abs(abs(A-C)-1)"
                         "+ abs(A - D) - abs(abs(A-D)-1)",
                         1)
-        cells = [n.map2d1d(x,y) for x,y in \
+        cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (x,height-1), (x+1,height-1), (x-1,height-1), (x,height-2)]]
         if (x,height-1) not in tmp_D:
             cnet.addLessThan(cells,  \
@@ -233,10 +233,11 @@ def flowParams(filename):
                         "+ abs(A - D) - abs(abs(A-D)-1)",
                         1)
 
-    corner_cells = [ [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
-                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
-                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
-                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]]
+    corner_cells = [ [n.map2d1d(posx,posy) for posx,posy in [ (0,0), (0,1), (1,0)]],
+                    [n.map2d1d(posx,posy) for posx,posy in [ (width-1,0), (width-2,0), (width-1,1)]],
+                    [n.map2d1d(posx,posy) for posx,posy in [ (width-1,height-1), (width-1,height-2), (width-2,height-1)]],
+                    [n.map2d1d(posx,posy) \
+                        for posx,posy in [ (0,height-1), (0,height-2), (1,height-1)]],
                 ]
     for corner in corner_cells:
         if corner[0] in tmp_D:

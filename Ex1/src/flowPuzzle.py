@@ -4,6 +4,23 @@ from ipdb import set_trace
 
 from astar import *
 from graphColoring import color_pool
+from csp import AC_3
+
+def f_numberlink(depth, domains):
+    return depth + h_numberlink(domains)
+
+""" Size of domain -1, summed together
+"""
+def h_numberlink(domains):
+    # promise = sum(len(vi.domain)-1 for vi in domains)
+    promise = 0
+    count = [0] * 50
+    for vi in domains:
+        lv = len(vi.domain)-1
+        promise += len(vi.domain)-1
+        if not lv:
+            count[vi.domain[0]] += 1
+    return promise
 
 
 """ Start with closest pair of nodes?
@@ -61,18 +78,15 @@ class FlowPuz(Problem):
         self.it_next = [0] * len(self.diag)
         for cur,nxt in pairwise(self.diag):
             self.it_next[cur] = nxt
-        print self.diag
-        print self.it_next
-            
+
 
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
         # self.network.clear()
 
-        start_state = self.cnet.getRootState()
+        start_state = self.cnet.getRootState(f_numberlink)
         start_state.new_paint = start_state[0] # START AT ZERO
-        # self.solver.AC_3(start_state, node_index)
         Q = [(start_state.cost_to_goal, start_state)]
         D = dict()
         D[start_state.index] = start_state
@@ -85,18 +99,14 @@ class FlowPuz(Problem):
     def genNeighbour(self, state):
         # check newpaint, generate next..
         new_vertex = self.it_next[state.new_paint.index]
-        set_trace()
         for value in state[new_vertex].domain:
             new_state = state.copy()
-            new_state[new_vertex].makeAssumption(value)
+            new_state[new_vertex].makeAssumption(value, False)
             new_state.new_paint = new_state[new_vertex]
-            print new_vertex
-            # new_state.new_paint = 
-            # if AC_3(self.cnet, new_state, new_vertex):
-            #     yield new_state
-            yield new_state
-            sleep(1.0)
-            break
+            if AC_3(self.cnet, new_state, new_vertex):
+                yield new_state
+            # yield new_state
+            sleep(0.2)
 
     """ The function to be invoked at the end of a search
     """

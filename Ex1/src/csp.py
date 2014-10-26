@@ -45,7 +45,6 @@ class CNET(object):
         for s in self.symvars:
             self.sym_dict[str(s)] = s
 
-
     def getConstraint(self, vertex):
         ret = self.constraints[vertex]
         return ret
@@ -55,40 +54,13 @@ class CNET(object):
             if len(self.domains) > 0:
                 return len(self.domains[0].domain)
         return -1
-    def readLP(self, line):
-        objects = line.split()
-        operators = [ OPERATORS[var] for var in objects if var in OPERATORS ]
-
-        symbol_in_func = []
-        fval = 0
-        for word in objects:
-            if word in OPERATORS:
-                operators.append(word)
-                continue
-            for letter in word:
-                # if letter is a number
-                constant = 1
-                if ord(letter) > 48 and ord(letter) < 58:
-                    constant = int(letter)
-                if letter in self.sym_dict:
-                    symbol_in_func.append(constant * self.sym_dict[letter])
-                    continue
-                fval = constant
-
-
-        set_trace()
-
-        c = Constraint(lambdafunc,
-                       [ (symv, int(v)) for (symv, v) in zip(symvars, variables)], 
-                       D, self)
-
 
             
     def addLessThan(self,vertexes, function, eval_value):
         use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
         symvars = symbols(' '.join(use_vars))
-        # lambdafunc = parse_expr(function)
-        lambdafunc = lambdify(symvars, LessThan(eval_value,parse_expr(function)))
+       # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, LessThan(parse_expr(function),eval_value))
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
@@ -104,7 +76,6 @@ class CNET(object):
         symvars = symbols(' '.join(use_vars))
         # lambdafunc = parse_expr(function)
         lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
-        set_trace()
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
@@ -130,8 +101,8 @@ class CNET(object):
         for var in variables:
             self.constraints[int(var)].append(c) # redundant set of pointers,
                                               # but fast lookup
-    def getRootState(self):
-        return CSPState(None, [li.copy() for li in self.domains], None, None)
+    def getRootState(self, func=f_csp):
+        return CSPState(None, [li.copy() for li in self.domains], None, None, func)
         # return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
@@ -143,9 +114,10 @@ class CNET(object):
         return self.domains[index]
 
 class CSPState(State):
-    def __init__(self, pred, domains, constraints, new_paint, f_csp=f_csp):
+    def __init__(self, pred, domains, constraints, new_paint, f_csp):
         self.domains = domains
         self.constraints = constraints
+        self.func = f_csp
         if pred:
             super(CSPState, self).__init__(id(self), pred,
                                            f_csp, (pred.depth + 1, domains))
@@ -177,7 +149,7 @@ class CSPState(State):
         cons = self.constraints or []
 
         return CSPState(self, [ var.copy() for var in doms ],
-                        [ c for c in cons], self.new_paint)
+                        [ c for c in cons], self.new_paint, self.func)
 
     def __getitem__(self, index):
         return self.domains[index]
@@ -195,8 +167,11 @@ class VertexInstance(object):
     def getCnetSelf(self):
         return self.cnet[self.index]
 
-    def makeAssumption(self, domainIndex):
-        self.domain = [self.cnet[self.index].domain[domainIndex]]
+    def makeAssumption(self, domainIndex, is_index=False):
+        if is_index:
+            self.domain = [self.cnet[self.index].domain[domainIndex]]
+        else:
+            self.domain = [domainIndex]
 
 class Constraint(object):
     """ This is the CI relative to the assignment text
@@ -231,29 +206,15 @@ class Constraint(object):
                 break
         return can_satisfy
 
-class CNET2(CNET):
-    def __init__(self, num_vars, domain):
-        self.domains = [ VertexInstance(index, [x for x in domain], self) \
-                                for index in range(num_vars)]
-        # self.variables = range(len(domains))
-        self.constraints = [ [] for _ in range(num_vars) ]
-
-        symbol_list = [ x for x in chain(lowercase,
-                                [ x+y for (x,y) in \
-                                product(lowercase, (str(x) for x in range(10)))])] \
-                                [:num_vars]
-        self.symvars = symbols(' '.join(symbol_list))
-        self.sym_dict = dict()
-        for s in self.symvars:
-            self.sym_dict[str(s)] = s
-
-
+from time import sleep
 def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         variable.makeAssumption(value)
         if not constraint.canSatisfy(state):
+            print "removing %d from %d" % (value, variable.index)
+            sleep(0.1)
             copy_domain.remove(value)
             revised = True
     variable.domain = copy_domain
