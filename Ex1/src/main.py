@@ -277,6 +277,10 @@ def ngramParams(filename):
                     p.append(mapcord(i,k,width))
             poss.append(p)
         possible_cols.append(poss)
+
+    A = [1, 2, 3]
+    B = [11, 21, 31]
+    print len(FiniteSet(A).intersect(FiniteSet(B)))
     
 
     cnet = CNET3(possible_rows, possible_cols)

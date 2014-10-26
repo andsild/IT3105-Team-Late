@@ -41,8 +41,10 @@ class Ngram(Problem):
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
-        print "Nodes generated --->",self.nodes_count
-        self.network.update()
+        if final_state:
+            for vi in final_state.domains:
+                if len(vi.domain) == 1:
+                    self.network.paint_node(vi.index, self.colors["green"])
         print "FINISHED"
 
     """ Paint nodes after iteration in local search
@@ -54,6 +56,6 @@ class Ngram(Problem):
             if len(vi.domain) == 1:
                 self.network.paint_node(vi.index, self.colors["green"])
             else:
-                self.network.paint_node(vi.index, self.colors["black"])
+                self.network.paint_node(vi.index, color_pool["black"])
         self.network.update()
 # EOF

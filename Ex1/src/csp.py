@@ -4,7 +4,6 @@ from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
-from sympy import Set
 from sympy.parsing.sympy_parser import parse_expr
 from itertools import chain, product, repeat
 from operator import add
@@ -234,6 +233,7 @@ class Constraint(object):
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
         for tup in product(*arg_list):
+            set_trace()
             if self.function(*tup):
                 can_satisfy = True
                 break
