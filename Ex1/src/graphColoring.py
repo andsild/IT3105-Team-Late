@@ -60,6 +60,7 @@ class Coloring(Problem):
                 yield new_state
 
     def destructor(self, final_state):
+        set_trace()
         if final_state:
             for vi in final_state.domains:
                 if len(vi.domain) == 1:

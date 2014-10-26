@@ -104,6 +104,7 @@ class CNET(object):
         symvars = symbols(' '.join(use_vars))
         # lambdafunc = parse_expr(function)
         lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        set_trace()
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v

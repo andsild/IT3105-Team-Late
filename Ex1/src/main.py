@@ -31,7 +31,7 @@ def searchParams(filename, mode):
 
             yield np.array( [ list(y for x in range(start_y, start_y + height) for y in range(start_x, start_x + width)),
                             list(x for x in range(start_y, start_y + height) for y in range(start_x, start_x + width))]
-                       )
+                      )
 
     inData = open(filename)
 
@@ -133,8 +133,6 @@ def flowParams(filename):
 
     width, height = in_data[0][::-1]
 
-
-
     tmp_D = set()
     for node,start_x,start_y,end_x,end_y in in_data[1:]:
         positions.append((start_x, start_y, end_x, end_y))
@@ -153,162 +151,106 @@ def flowParams(filename):
 
     cords = np.array( [xLine, yLine] )
     n = Network2D(cords, (width, height))
-    # cnet = CNET(n.g.num_vertices(), len(positions))
-    domain = [0,10,11,14,15] # 4
-    cnet = CNET2(n.g.num_vertices(), domain) # one for each possible direction
-    """ I make the strong assumption that the board if filled diagonally.
-        There are a finite amount of choises: you can come in from north or 
-        west. you can exit south or east. This gives four possible choises.
-
-        AXIS: X ---> OUTGOING
-        AXIS: Y |  INCOMING
-        * *  S   E
-     *  0 .  2   3
-     *  . .  .   .
-     N  . . 10  11
-     W  . . 14  15
-     
-     In other words, choosing value 10 means that incoming is N, outgoing is S
-
-     The endpoints only have one outgoing/incoming.
-    """
-
-    # cons1 : < 0
-    # cons2 : > 0
-    cons1_horiz = cons1_vert = "B - ((A % 4)+1)*4"
-    cons2_horiz = cons2_vert = "B - (A % 4)*4"
-    """ 
-          * * *
-        * . A B
-        * . . .
-        this states that the neighbouring cell (A is upper, B is lower)
-        has to have the incoming degree respective to the top
-        Is A is going out east, incoming S is filtered from the domain B
-    """
-    """ 
-          * * *
-        * . A .
-        * . B .
-    this states that the neighbouring cell (A is left-most, B is right-adjacent)
-        has to have the incoming degree respective to the left.
-        Is A is going out east, incoming W is filtered from the domain B
-    """
-
-    # cons1 : <= 0
-    cons1_diag = "(A % 4) - (B % 4) "
-    """
-          * * *
-        * . . A
-        * . B .
-        this states that the neighbouring cell (A is upper right, B is i-1,j-1)
-        cannot be such that both A and B direct flow to the same cell.
-        In other words, prevent that when A % 4 == 2 (flow down), that 
-        B can choose a value s.t. B % 2 == 3. Therefore, we say that
-        B % 4 <= A % 4.
-    """
-
+    cnet = CNET(n.g.num_vertices(), len(positions))
 
     for y in range(1,height-1):
         for x in range(width):
             cells = [n.map2d1d(x,y) for x,y in \
-                        [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
+                    [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
             if (x,y) not in tmp_D:
-               cnet.addCons(cells,  \
-                             "X - (Y+1) * 4", 0)
-                             # "abs(A - B) - abs(abs(A-B)-1)"
-                             #  "+ abs(A - C) - abs(abs(A-C)-1)"
-                             #  "+ abs(A - D) - abs(abs(A-D)-1)"
-                             #  "+ abs(A - E) - abs(abs(A-E)-1)",
-                             # 0)
+                cnet.addLessThan(cells,  \
+                            "abs(A - B) - abs(abs(A-B)-1)"
+                            "+ abs(A - C) - abs(abs(A-C)-1)"
+                            "+ abs(A - D) - abs(abs(A-D)-1)"
+                            "+ abs(A - E) - abs(abs(A-E)-1)",
+                            0)
             else:
-                cnet.addCons(cells,  \
-                             "abs(A - B) - abs(abs(A-B)-1)"
-                              "+ abs(A - C) - abs(abs(A-C)-1)"
-                              "+ abs(A - D) - abs(abs(A-D)-1)"
-                              "+ abs(A - E) - abs(abs(A-E)-1)",
-                             2)
-    for x in range(1,width):
+                cnet.addLessThan(cells, \
+                            "abs(A - B) - abs(abs(A-B)-1)"
+                            "+ abs(A - C) - abs(abs(A-C)-1)"
+                            "+ abs(A - D) - abs(abs(A-D)-1)"
+                            "+ abs(A - E) - abs(abs(A-E)-1)",
+                            2)
+
+
+    for y in range(1,height-1):
         cells = [n.map2d1d(x,y) for x,y in \
-                    [ (x,0), (x+1,0), (x-1,0)]]
+                [ (0,y), (0,y+1), (0,y-1), (1,y)]]
         if (x,0) not in tmp_D:
-            cnet.addcons(cells,  \
-                            "abs(a - b) - abs(abs(a-b)-1)"
-                            "+ abs(a - c) - abs(abs(a-c)-1)"
-                            "+ abs(a - d) - abs(abs(a-d)-1)",
-                            1)
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        -1)
         else:
-            cnet.addCons(cells,  \
-                            "abs(A - B) - abs(abs(A-B)-1)"
-                            "+ abs(A - C) - abs(abs(A-C)-1)"
-                            "+ abs(A - D) - abs(abs(A-D)-1)"
-                            "+ abs(A - E) - abs(abs(A-E)-1)",
-                            2)
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        1)
         cells = [n.map2d1d(x,y) for x,y in \
-                    [ (x,height-1), (x+1,height-1), (x-1,height-1)]]
+                [ (width-1,y), (width-1,y+1), (width-1,y-1), (width-2,y)]]
         if (x,height-1) not in tmp_D:
-            cnet.addcons(cells,  \
-                            "abs(a - b) - abs(abs(a-b)-1)"
-                            "+ abs(a - c) - abs(abs(a-c)-1)"
-                            "+ abs(a - d) - abs(abs(a-d)-1)",
-                            1)
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        -1)
         else:
-            cnet.addCons(cells,  \
-                            "abs(A - B) - abs(abs(A-B)-1)"
-                            "+ abs(A - C) - abs(abs(A-C)-1)"
-                            "+ abs(A - D) - abs(abs(A-D)-1)"
-                            "+ abs(A - E) - abs(abs(A-E)-1)",
-                            2)
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        1)
 
+    for x in range(1,width-1):
+        cells = [n.map2d1d(x,y) for x,y in \
+                [ (x,0), (x+1,0), (x-1,0), (x,1)]]
+        if (x,0) not in tmp_D:
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        -1)
+        else:
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        1)
+        cells = [n.map2d1d(x,y) for x,y in \
+                [ (x,height-1), (x+1,height-1), (x-1,height-1), (x,height-2)]]
+        if (x,height-1) not in tmp_D:
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        -1)
+        else:
+            cnet.addLessThan(cells,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        "+ abs(A - D) - abs(abs(A-D)-1)",
+                        1)
 
+    corner_cells = [ [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
+                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
+                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]],
+                    [n.map2d1d(x,y) for x,y in [ (0,0), (1,1), (0,1)]]
+                ]
+    for corner in corner_cells:
+        if corner[0] in tmp_D:
+            cnet.addLessThan(corner,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)"
+                        -2)
+        else:
+            cnet.addLessThan(corner,  \
+                        "abs(A - B) - abs(abs(A-B)-1)"
+                        "+ abs(A - C) - abs(abs(A-C)-1)",
+                        0)
 
     prob = FlowPuz(n, cnet, positions, (width,height), COLORS)
-
-# func tryConnection(paper *Paper, pos1 int, dirs int) bool {
-#     // Extract the (last) bit which we will process in this call
-#     dir := dirs & -dirs
-#     pos2 := pos1 + paper.Vctr[dir]
-#     end1, end2 := paper.end[pos1], paper.end[pos2]
-#
-#     // Check different sources arent connected
-#     if paper.Table[end1] != EMPTY && paper.Table[end2] != EMPTY &&
-#         paper.Table[end1] != paper.Table[end2] {
-#         return false
-#     }
-#     // No loops
-#     if end1 == pos2 && end2 == pos1 {
-#         return false
-#     }
-#     // No tight corners (Just an optimization)
-#     if paper.Con[pos1] != 0 {
-#         dir2 := paper.Con[pos1+paper.Vctr[paper.Con[pos1]]]
-#         dir3 := paper.Con[pos1] | dir
-#         if DIAG[dir2] && DIAG[dir3] && dir2&dir3 != 0 {
-#             return false
-#         }
-#     }
-#
-#     // Add the connection and a backwards connection from pos2
-#     old1, old2 := paper.Con[pos1], paper.Con[pos2]
-#     paper.Con[pos1] |= dir
-#     paper.Con[pos2] |= MIR[dir]
-#     // Change states of ends to connect pos1 and pos2
-#     old3, old4 := paper.end[end1], paper.end[end2]
-#     paper.end[end1] = end2
-#     paper.end[end2] = end1
-#
-#     // Remove the done bit and recurse if nessecary
-#     dir2 := dirs &^ dir
-#     res := false
-#     if dir2 == 0 {
-#         res = chooseConnection(paper, paper.next[pos1])
-#     } else {
-#         res = tryConnection(paper, pos1, dir2)
-#     }
-#
-
-        
-
-
     
     return n.widget, prob
 
