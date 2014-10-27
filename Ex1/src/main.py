@@ -365,11 +365,19 @@ def ngramParams(filename):
             poss.append(p)
         possible_cols.append(poss)
 
+    for i in range(len(possible_rows)):
+        for j in range(len(possible_rows[i])):
+            possible_rows[i][j] = set(possible_rows[i][j])
+
+    for i in range(len(possible_cols)):
+        for j in range(len(possible_cols[i])):
+            possible_cols[i][j] = set(possible_cols[i][j])
+
+    print possible_rows
+    print possible_cols
+
     cnet = CNET3(possible_rows, possible_cols)
     prob = Ngram(network, cnet, possible_rows, possible_cols, color_pool)
-
-    print possible_cols
-    print possible_rows
 
     return network.widget, prob
 

@@ -167,7 +167,7 @@ class CNET3(CNET):
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
 
-        func = lambda A,B: len(set(A).intersection(set(B)))
+        func = lambda A,B: len(A.intersection(B))
 
         c = Constraint(func,
                        [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
@@ -223,8 +223,8 @@ class VertexInstance(object):
         self.cnet = caller
 
     def copy(self):
-        if self.domain and type(self.domain[0]) == list:
-            return VertexInstance(self.index, [[x for x in v] for v in self.domain], self.cnet)
+        if self.domain and type(self.domain[0]) == set:
+            return VertexInstance(self.index, [set([x for x in v]) for v in self.domain], self.cnet)
         return VertexInstance(self.index, [v for v in self.domain], self.cnet)
         # return VertexInstance(self.index, [v for v in self.domain], self.cnet)
 
@@ -320,7 +320,7 @@ def AC_3(cnet, state, vertex):
 
 def revise_NGARM(variable, constraint, state):
     revised = False
-    copy_domain = [ [y for y in x] for x in variable.domain]
+    copy_domain = [ set([y for y in x]) for x in variable.domain]
     for index,value in enumerate(variable.domain): # FIXME: this index is wrong
         variable.makeAssumption(value, is_index=False)
         if not constraint.canSatisfy(state):
