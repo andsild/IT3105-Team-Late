@@ -216,7 +216,6 @@ class CSPState(State):
     def __getitem__(self, index):
         return self.domains[index]
 
-
 class VertexInstance(object):
     def __init__(self, index, domain, caller):
         self.index = index
@@ -224,7 +223,9 @@ class VertexInstance(object):
         self.cnet = caller
 
     def copy(self):
-        return VertexInstance(self.index, [[x for x in v] for v in self.domain], self.cnet)
+        if self.domain and type(self.domain[0]) == list:
+            return VertexInstance(self.index, [[x for x in v] for v in self.domain], self.cnet)
+        return VertexInstance(self.index, [v for v in self.domain], self.cnet)
         # return VertexInstance(self.index, [v for v in self.domain], self.cnet)
 
     def getCnetSelf(self):
