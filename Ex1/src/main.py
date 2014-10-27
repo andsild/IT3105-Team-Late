@@ -179,7 +179,7 @@ def flowParams(filename):
     # LEFT BORDER
     for y in range(1,height-1):
         cells = [n.map2d1d(posx,posy) for posx,posy in \
-                [ (0,y), (0,y+1), (0,y-1), (1,y)]]
+                [ (0,y), (0,y+1), (1,y), (0,y-1)]]
         if (0,y) not in tmp_D:
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
@@ -194,7 +194,7 @@ def flowParams(filename):
                         1)
     # RIGHT BORDER
         cells = [n.map2d1d(posx,posy) for posx,posy in \
-                [ (width-1,y), (width-1,y+1), (width-1,y-1), (width-2,y)]]
+                [ (width-1,y), (width-1,y+1), (width-2,y), (width-1,y-1)]]
         if (width-1,y) not in tmp_D:
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
@@ -242,9 +242,9 @@ def flowParams(filename):
 
     corner_cells = [ [((posx,posy),n.map2d1d(posx,posy)) for posx,posy in [ (0,0), (0,1), (1,0)]],
                     [((posx,posy),n.map2d1d(posx,posy)) for posx,posy in [ (width-1,0), (width-2,0), (width-1,1)]],
-                    [((posx,posy),n.map2d1d(posx,posy)) for posx,posy in [ (width-1,height-1), (width-1,height-2), (width-2,height-1)]],
+                    [((posx,posy),n.map2d1d(posx,posy)) for posx,posy in [ (width-1,height-1), (width-2,height-1), (width-1,height-2)]],
                     [((posx,posy),n.map2d1d(posx,posy)) 
-                        for posx,posy in [ (0,height-1), (0,height-2), (1,height-1)]],
+                        for posx,posy in [ (0,height-1), (1,height-1), (0,height-2)]],
                 ]
     for tup in corner_cells:
         corner = [x[1] for x in tup]

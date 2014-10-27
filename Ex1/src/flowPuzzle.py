@@ -12,14 +12,14 @@ def f_numberlink(depth, domains):
 """ Size of domain -1, summed together
 """
 def h_numberlink(domains):
-    # promise = sum(len(vi.domain)-1 for vi in domains)
-    promise = 0
-    count = [0] * 50
-    for vi in domains:
-        lv = len(vi.domain)-1
-        promise += len(vi.domain)-1
-        if not lv:
-            count[vi.domain[0]] += 1
+    promise = sum(len(vi.domain)-1 for vi in domains)
+    # promise = 0
+    # count = [0] * 50
+    # for vi in domains:
+    #     lv = len(vi.domain)-1
+    #     promise += len(vi.domain)-1
+    #     if not lv:
+    #         count[vi.domain[0]] += 1
     return promise
 
 
@@ -115,8 +115,6 @@ class FlowPuz(Problem):
             new_state[new_vertex].makeAssumption(value, False)
             if AC_3(self.cnet, new_state, new_vertex):
                 yield new_state
-            # yield new_state
-            sleep(0.2)
 
     """ The function to be invoked at the end of a search
     """

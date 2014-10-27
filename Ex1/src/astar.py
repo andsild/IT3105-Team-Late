@@ -56,7 +56,6 @@ def astar(network, problem, Q, D):
         # problem.updateStates(curState, Q[0][1])
         if Q:
             problem.updateStates(Q[0][1], curState)
-        sleep(0.1)
         return True
     print "---\nMode:",problem.mode
     print "goal not found"

@@ -204,8 +204,15 @@ class Constraint(object):
         self.addState(state)
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
+
         for tup in product(*arg_list):
             if self.function(*tup):
+                if len(tup) == 5:
+                    check = state[self.vi_list[-1][-1]-1].domain[0]
+                    if check == tup[0] and check == tup[-1] and check == tup[-3]:
+                        tup = list(tup[:-1]) + [99]
+                        if not self.function(*tup):
+                            continue
                 can_satisfy = True
                 break
         return can_satisfy
@@ -219,12 +226,12 @@ def revise(variable, constraint, state):
         # if variable.index == 0 and not constraint.canSatisfy(state):
             # set_trace()
         if not constraint.canSatisfy(state):
-            print "removing %s from %d" % (lookupColor(value), variable.index)
+            # print "removing %s from %d" % (lookupColor(value), variable.index)
             # sleep(0.1)
             copy_domain.remove(value)
             revised = True
-    if revised:
-        print "variable %d reduced to %s" % (variable.index, str(copy_domain))
+    # if revised:
+        # print "variable %d reduced to %s" % (variable.index, str(copy_domain))
     variable.domain = copy_domain
     return revised
 
