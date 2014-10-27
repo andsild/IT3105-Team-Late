@@ -8,7 +8,8 @@ class Ngram(Problem):
     def __init__(self, network, cnet, p_rows, p_cols, colors):
         super(Ngram, self).__init__(network)
         self.cnet = cnet
-        self.nodes_count = 0
+        self.nodes_gen = 0
+        self.nodes_exp = 0
         self.p_rows = p_rows
         self.p_cols = p_cols
         self.colors = colors
@@ -30,6 +31,7 @@ class Ngram(Problem):
     """ Generate neighbours from the current state
     """
     def genNeighbour(self, state):
+        self.nodes_exp += 1
         new_vertex = state.getUnassigned_Nonrandom()  # VERTEX NUMBERING
         # STARTS AT TOP COL, THEN PROCEEDS TO RIGHT THEN EACH ROW FROM..
         print "selecting %d which can get domain %s " \
@@ -40,12 +42,14 @@ class Ngram(Problem):
             # new_state[new_vertex].makeAssumption(index, True)
             new_state[new_vertex].makeAssumption(value)
             if AC_3_NGRAM(self.cnet, new_state, new_vertex):
+                self.nodes_gen += 1
                 yield new_state
 
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
-        print "Nodes generated --->",self.nodes_count
+        print "Nodes expanded --->",self.nodes_exp
+        print "Nodes generated --->",self.nodes_gen
         if final_state:
             for vi in final_state.domains:
                 if len(vi.domain) == 1:
