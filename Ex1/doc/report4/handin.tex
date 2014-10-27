@@ -127,7 +127,7 @@ and also a parser for the input files.
 Both problems could be fully expressed as SAT, so we found both problems to
 be NP-hard. We chose to use this representation for the flow puzzle. 
 While the benchmark of Michael Spivey 
-\tiny\begin{verbatim}
+\small\begin{verbatim}
 [http://spivey.oriel.ox.ac.uk
 /corner/Programming_competition_results]\end{verbatim}
 \normalsize
@@ -136,6 +136,11 @@ incoming/outgoing direction of flow (NE, NW, NS, WE, WS \dots),
 we chose SAT because of its simplicity and ease of implementing it in our
 model, and also with the knowledge that the input files were no bigger than
 $10 \times 10$, and that small differences in performance is not critical to our evaluation.
+Also, the SAT formulation meant that we had small domains, which is important
+when using our CNET because domains are copied quite often... So therefore, 
+even if the winning ``numberlink'' from the benchmark[ibid] modeled 
+his project using directions, it might be that it is inefficient in 
+our model when using GAC and constraint propagation.
 
 In our model, we represent the board as a 2D-grid of cells, each representing one
 vertex instance $v_{i,j}$ for poosition $i,j$ in the cartesian plane.
@@ -144,12 +149,15 @@ the number of endpoints / 2.
 Each cell $v_{i,j}$ must be a part of the path
 \footnote{I will assume the reader is has a mutual understanding of ``path''}
 from an endpoint $e_{i,j}$ to another endpoint $e_{i+\alpha,j+\beta}$.
-Therefor our constraints are modelled as follows:
-\begin{equation*}
-\forall{i,j}: leastTwoOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == v_{i,j}
-\end{equation*}
+Therefore our constraints are modelled as follows:
+\begin{align}
+    \forall{i,j}: leastTwoOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == v_{i,j} \\
+    \forall{i,j}: leastOneOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == e_{i,j}
+\end{align}
 this can also be thought of as applying a 5-point stencil to the grid
-and validating each neighbour value
+and validating each neighbour value. This constraint only applies to the entir
+LOOPS, deffered
+
 \begin{figure}[Hb]
 \centering
     \includegraphics[height=2cm,keepaspectratio,width=2.5in]{stencil.jpg}
@@ -157,9 +165,24 @@ and validating each neighbour value
 \label{fig:stencil}
 \end{figure}
 
+\subsection{Choice of next cell}
+Clearly, random is bad..
+
+\subsection{Choice of heurstic}
+We scanned through 
+
 
 \section*{Modelling Nonograms}
+While nonograms certainly also can be expressed as SAT, we found it easier to
+follow the model suggested to us in the assignment text. Given a rule
+$r$, we generate all possible sequences.
 
+propagates..
 
+\subsection{Choice of heuristic}
+
+\subsection{Choice of next cell}
+
+PICTURES?
 
 \end{document}
