@@ -69,13 +69,34 @@ class CNET(object):
                        D, self)
         for var in vertexes:
             self.constraints[var].append(c) # redundant set of pointers,
+    
+    def addLambda(self,vertexes,string, function, eval_value):
+        use_vars = sorted(filter(set(string).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(function,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
 
             
     def addCons(self,vertexes, function, eval_value):
         use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
         symvars = symbols(' '.join(use_vars))
         # lambdafunc = parse_expr(function)
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
         lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        # print lambdafunc(1,1,1,1,1)
+        set_trace()
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
