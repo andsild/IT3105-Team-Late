@@ -132,7 +132,6 @@ class CNET3(CNET):
         self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
         
         func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
-        #func = "FiniteSet(A).intersect(FiniteSet(B)).is_EmptySet()"
 
         for i in range(len(p_rows)):
             for j in range(len(p_rows),len(p_rows)+len(p_cols)):
@@ -148,17 +147,22 @@ class CNET3(CNET):
             self.sym_dict[str(s)] = s
 
     def addCons(self,vertexes, function, eval_value):
-        use_vars = sorted(filter(set(function).__contains__, set("ABCDE")))
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
         symvars = symbols(' '.join(use_vars))
-        
+
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
         lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
-            c = Constraint(lambda A,B: len(set(A).intersection(set(B))),[ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)],D, self)
+        c = Constraint(lambda A,B: len(set(A).intersection(set(B))),
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
         for var in vertexes:
             self.constraints[var].append(c)
-
+            print c.vi_list
 
 class CSPState(State):
     def __init__(self, pred, domains, constraints, new_paint):
@@ -174,6 +178,7 @@ class CSPState(State):
 
     def isGoal(self):
         assigned = [ len(vi.domain) == 1 for vi in self.domains]
+        print assigned
         return all(assigned)
 
     def getUnassigned_Nonrandom(self):
@@ -243,6 +248,7 @@ class Constraint(object):
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
         for tup in product(*arg_list):
+            print tup[0],'-',tup[1]
             if self.function(*tup):
                 can_satisfy = True
                 break
@@ -326,19 +332,6 @@ def AC_3_NGRAM(cnet, state, vertex):
         if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
                 return False
-
-            ### 
-            ### ADDED AFTER DEADLINE
-            ### 
-
-            # WHAT HAS BEEN DONE
-            # for neighbour in c.getAdjacent(v, state):
-            #     Q.append( (neighbour, c))
-
-            # Commented out the for loop above.
-            # instead of *just* adding the reverse constraint
-            # (x != y --> y != x), we now also add for all constraintst that x
-            # occurs in
 
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):

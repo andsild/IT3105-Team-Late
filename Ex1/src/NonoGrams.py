@@ -31,7 +31,6 @@ class Ngram(Problem):
     """
     def genNeighbour(self, state):
         new_vertex = state.getUnassigned_Nonrandom() 
-
         for index,value in enumerate(state[new_vertex].domain):
             new_state = state.copy()
             new_state[new_vertex].makeAssumption(index)
@@ -41,11 +40,9 @@ class Ngram(Problem):
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
-        if final_state:
-            for vi in final_state.domains:
-                if len(vi.domain) == 1:
-                    self.network.paint_node(vi.index, self.colors["green"])
-        print "FINISHED"
+        print "Nodes generated --->",self.nodes_count
+        self.network.update()
+        print'FINISHED'
 
     """ Paint nodes after iteration in local search
         @param new is the lates state entered

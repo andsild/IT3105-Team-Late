@@ -233,10 +233,9 @@ def ngramParams(filename):
 
     width, height = inData[0]
 
-    rows = inData[1:height+1]
     columns = inData[height+1:]
-    
-
+    rows = inData[1:height+1]
+    rows = rows[::-1]
 
     xLine,yLine = [],[]
 
