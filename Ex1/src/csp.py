@@ -281,26 +281,18 @@ class Constraint(object):
                 break
         return can_satisfy
 
-from time import sleep
 def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         variable.makeAssumption(value)
-        # if variable.index == 0 and not constraint.canSatisfy(state):
-            # set_trace()
         if not constraint.canSatisfy(state):
-            # print "removing %s from %d" % (lookupColor(value), variable.index)
-            # sleep(0.1)
             copy_domain.remove(value)
             revised = True
-    # if revised:
-        # print "variable %d reduced to %s" % (variable.index, str(copy_domain))
     variable.domain = copy_domain
     return revised
 
 def AC_3(cnet, state, vertex):
-    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state): # this can be used, vertex is assumed
@@ -311,7 +303,6 @@ def AC_3(cnet, state, vertex):
         origDomain = v.domain
         if revise(v, c, state):
             if len(v.domain) == 0:
-                print "\tabandoning..."
                 return False
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):
@@ -324,10 +315,7 @@ def revise_NGARM(variable, constraint, state):
     for index,value in enumerate(variable.domain): # FIXME: this index is wrong
         variable.makeAssumption(value, is_index=False)
         if not constraint.canSatisfy(state):
-            d=constraint.getAdjacent(variable.index, state)[0].domain
-            # print "domain %s did not satisfy %s" % (str(variable.domain), str(d)),
             copy_domain.remove(value)
-            # copy_domain.pop(index)
             revised = True
     variable.domain = copy_domain
     return revised
@@ -341,8 +329,6 @@ def AC_3_NGRAM(cnet, state, vertex):
         v, c = Q.pop()
         if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
-                # print "\tabandonin vertex %d with domain %s, because vertex %d" \
-                #     % (vertex, state[vertex].domain, v.index)
                 return False
 
             for c in cnet.getConstraint(v.index):
@@ -350,6 +336,5 @@ def AC_3_NGRAM(cnet, state, vertex):
                     Q.append((vi, c))
 
     return True
-from flowPuzzle import lookupColor
 
 #EOF
