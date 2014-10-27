@@ -53,8 +53,6 @@ class FlowPuz(Problem):
         self.width, self.height = dim
         self.mode = mode
         self.cnet = cnet
-        self.nodes_gen = 1
-        self.nodes_exp = 1
         """ The obstacle coordinates  """
         for index,(sx,sy,ex,ey) in enumerate(positions):
             cnet[network.map2d1d(sx,sy)].makeAssumption(index)
@@ -92,6 +90,8 @@ class FlowPuz(Problem):
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
+        self.nodes_gen = 1
+        self.nodes_exp = 1
         # self.network.clear()
 
         start_state = self.cnet.getRootState(f_numberlink)
