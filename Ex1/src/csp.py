@@ -1,6 +1,5 @@
 #!/usr/bin/python
 from string import lowercase, uppercase
-from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
@@ -124,7 +123,6 @@ class CNET(object):
                                               # but fast lookup
     def getRootState(self, func=f_csp):
         return CSPState(None, [li.copy() for li in self.domains], None, None, func)
-        # return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
         if type(index) == Constraint:
@@ -141,16 +139,13 @@ class CNET3(CNET):
             self.domains.append(VertexInstance(index,item,self))
 
         self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
-        print [vi.domain for vi in self.domains]
         
         func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
 
         for i in range(len(p_cols)):
             for j in range(len(p_cols),len(p_rows)+len(p_cols)):
-                print i,j
                 self.addCons([i,j],func,1)
                 # self.addCons([j,i],func,1)
-
         symbol_list = [ x for x in chain(lowercase,
                                 [ x+y for (x,y) in \
                                 product(lowercase, (str(x) for x in range(10)))])] \
@@ -229,7 +224,8 @@ class VertexInstance(object):
         self.cnet = caller
 
     def copy(self):
-        return VertexInstance(self.index, [v for v in self.domain], self.cnet)
+        return VertexInstance(self.index, [[x for x in v] for v in self.domain], self.cnet)
+        # return VertexInstance(self.index, [v for v in self.domain], self.cnet)
 
     def getCnetSelf(self):
         return self.cnet[self.index]
@@ -344,8 +340,8 @@ def AC_3_NGRAM(cnet, state, vertex):
         v, c = Q.pop()
         if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
-                print "\tabandonin vertex %d with domain %s, because vertex %d" \
-                    % (vertex, state[vertex].domain, v.index)
+                # print "\tabandonin vertex %d with domain %s, because vertex %d" \
+                #     % (vertex, state[vertex].domain, v.index)
                 return False
 
             for c in cnet.getConstraint(v.index):

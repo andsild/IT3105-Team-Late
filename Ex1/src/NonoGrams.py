@@ -37,7 +37,8 @@ class Ngram(Problem):
         for index,value in enumerate(state[new_vertex].domain):
             print "Assuming value %s" % (str(value))
             new_state = state.copy()
-            new_state[new_vertex].makeAssumption(index, True)
+            # new_state[new_vertex].makeAssumption(index, True)
+            new_state[new_vertex].makeAssumption(value)
             if AC_3_NGRAM(self.cnet, new_state, new_vertex):
                 yield new_state
 
@@ -64,8 +65,10 @@ class Ngram(Problem):
     def updateStates(self, new, cur):
         for vi in new.domains:
             if len(vi.domain) == 1:
-                self.network.paint_node(vi.index, self.colors["green"])
-            else:
-                self.network.paint_node(vi.index, self.colors["black"])
+                for val in vi.domain[0]:
+                    if val > 0:
+                        self.network.paint_node(val-1,self.colors["green"])
+                    else:
+                        self.network.paint_node(abs(val)-1,self.colors["black"])
         self.network.update()
 # EOF
