@@ -205,9 +205,29 @@ def flowParams(filename):
             yLine.append(y)
 
     cords = np.array( [xLine, yLine] )
+<<<<<<< HEAD
     COLORS = [ x for x in color_pool.values() \
           if x is not color_pool["black"] and x is not color_pool["white"]]\
         [:len(positions)]
+=======
+    n = Network2D(cords)
+    # cnet = CNET(n.g.num_vertices(), len(positions))
+    cnet = CNET(n.g.num_vertices(), 4)
+    prob = FlowPuz(n, cnet, positions, (width,height))
+
+    for i in range(1,width):
+        cnet.readCons(i,i-1)
+    for i in range(width, n.g.num_vertices(), width):
+        cnet.readCons(i,i-width)
+        for w in range(i+1, width-1):
+            use = i + w
+            cnet.readCons(use, use-1, use-width,use-width+1)
+        cnet.readCons(use,use-1,use-width)
+
+
+
+        
+>>>>>>> 89d1fc33f482083cc8815703e6b82a8a3e50a912
 
     cords = np.array( [xLine, yLine] )
     n = Network2D(cords, (width, height))
@@ -337,10 +357,10 @@ def ngramParams(filename):
     inData = [ [int(num) for num in x.split()] for x in inData]
     inData.pop()
 
-    width, height = inData[0]   # width means number of rows
+    width, height = inData[0]
 
     columns = inData[height+1:]
-    rows = inData[1:height+1] # the first n numbers
+    rows = inData[1:height+1]
     rows = rows[::-1]
 
     xLine,yLine = [],[]
@@ -351,7 +371,7 @@ def ngramParams(filename):
             yLine.append(y)
 
     cords = np.array( [xLine, yLine] )
-    network = Network2D(cords, (width, height))
+    network = Network2D(cords)
 
     generated = []
     possible_rows = []
@@ -364,36 +384,27 @@ def ngramParams(filename):
         for j in generated[i]:
             p = []
             for k in range(len(j)):
-                put = mapcord(k,i,width) + 1
                 if j[k] == 1:
-                    p.append(put)
-                else:
-                    p.append(-put)
+                    p.append(mapcord(k,i,width))
             poss.append(p)
         possible_rows.append(poss)
 
     generated = []
     for rule in columns:
         generated.append(generatePos(rule,height))
+    
     for i in range(len(generated)):
         poss = []
         for j in generated[i]:
             p = []
             for k in range(len(j)):
-                put = mapcord(i+1,k,width)
                 if j[k] == 1:
-                    p.append(put)
-                else:
-                    p.append(-put)
+                    p.append(mapcord(i,k,width))
             poss.append(p)
         possible_cols.append(poss)
 
     cnet = CNET3(possible_rows, possible_cols)
     prob = Ngram(network, cnet, possible_rows, possible_cols, color_pool)
-
-    print possible_cols
-    print possible_rows
-    set_trace()
 
     return network.widget, prob
 

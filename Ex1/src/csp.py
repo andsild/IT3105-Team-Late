@@ -26,7 +26,7 @@ OPERATORS = {
    ">=" : GreaterThan,
     "<=" : LessThan,
     ">"  : StrictGreaterThan,
-    "<"  : StrictLessThan,
+  "<"  : StrictLessThan,
 }
 
 class CNET(object):
@@ -44,6 +44,7 @@ class CNET(object):
         self.sym_dict = dict()
         for s in self.symvars:
             self.sym_dict[str(s)] = s
+
 
     def getConstraint(self, vertex):
         ret = self.constraints[vertex]
@@ -86,7 +87,7 @@ class CNET(object):
         for var in vertexes:
             self.constraints[var].append(c) # redundant set of pointers,
 
-            
+
     def addCons(self,vertexes, function, eval_value):
         use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
         symvars = symbols(' '.join(use_vars))
@@ -96,7 +97,6 @@ class CNET(object):
             check[(str(v))] = v
         lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
         # print lambdafunc(1,1,1,1,1)
-        set_trace()
         D = {}
         for symv,v in zip(symvars, vertexes):
             D[symv] = v
@@ -105,7 +105,7 @@ class CNET(object):
                        D, self)
         for var in vertexes:
             self.constraints[var].append(c) # redundant set of pointers,
-
+    
 
     def readCanonical(self, line):
         variables = line.split()
@@ -133,6 +133,53 @@ class CNET(object):
                     return c
             return None
         return self.domains[index]
+
+class CNET3(CNET):
+    def __init__(self, p_rows, p_cols):
+        self.domains = []
+        for index,item in enumerate(chain(p_cols, p_rows)):
+            self.domains.append(VertexInstance(index,item,self))
+
+        self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
+        print [vi.domain for vi in self.domains]
+        set_trace()
+        
+        func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
+
+        for i in range(len(p_cols)):
+            for j in range(len(p_cols),len(p_rows)+len(p_cols)):
+                print i,j
+                self.addCons([i,j],func,1)
+                # self.addCons([j,i],func,1)
+
+        symbol_list = [ x for x in chain(lowercase,
+                                [ x+y for (x,y) in \
+                                product(lowercase, (str(x) for x in range(10)))])] \
+                                [:len(p_rows)+len(p_cols)]
+        self.symvars = symbols(' '.join(symbol_list))
+        self.sym_dict = dict()
+        for s in self.symvars:
+            self.sym_dict[str(s)] = s
+
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+
+        func = lambda A,B: len(set(A).intersection(set(B)))
+
+        c = Constraint(func,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c)
 
 class CSPState(State):
     def __init__(self, pred, domains, constraints, new_paint, f_csp):
@@ -218,15 +265,15 @@ class Constraint(object):
                 if index is not vertex]
 
     def canSatisfy(self, state):
-        #FIXME
-        """ if two variables have the same value as the center,
-        and their domain size is one, disconsider one of them...
-        """
+        #FIXME: circular stuff
         self.addState(state)
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
 
         for tup in product(*arg_list):
+            print tup[0],'-',tup[1]
+            print self.vi_list
+            # set_trace()
             if self.function(*tup):
                 if len(tup) == 5:
                     check = state[self.vi_list[-1][-1]-1].domain[0]
@@ -270,12 +317,42 @@ def AC_3(cnet, state, vertex):
             if len(v.domain) == 0:
                 print "\tabandoning..."
                 return False
-
             for c in cnet.getConstraint(v.index):
                 for vi in c.getAdjacent(v.index, state):
                     Q.append((vi, c))
     return True
 
+def revise_NGARM(variable, constraint, state):
+    revised = False
+    copy_domain = [x for x in variable.domain]
+    for index,value in enumerate(variable.domain):
+        variable.makeAssumption(index, True)
+        if not constraint.canSatisfy(state):
+            d=constraint.getAdjacent(variable.index, state)[0].domain
+            print "domain %s did not satisfy %s" % (str(variable.domain), str(d))
+            copy_domain.remove(value)
+            revised = True
+    variable.domain = copy_domain
+    return revised
+
+def AC_3_NGRAM(cnet, state, vertex):
+    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
+    Q = []
+    for c in cnet.getConstraint(vertex):
+        for vi in c.getAdjacent(vertex, state):
+            Q.append((vi, c))
+    while Q:
+        v, c = Q.pop()
+        if revise_NGARM(v, c, state):
+            if len(v.domain) == 0:
+                print "\tabandoning..."
+                return False
+
+            for c in cnet.getConstraint(v.index):
+                for vi in c.getAdjacent(v.index, state):
+                    Q.append((vi, c))
+
+    return True
 from flowPuzzle import lookupColor
 
 #EOF

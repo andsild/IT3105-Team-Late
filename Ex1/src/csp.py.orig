@@ -1,17 +1,13 @@
 #!/usr/bin/python
-from string import lowercase
+from string import lowercase, uppercase
 from copy import deepcopy
 from ipdb import set_trace
 import numpy as np
 from sympy import *
-from itertools import chain, product, repeat, izip
+from sympy.parsing.sympy_parser import parse_expr
+from itertools import chain, product, repeat
 from operator import add
-
 from astar import State, Problem
-
-def pairwise(iterable):
-    a = iter(iterable)
-    return izip(a,a)
 
 def f_csp(depth, domains):
     return depth + h_csp(domains)
@@ -26,7 +22,7 @@ def h_csp(domains):
 
 OPERATORS = {
     "+"  : add,
-    ">=" : GreaterThan,
+   ">=" : GreaterThan,
     "<=" : LessThan,
     ">"  : StrictGreaterThan,
     "<"  : StrictLessThan,
@@ -45,10 +41,8 @@ class CNET(object):
                                 [:num_vars]
         self.symvars = symbols(' '.join(symbol_list))
         self.sym_dict = dict()
-        self.sym_to_index = dict()
-        for index,s in enumerate(self.symvars):
+        for s in self.symvars:
             self.sym_dict[str(s)] = s
-            self.sym_to_index[str(s)] = index
 
     def getConstraint(self, vertex):
         ret = self.constraints[vertex]
@@ -60,40 +54,73 @@ class CNET(object):
                 return len(self.domains[0].domain)
         return -1
 
-    def readLP(self, line):
-        objects = line.split()
-        operators = [ ] 
+<<<<<<< HEAD
+            
+    def addLessThan(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+       # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, LessThan(parse_expr(function),eval_value))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(lambdafunc,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
+    
+    def addLambda(self,vertexes,string, function, eval_value):
+        use_vars = sorted(filter(set(string).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(function,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
 
-        symbol_in_func = []
-        fval = 0
-        for word in objects:
-            if word in OPERATORS:
-                operators.append(OPERATORS[word])
-                continue
-            for letter in word:
-                # if letter is a number
-                constant = 1
-                if ord(letter) > 48 and ord(letter) < 58:
-                    constant = int(letter)
-                if letter in self.sym_dict:
-                    symbol_in_func.append(constant * self.sym_dict[letter])
-                    continue
-                fval = constant
+            
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        # print lambdafunc(1,1,1,1,1)
+        set_trace()
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+=======
+>>>>>>> 89d1fc33f482083cc8815703e6b82a8a3e50a912
+        c = Constraint(lambdafunc,
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
 
 
-        lhs = None
-        if len(operators) < 2:
-            lhs = symbol_in_func[0]
-        else:
-            op_list = [ op(pair_var) for (pair_var,op) in zip(pairwise(symbol_in_func), operators)]
-            lhs = op_list[0]
-            for expr in op_list[:1]:
-                lhs += expr
-
-        lhs_sym, rhs_sym = symbols("lhs rhs")
-        rhs = lambdify( (lhs_sym, rhs_sym), operators[-1](lhs_sym, rhs_sym))
-
-        lc = LPConstraint(lhs, rhs, symbol_in_func, self)
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set("ABCDE")))
+        symvars = symbols(' '.join(use_vars))
+        # lambdafunc = parse_expr(function)
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+            c = Constraint(lambdafunc,[ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)],D, self)
+        for var in vertexes:
+            self.constraints[var].append(c) # redundant set of pointers,
+    
 
     def readCanonical(self, line):
         variables = line.split()
@@ -110,8 +137,8 @@ class CNET(object):
         for var in variables:
             self.constraints[int(var)].append(c) # redundant set of pointers,
                                               # but fast lookup
-    def getRootState(self):
-        return CSPState(None, [li.copy() for li in self.domains], None, None)
+    def getRootState(self, func=f_csp):
+        return CSPState(None, [li.copy() for li in self.domains], None, None, func)
         # return CSPState(None, [deepcopy(li) for li in self.domains], None, None)
 
     def __getitem__(self, index):
@@ -120,14 +147,57 @@ class CNET(object):
                 if c == self.constraints:
                     return c
             return None
-        if type(index) == str:
-            return self.sym_to_index[index]
         return self.domains[index]
 
+class CNET3(CNET):
+    def __init__(self, p_rows, p_cols):
+        self.domains = []
+        for index,item in enumerate(p_rows):
+            self.domains.append(VertexInstance(index,item,self))
+        
+        for index,item in enumerate(p_cols):
+            self.domains.append(VertexInstance(index+len(p_rows),item,self))
+
+        self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
+        
+        func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
+
+        for i in range(len(p_rows)):
+            for j in range(len(p_rows),len(p_rows)+len(p_cols)):
+                self.addCons([i,j],func,1)
+
+        symbol_list = [ x for x in chain(lowercase,
+                                [ x+y for (x,y) in \
+                                product(lowercase, (str(x) for x in range(10)))])] \
+                                [:len(p_rows)+len(p_cols)]
+        self.symvars = symbols(' '.join(symbol_list))
+        self.sym_dict = dict()
+        for s in self.symvars:
+            self.sym_dict[str(s)] = s
+
+    def addCons(self,vertexes, function, eval_value):
+        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
+        symvars = symbols(' '.join(use_vars))
+
+        check = {}
+        for v in symvars:
+            check[(str(v))] = v
+        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
+        D = {}
+        for symv,v in zip(symvars, vertexes):
+            D[symv] = v
+        c = Constraint(lambda A,B: len(set(A).intersection(set(B))),
+                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
+                       D, self)
+        for var in vertexes:
+            self.constraints[var].append(c)
+            print c.vi_list
+
 class CSPState(State):
-    def __init__(self, pred, domains, constraints, new_paint):
+    def __init__(self, pred, domains, constraints, new_paint, f_csp):
         self.domains = domains
         self.constraints = constraints
+        self.func = f_csp
         if pred:
             super(CSPState, self).__init__(id(self), pred,
                                            f_csp, (pred.depth + 1, domains))
@@ -160,14 +230,10 @@ class CSPState(State):
         cons = self.constraints or []
 
         return CSPState(self, [ var.copy() for var in doms ],
-                        [ c for c in cons], self.new_paint)
+                        [ c for c in cons], self.new_paint, self.func)
 
     def __getitem__(self, index):
-        if type(index) == Symbol:
-            return self.domains[self.cnet[str(index)]]
         return self.domains[index]
-
-
 
 class VertexInstance(object):
     def __init__(self, index, domain, caller):
@@ -181,8 +247,11 @@ class VertexInstance(object):
     def getCnetSelf(self):
         return self.cnet[self.index]
 
-    def makeAssumption(self, domainIndex):
-        self.domain = [self.cnet[self.index].domain[domainIndex]]
+    def makeAssumption(self, domainIndex, is_index=False):
+        if is_index:
+            self.domain = [self.cnet[self.index].domain[domainIndex]]
+        else:
+            self.domain = [domainIndex]
 
 class Constraint(object):
     """ This is the CI relative to the assignment text
@@ -208,48 +277,83 @@ class Constraint(object):
                 if index is not vertex]
 
     def canSatisfy(self, state):
+        #FIXME
+        """ if two variables have the same value as the center,
+        and their domain size is one, disconsider one of them...
+        """
         self.addState(state)
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
+
         for tup in product(*arg_list):
+            print tup[0],'-',tup[1]
             if self.function(*tup):
+                if len(tup) == 5:
+                    check = state[self.vi_list[-1][-1]-1].domain[0]
+                    if check == tup[0] and check == tup[-1] and check == tup[-3]:
+                        tup = list(tup[:-1]) + [99]
+                        if not self.function(*tup):
+                            continue
                 can_satisfy = True
                 break
         return can_satisfy
 
-class LPConstraint(Constraint):
-    """ Similar to the other constraint except that in order to evaluate
-        the constraint you will need to evaluate two expressions.
-        E.g. to evalute "a + b <= 1", you need to evaluate both "a + b" and 
-        "lhs <= rhs"
-    """
-    def __init__(self, lhs_func, rhs_func, vi_list, caller):
-        self.lhs_func = lhs_func
-        super(LPConstraint, self).__init__(rhs_func, vi_list, None, caller)
-
-<<<<<<< HEAD
-    # def canSatisfy(self, state):
-    #     self.
-=======
-    def canSatisfy(self, state):
-        self.addState(state)
-        can_satisfy = False
-        arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
-
->>>>>>> ec9d2c3a3cd9bea0249d4bfaa11be5651307307c
-
+from time import sleep
 def revise(variable, constraint, state):
     revised = False
     copy_domain = [x for x in variable.domain]
     for value in variable.domain:
         variable.makeAssumption(value)
+        # if variable.index == 0 and not constraint.canSatisfy(state):
+            # set_trace()
+        if not constraint.canSatisfy(state):
+            # print "removing %s from %d" % (lookupColor(value), variable.index)
+            # sleep(0.1)
+            copy_domain.remove(value)
+            revised = True
+    # if revised:
+        # print "variable %d reduced to %s" % (variable.index, str(copy_domain))
+    variable.domain = copy_domain
+    return revised
+
+def AC_3(cnet, state, vertex):
+    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
+    Q = []
+    for c in cnet.getConstraint(vertex):
+        for vi in c.getAdjacent(vertex, state): # this can be used, vertex is assumed
+            # print "%d is considered adjacent to %d" % (vi.index, vertex)
+            Q.append((vi, c))
+    while Q:
+        v, c = Q.pop()
+        origDomain = v.domain
+        if revise(v, c, state):
+            if len(v.domain) == 0:
+                print "\tabandoning..."
+                return False
+
+            for c in cnet.getConstraint(v.index):
+                for vi in c.getAdjacent(v.index, state):
+                    Q.append((vi, c))
+    return True
+
+<<<<<<< HEAD
+from flowPuzzle import lookupColor
+
+#EOF
+=======
+def revise_NGARM(variable, constraint, state):
+    revised = False
+    copy_domain = [x for x in variable.domain]
+    for index,value in enumerate(variable.domain):
+        variable.makeAssumption(index)
         if not constraint.canSatisfy(state):
             copy_domain.remove(value)
             revised = True
     variable.domain = copy_domain
     return revised
 
-def AC_3(cnet, state, vertex):
+def AC_3_NGRAM(cnet, state, vertex):
+    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state):
@@ -257,7 +361,7 @@ def AC_3(cnet, state, vertex):
     while Q:
         v, c = Q.pop()
         origDomain = v.domain
-        if revise(v, c, state):
+        if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
                 return False
 
@@ -267,3 +371,4 @@ def AC_3(cnet, state, vertex):
     return True
 
 #EOF
+>>>>>>> 89d1fc33f482083cc8815703e6b82a8a3e50a912
