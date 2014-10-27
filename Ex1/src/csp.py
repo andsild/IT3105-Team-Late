@@ -328,14 +328,9 @@ def revise_NGARM(variable, constraint, state):
         variable.makeAssumption(value, is_index=False)
         if not constraint.canSatisfy(state):
             d=constraint.getAdjacent(variable.index, state)[0].domain
-            print "domain %s did not satisfy %s" % (str(variable.domain), str(d)),
-            x=len(copy_domain)
-            # copy_domain.remove(value)
-            y = copy_domain.pop(index)
-            if x > len(copy_domain):
-                print "so removed %s" % (str(y))
-            else:
-                print
+            # print "domain %s did not satisfy %s" % (str(variable.domain), str(d)),
+            copy_domain.remove(value)
+            # copy_domain.pop(index)
             revised = True
     variable.domain = copy_domain
     return revised

@@ -66,6 +66,6 @@ class Ngram(Problem):
             if len(vi.domain) == 1:
                 self.network.paint_node(vi.index, self.colors["green"])
             else:
-                self.network.paint_node(vi.index, color_pool["black"])
+                self.network.paint_node(vi.index, self.colors["black"])
         self.network.update()
 # EOF
