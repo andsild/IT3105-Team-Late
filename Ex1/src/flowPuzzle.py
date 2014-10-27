@@ -53,7 +53,6 @@ class FlowPuz(Problem):
         self.width, self.height = dim
         self.mode = mode
         self.cnet = cnet
-        self.nodes_count = 0
         """ The obstacle coordinates  """
         for index,(sx,sy,ex,ey) in enumerate(positions):
             cnet[network.map2d1d(sx,sy)].makeAssumption(index)
@@ -91,6 +90,8 @@ class FlowPuz(Problem):
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
+        self.nodes_gen = 1
+        self.nodes_exp = 1
         # self.network.clear()
 
         start_state = self.cnet.getRootState(f_numberlink)
@@ -104,6 +105,7 @@ class FlowPuz(Problem):
     """ Generate neighbours from the current state
     """
     def genNeighbour(self, state):
+        self.nodes_exp += 1
         # check newpaint, generate next..
         new_vertex = self.it_next[state.new_paint.index]
         for value in state[new_vertex].domain:
@@ -114,12 +116,14 @@ class FlowPuz(Problem):
                 yield new_state
             new_state[new_vertex].makeAssumption(value, False)
             if AC_3(self.cnet, new_state, new_vertex):
+                self.nodes_gen += 1
                 yield new_state
 
     """ The function to be invoked at the end of a search
     """
     def destructor(self, final_state=None):
-        print "Nodes generated --->",self.nodes_count
+        print "Nodes expanded --->",self.nodes_exp
+        print "Nodes generated --->",self.nodes_gen
         if final_state:
             for vi in final_state.domains:
                 if len(vi.domain) == 1:

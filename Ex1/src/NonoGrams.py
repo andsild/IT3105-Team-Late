@@ -8,8 +8,6 @@ class Ngram(Problem):
     def __init__(self, network, cnet, p_rows, p_cols, colors):
         super(Ngram, self).__init__(network)
         self.cnet = cnet
-        self.nodes_gen = 0
-        self.nodes_exp = 0
         self.p_rows = p_rows
         self.p_cols = p_cols
         self.colors = colors
@@ -18,6 +16,8 @@ class Ngram(Problem):
     """ Send out the initial Q and implementations details
     """
     def triggerStart(self):
+        self.nodes_gen = 1
+        self.nodes_exp = 1
         self.network.clear()
         start_state = self.cnet.getRootState()
         start_state.new_paint = start_state[0]

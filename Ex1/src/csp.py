@@ -140,11 +140,12 @@ class CNET3(CNET):
 
         self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
         
-        func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
+        #func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
+        func = lambda A,B: len(A.intersection(B))
 
         for i in range(len(p_cols)):
             for j in range(len(p_cols),len(p_rows)+len(p_cols)):
-                self.addCons([i,j],func,1)
+                self.addLambda([i,j],"AB",func,1)
                 # self.addCons([j,i],func,1)
         symbol_list = [ x for x in chain(lowercase,
                                 [ x+y for (x,y) in \
@@ -154,26 +155,6 @@ class CNET3(CNET):
         self.sym_dict = dict()
         for s in self.symvars:
             self.sym_dict[str(s)] = s
-
-    def addCons(self,vertexes, function, eval_value):
-        use_vars = sorted(filter(set(function).__contains__, set(uppercase)))
-        symvars = symbols(' '.join(use_vars))
-
-        check = {}
-        for v in symvars:
-            check[(str(v))] = v
-        lambdafunc = lambdify(symvars, Eq(eval_value,parse_expr(function)))
-        D = {}
-        for symv,v in zip(symvars, vertexes):
-            D[symv] = v
-
-        func = lambda A,B: len(A.intersection(B))
-
-        c = Constraint(func,
-                       [ (symv, int(v)) for (symv, v) in zip(symvars, vertexes)], 
-                       D, self)
-        for var in vertexes:
-            self.constraints[var].append(c)
 
 class CSPState(State):
     def __init__(self, pred, domains, constraints, new_paint, f_csp):
