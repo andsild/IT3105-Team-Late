@@ -35,6 +35,7 @@ class Ngram(Problem):
         print "selecting %d which can get domain %s " \
             %  (new_vertex, str(state[new_vertex].domain))
         for index,value in enumerate(state[new_vertex].domain):
+            print "Assuming value %s" % (str(value))
             new_state = state.copy()
             new_state[new_vertex].makeAssumption(index, True)
             if AC_3_NGRAM(self.cnet, new_state, new_vertex):
@@ -44,6 +45,15 @@ class Ngram(Problem):
     """
     def destructor(self, final_state=None):
         print "Nodes generated --->",self.nodes_count
+        if final_state:
+            for vi in final_state.domains:
+                if len(vi.domain) == 1:
+                    for val in vi.domain[0]:
+                        if val > 0:
+                            self.network.paint_node(val-1,self.colors["green"])
+                        else:
+                            self.network.paint_node(abs(val)-1,self.colors["black"])
+
         self.network.update()
         print'FINISHED'
 

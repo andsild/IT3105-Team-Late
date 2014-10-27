@@ -142,7 +142,6 @@ class CNET3(CNET):
 
         self.constraints = [ [] for _ in range(len(p_rows)+len(p_cols)) ]
         print [vi.domain for vi in self.domains]
-        set_trace()
         
         func = "len(FiniteSet(A).intersect(FiniteSet(B)))"
 
@@ -271,8 +270,8 @@ class Constraint(object):
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
 
         for tup in product(*arg_list):
-            print tup[0],'-',tup[1]
-            print self.vi_list
+            # print tup[0],'-',tup[1]
+            # print self.vi_list
             # set_trace()
             if self.function(*tup):
                 if len(tup) == 5:
@@ -324,19 +323,24 @@ def AC_3(cnet, state, vertex):
 
 def revise_NGARM(variable, constraint, state):
     revised = False
-    copy_domain = [x for x in variable.domain]
-    for index,value in enumerate(variable.domain):
-        variable.makeAssumption(index, True)
+    copy_domain = [ [y for y in x] for x in variable.domain]
+    for index,value in enumerate(variable.domain): # FIXME: this index is wrong
+        variable.makeAssumption(value, is_index=False)
         if not constraint.canSatisfy(state):
             d=constraint.getAdjacent(variable.index, state)[0].domain
-            print "domain %s did not satisfy %s" % (str(variable.domain), str(d))
-            copy_domain.remove(value)
+            print "domain %s did not satisfy %s" % (str(variable.domain), str(d)),
+            x=len(copy_domain)
+            # copy_domain.remove(value)
+            y = copy_domain.pop(index)
+            if x > len(copy_domain):
+                print "so removed %s" % (str(y))
+            else:
+                print
             revised = True
     variable.domain = copy_domain
     return revised
 
 def AC_3_NGRAM(cnet, state, vertex):
-    # Q = [ (vi,c) for vi,c in ( c.getAdjacent(vertex, state),c) for c in cnet.getConstraint(vertex) ]
     Q = []
     for c in cnet.getConstraint(vertex):
         for vi in c.getAdjacent(vertex, state):
@@ -345,7 +349,8 @@ def AC_3_NGRAM(cnet, state, vertex):
         v, c = Q.pop()
         if revise_NGARM(v, c, state):
             if len(v.domain) == 0:
-                print "\tabandoning..."
+                print "\tabandonin vertex %d with domain %s, because vertex %d" \
+                    % (vertex, state[vertex].domain, v.index)
                 return False
 
             for c in cnet.getConstraint(v.index):

@@ -393,7 +393,6 @@ def ngramParams(filename):
 
     print possible_cols
     print possible_rows
-    set_trace()
 
     return network.widget, prob
 
