@@ -94,7 +94,7 @@
 \begin{abstract}
     This text answers assignment 3, 4: Combining Best-First Search and Constraint-Satisfaction to Solve Complex Puzzles.  
     In this document, we explain representations, heuristics and design decisions we used to handle flow puzzels and nonograms tasks. 
-    The assignment is built on previous modul through several extensions.
+    The assignment is built on previous module using simple extensions and subclassing.
 \end{abstract}
 
 % \begin{IEEEkeywords}
@@ -115,23 +115,151 @@ are:
     \item Added methods ``addCons(...)'' and ``addLambda(...)'', which can take
         either a lambda, or a string that is parsable as a lambda, and translate
         that into a constraint. 
-        Example: addCons([1,2], "A \textless B") adds a constraint for vertex instance
-        1 and 2, and maps them onto A, B respectively (the first index maps
+        Example: addCons([1,2], "A \textless B") adds a constraint between VI
+        1 and 2, where the indexes are mapped into the string
+        in order (the first index maps
         to the first capital letter in the string).
     \item Special case handling for when the domains consist of \textit{sets} rather
         than single numbers, as used in the previous assignment.
 \end{enumerate}
 Apart from item 1 and 2, this assignement is solved by subclassing the class
-``Problem'' and implementing its methods\footnote{in ``astar.py'': triggerStart(), genNeighbour(), destructor(), updateStates()}
-and also a parser for the input files.
+``Problem'' and implementing its abstract methods\footnote{in ``astar.py'': triggerStart(), genNeighbour(), destructor(), updateStates()}
+. Also, you will need to parse the input for each problem. This is done in our
+``main.py''. As a reminder, the abstract methods of the ``Problem'' class
+defines:
+\begin{description}
+    \item[Drawing] - how each state should be painted. The method receives 
+        both the previous state and the current one. By comparing the states, you
+        can avoid repainting the whole GUI, or use a lazy updating scheme.
+        In this assignement, with either few states or nodes, we chose the latter.
+    \item[Destructor] - what to do when the A* queue is exhausted. In this assigment
+        we simply print the total number of nodes used and expanded in the
+        A*-search, and do a last repainting of the GUI.
+    \item[Generating successor states] - defines how, given a state, to generate
+        all its successors.
+    \item[Generating initial state] - creates the initial queue for A*.
+\end{description}
+
 
 \subsection*{Considerations}
-While the A*-GAC solver has the benefit of begin general, we found it difficult
-with copying domaijns
+The biggest problem we found related to using A*-GAC was that we could not
+implement a solution that relied on states.
+For example, apart from running time, it should not matter if a constraint
+$c_1$  is run before constraint $c_2$ - they should both prune their domain as
+much as needed. Therefore we could not implement thoughts such as
+``if check(A) then othercheck (B)''.
 
-\section*{Modeling Numberlink}
 Both problems could be fully expressed as SAT, so we found both problems to
-be NP-hard. We chose to use this representation for the flow puzzle. 
+be NP-hard. Therefore we knew that to find exact solutions, we would have
+non-polyomial problem-sizes. It was therefore tempting to use local search,
+but we felt that the inputs given were small enough that an iterative solution
+would do well.
+
+\section*{Modelling Nonograms}
+While nonograms certainly can be expressed as SAT, we found it easier to
+follow the model suggested to us in the assignment text. This is 
+to use each row or column as a VI, and have their domains as all possible
+orderings given their rule $r$. The disadvantage of this approach, namely the large domain-spaces, were not deemed
+to be critical to our application under the premise that we would always solve
+relatively small boards.
+
+Each cell in the cartesian-grid used in a nonogram can be represented by a single number.
+We did this numbering in the fashion seen in ~\autoref{fig:grid}.
+% We used cell numbering such that a cell at row i, column j has coordinate 
+% $(\text{WIDTH} \times i) + j$.
+% Therefore, a board with $3 \times 3$ cells will have numbers 1-9 for each position.
+Now the possible domain for each row, column is represented by the numbers
+in that row or column. For example, given the rule ``3'', the rows in  ~\autoref{fig:grid} would
+have their domain as [1,2,3] or [4,5,6].
+Blank cells are representing by using the negative of the coordinate in a cell.
+Thus, for the second column in ~\autoref{fig:grid}, given rule ``1'', would have
+two possible domain values: [-2,4] and [2,-4].
+
+\begin{figure}[Hb]
+\centering
+  % TikZ picture with origin upper left
+    \begin{tikzpicture}[yscale=-1] 
+        % 4x4 grid
+        \draw (0, 0) grid (3, 2);
+        % origin point
+        \draw [color=blue, fill=blue] (0, 0) circle (0.1);
+        % % x-axis
+        % \draw [thick,->] (0, 0) -- (3.5, 0);
+        % % y-axis
+        % \draw [thick,->] (0, 0) -- (0, 3.5);
+        % origin label
+        % \node at (-0.5, 0.5) {1};
+        \node at (0.5, 0.5) {1};
+        \node at (1.5, 0.5) {2};
+        \node at (2.5, 0.5) {3};
+        \node at (0.5, 1.5) {3};
+        \node at (1.5, 1.5) {4};
+        \node at (2.5, 1.5) {5};
+        % % x-axis label
+        % \node at (4.5, -0.5) {200px};
+        % % y-axis label
+        % \node at (0, 5) {200px};
+    \end{tikzpicture}
+    \caption{Our representation of a cartesian grid}
+\label{fig:grid}
+\end{figure}
+
+Now, all constraints can be expressed as matchings between two VI's,
+a row and a column. In pseudocode, our generated lambda is as follows:
+\begin{verbatim}
+len(A.intersection(B)) == 1
+\end{verbatim}
+
+where A,B can be the VI for a row or column (the function is symmetric).
+
+An intersection will only occur if the shared coordinate in each domain has the same
+sign (positive or negative value). Since each row and column only share one cell,
+this function is able to filter domains successfully.
+
+The disadvantage to our lambda is that the constraints will assess large spaces,
+while the constraint only depend on one value in each domain. Also,
+the A*-GAC requires much copying states and domains, so much excess overhead
+is included. However, the program still runs in under 20 seconds for all 
+the given test inputs, so we have not spent time optimizing the function\footnote{
+    using properties such as that you can determine exactly which cell you need
+to compare using only the indexes $i,j$}
+-
+
+% Firstly we pair each row with all columns 
+% and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
+% between possible row and column pattern and accept only value $1$ as valid solution. % DO WE? eval_value is not used anywhere, only intersection?
+%
+\subsection{Choice of heuristic}
+After finishing our solver, it was easy to see that few states are ever created and
+expanded. This is due to the coupling of constraints: each row is paired
+with every column, and verca visa. In general this means that reducing one domain forces
+the GAC to filter the entire space of VI's multiple times.
+With a small problem space for the A*-algorithm, it became clear that the
+choise of heuristic is not critical. We used ``min-domain'', which works OK.
+
+% In this approach we can find heuristics in some places:
+% \begin{enumerate}
+%     \item in A* we used the same $h-function$ as in previous graph coloring module where an index value to each node 
+%     in the search tree is given determined by:
+%     \begin{verbatim}
+%      f = depth + h(domains)
+%      \end{verbatim}
+%      In $h-function$ we count the size of all domains to each variable and then the state with lowest value is chosen.\\
+\subsection{Choice of next VI}
+We tried experimenting with the choice of each VI. We initially postulated that
+choosing a center row or column would yield would be faster. However, it is
+important to note that to the constraints only binary relationships matter,
+and pruning one row will likely invoke constraints from all other rows.
+Therefore the starting VI is chosen randomly.
+
+For successor states we found that selecting the VI with the smallest domain
+reduced the running time. The idea is that this VI first of all has fewer
+constraints that needs to be checked. Also, assuming our heuristic has chosen
+a state that is closer to the goal, the VI with the smallest domain will likely
+force a feasible solution faster.
+
+\section*{Modeling Flow Puzzles}
+We chose to use SAT representation for the flow puzzle. 
 While the benchmark of Michael Spivey 
 \small\begin{verbatim}
 [http://spivey.oriel.ox.ac.uk
@@ -178,122 +306,7 @@ Clearly, random is bad..
 We scanned through 
 
 
-\section*{Modelling Nonograms}
-While nonograms certainly also can be expressed as SAT, we found it easier to
-follow the model suggested to us in the assignment text. This is 
-to use each row or column as a VI, and have their domains as all possible
-orderings given their rule $r$. Also, the
-promise of a ``reduction in running time of 60\%'' was alluring.
-The disadvantage of this approach, namely the large domain-spaces, were not deemed
-to be critical to our application under the premise that we would always solve
-relatively small boards.
 
-Each cell in the cartesian-grid used in a nonogram can be represented by a single number.
-We did this numbering in the fashion seen in ~\autoref{fig:grid}
-% We used cell numbering such that a cell at row i, column j has coordinate 
-% $(\text{WIDTH} \times i) + j$.
-% Therefore, a board with $3 \times 3$ cells will have numbers 1-9 for each position.
-Now the possible domain for each row, column is represented by the numbers
-in that row or column. For example, given the rule ``3'', the rows in  ~\autoref{fig:grid} would
-have their domain as [1,2,3] or [4,5,6].
-Blank cells are representing by using the negative of the coordinate in a cell.
-Thus, for the second column in ~\autoref{fig:grid}, given rule ``1'', would have
-two possible domain values: [-2,4] and [2,-4].
-
-\begin{figure}[Hb]
-\centering
-  % TikZ picture with origin upper left
-    \begin{tikzpicture}[yscale=-1] 
-        % 4x4 grid
-        \draw (0, 0) grid (3, 2);
-        % origin point
-        \draw [color=blue, fill=blue] (0, 0) circle (0.1);
-        % % x-axis
-        % \draw [thick,->] (0, 0) -- (3.5, 0);
-        % % y-axis
-        % \draw [thick,->] (0, 0) -- (0, 3.5);
-        % origin label
-        % \node at (-0.5, 0.5) {1};
-        \node at (0.5, 0.5) {1};
-        \node at (1.5, 0.5) {2};
-        \node at (2.5, 0.5) {3};
-        \node at (0.5, 1.5) {3};
-        \node at (1.5, 1.5) {4};
-        \node at (2.5, 1.5) {5};
-        % % x-axis label
-        % \node at (4.5, -0.5) {200px};
-        % % y-axis label
-        % \node at (0, 5) {200px};
-    \end{tikzpicture}
-\caption{Our representation of coordinates in a grid}
-\label{fig:grid}
-\end{figure}
-
-Now, all constraints can be expressed as matchings between two VI's,
-a row and a column. Our lambda, in pseudocode looks as follows:
-\begin{verbatim}
-len(A.intersection(B)) == 1
-\end{verbatim}
-
-where A,B can be the VI for a row or column (the function is symmetric).
-
-An intersection will only occur if the coordinate in each domain has the same
-sign (positive or negative value). Since each row and column only share one cell,
-this function is able to filter domains successfully.
-
-The disadvantage to our lambda is that the constraints will assess large spaces,
-while the constraint only depend on one value in each domain. Also,
-the A*-GAC requires much copying states and domains, so much excess overhead
-is included. However, the program still runs in under 20 seconds for all 
-the given test inputs, so we have not spent time optimizing the function\footnote{
-    using properties such as that you can determine exactly which cell you need
-to compare using only the indexes $i,j$}
--
-
-% Firstly we pair each row with all columns 
-% and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
-% between possible row and column pattern and accept only value $1$ as valid solution. % DO WE? eval_value is not used anywhere, only intersection?
-%
-\subsection{Choice of heuristic}
-After finishing our solver, it was easy to see that few states are ever created and
-expanded. This is due to the coupling of constraints: each row is paired
-with every column, and verca visa. In general this means that reducing one domain forces
-the GAC to filter the entire space of VI's multiple times.
-With a small problem space for the A*, it became clear that the
-choise of heuristic is not critical. Therefore we used the same function 
-as in \dotso
-
-In this approach we can find heuristics in some places:
-\begin{enumerate}
-    \item in A* we used the same $h-function$ as in previous graph coloring module where an index value to each node 
-    in the search tree is given determined by:
-    \begin{verbatim}
-     f = depth + h(domains)
-     \end{verbatim}
-     In $h-function$ we count the size of all domains to each variable and then the state with lowest value is chosen.\\
-    \item New vertex is generated in specific state as first chosen from vertexes where the domain size where not
-    reduced to $1$. Subsequently for all values in its domain assumptions are made domain revised and new states
-    generated.
-\end{enumerate}
-
-\subsection{Structure and other}
-In the nonogram solver module we use new subclass of our general $Problem$ again. As usually, we needed 
-to implement basic abstract methods for triggering initial queue in A*, generating neighbours, update method for painting, 
-final destructor and also unique constructer as we mentioned. These are quite simple functions, therefore we do 
-not consider it necessary to discuss them in more details.\\
-
-In order to create fast solution we decided to use sets instead of lists for preserving and comparing all values in 
-domains of our variables. We also use indexing of values in variables and we try eliminate all redundant copies. 
-This decision forced us to create modified version of $revise$ method.
-
-
-
-PICTURES?
-
-\section{MIN-CONFLICTS?}
-Using MIN-conflicts never occured..
-
-graph labeling
 
 
 \end{document}

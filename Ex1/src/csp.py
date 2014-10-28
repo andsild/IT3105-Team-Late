@@ -174,10 +174,11 @@ class CSPState(State):
         return all(assigned)
 
     def getUnassigned_Nonrandom(self):
-        unassigned = [ index for index,vi in enumerate(self.domains) \
+        unassigned = [ (len(vi.domain),index) for index,vi in enumerate(self.domains) \
                if len(vi.domain) > 1 ]
         if len(unassigned) > 0:
-            return unassigned[0]
+            return min(unassigned)[1]
+            return unassigned[-0]
         return self.genRandomVertex()
     
     def getUnassigned(self):
@@ -250,7 +251,8 @@ class Constraint(object):
         for tup in product(*arg_list):
             # print tup[0],'-',tup[1]
             # print self.vi_list
-            # set_trace()
+            # if len(tup) >= 4:
+            #     set_trace()
             if self.function(*tup):
                 if len(tup) == 5:
                     check = state[self.vi_list[-1][-1]-1].domain[0]
