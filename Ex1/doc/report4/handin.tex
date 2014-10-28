@@ -125,6 +125,10 @@ Apart from item 1 and 2, this assignement is solved by subclassing the class
 ``Problem'' and implementing its methods\footnote{in ``astar.py'': triggerStart(), genNeighbour(), destructor(), updateStates()}
 and also a parser for the input files.
 
+\subsection*{Considerations}
+While the A*-GAC solver has the benefit of begin general, we found it difficult
+with copying domaijns
+
 \section*{Modeling Numberlink}
 Both problems could be fully expressed as SAT, so we found both problems to
 be NP-hard. We chose to use this representation for the flow puzzle. 
@@ -176,33 +180,89 @@ We scanned through
 
 \section*{Modelling Nonograms}
 While nonograms certainly also can be expressed as SAT, we found it easier to
-follow the model suggested to us in the assignment text. In this approach firstly from given input 
-we need to calculate all possible linear patterns that fill the row and satisfy the segment specification. 
-Same for columns. We do this with recursive function $generatePos$ inspired by this project:
-\small\begin{verbatim}
-[https://github.com/coolbutuseless
-/nonogram-solver]
-\end{verbatim}
-\normalsize
-Here from given rule $r$, we generate all possible sequences for row or column where "filled" 
-cells are represented with positive value of mapped coordinates of the cell and "unfilled" conversely negative. 
-We use the same representation of cells as in previous module - vertex instances with two coordinates 
-in 2D-grid board, however mapped in single value in row or column pattern representation.\\
+follow the model suggested to us in the assignment text. This is 
+to use each row or column as a VI, and have their domains as all possible
+orderings given their rule $r$. Also, the
+promise of a ``reduction in running time of 60\%'' was alluring.
+The disadvantage of this approach, namely the large domain-spaces, were not deemed
+to be critical to our application under the premise that we would always solve
+relatively small boards.
 
-Here we are able to build the CNET. In this step we had to create a new subclass of CNET with 
-overridden constructor. Just because we use variables with constant domain size in previous modules 
-and this case we work with variable domain size.
-In our approach we use each row and each column as variable. Then all viable patterns for specific rows 
-and columns are their domains.
-As the contraint there is only one function applied overall:
+Each cell in the cartesian-grid used in a nonogram can be represented by a single number.
+We did this numbering in the fashion seen in ~\autoref{fig:grid}
+% We used cell numbering such that a cell at row i, column j has coordinate 
+% $(\text{WIDTH} \times i) + j$.
+% Therefore, a board with $3 \times 3$ cells will have numbers 1-9 for each position.
+Now the possible domain for each row, column is represented by the numbers
+in that row or column. For example, given the rule ``3'', the rows in  ~\autoref{fig:grid} would
+have their domain as [1,2,3] or [4,5,6].
+Blank cells are representing by using the negative of the coordinate in a cell.
+Thus, for the second column in ~\autoref{fig:grid}, given rule ``1'', would have
+two possible domain values: [-2,4] and [2,-4].
+
+\begin{figure}[Hb]
+\centering
+  % TikZ picture with origin upper left
+    \begin{tikzpicture}[yscale=-1] 
+        % 4x4 grid
+        \draw (0, 0) grid (3, 2);
+        % origin point
+        \draw [color=blue, fill=blue] (0, 0) circle (0.1);
+        % % x-axis
+        % \draw [thick,->] (0, 0) -- (3.5, 0);
+        % % y-axis
+        % \draw [thick,->] (0, 0) -- (0, 3.5);
+        % origin label
+        % \node at (-0.5, 0.5) {1};
+        \node at (0.5, 0.5) {1};
+        \node at (1.5, 0.5) {2};
+        \node at (2.5, 0.5) {3};
+        \node at (0.5, 1.5) {3};
+        \node at (1.5, 1.5) {4};
+        \node at (2.5, 1.5) {5};
+        % % x-axis label
+        % \node at (4.5, -0.5) {200px};
+        % % y-axis label
+        % \node at (0, 5) {200px};
+    \end{tikzpicture}
+\caption{Our representation of coordinates in a grid}
+\label{fig:grid}
+\end{figure}
+
+Now, all constraints can be expressed as matchings between two VI's,
+a row and a column. Our lambda, in pseudocode looks as follows:
 \begin{verbatim}
-func = lambda A,B: len(A.intersection(B))
+len(A.intersection(B)) == 1
 \end{verbatim}
-Here we can assume A variable for rows and B variable for columns. Firstly we pair each row with all columns 
-and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
-between possible row and column pattern and accept only value $1$ as valid solution. % DO WE? eval_value is not used anywhere, only intersection?
 
+where A,B can be the VI for a row or column (the function is symmetric).
+
+An intersection will only occur if the coordinate in each domain has the same
+sign (positive or negative value). Since each row and column only share one cell,
+this function is able to filter domains successfully.
+
+The disadvantage to our lambda is that the constraints will assess large spaces,
+while the constraint only depend on one value in each domain. Also,
+the A*-GAC requires much copying states and domains, so much excess overhead
+is included. However, the program still runs in under 20 seconds for all 
+the given test inputs, so we have not spent time optimizing the function\footnote{
+    using properties such as that you can determine exactly which cell you need
+to compare using only the indexes $i,j$}
+-
+
+% Firstly we pair each row with all columns 
+% and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
+% between possible row and column pattern and accept only value $1$ as valid solution. % DO WE? eval_value is not used anywhere, only intersection?
+%
 \subsection{Choice of heuristic}
+After finishing our solver, it was easy to see that few states are ever created and
+expanded. This is due to the coupling of constraints: each row is paired
+with every column, and verca visa. In general this means that reducing one domain forces
+the GAC to filter the entire space of VI's multiple times.
+With a small problem space for the A*, it became clear that the
+choise of heuristic is not critical. Therefore we used the same function 
+as in \dotso
+
 In this approach we can find heuristics in some places:
 \begin{enumerate}
     \item in A* we used the same $h-function$ as in previous graph coloring module where an index value to each node 
@@ -233,5 +293,17 @@ PICTURES?
 \section{MIN-CONFLICTS?}
 Using MIN-conflicts never occured..
 
+graph labeling
+
 
 \end{document}
+% Same for columns. We do this with recursive function $generatePos$ inspired by
+% this project: \small\begin{verbatim}
+% [https://github.com/coolbutuseless
+% /nonogram-solver]
+% \end{verbatim}
+% \normalsize
+
+% Here we are able to build the CNET. In this step we had to create a new subclass of CNET with 
+% overridden constructor. Just because we use variables with constant domain size in previous modules 
+% and this case we work with variable domain size.
