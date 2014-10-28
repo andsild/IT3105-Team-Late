@@ -85,6 +85,7 @@ class FlowPuz(Problem):
         self.it_next = [0] * len(self.diag)
         for cur,nxt in pairwise(self.diag):
             self.it_next[cur] = nxt
+        self.it_next = [0] + self.it_next
 
 
     """ Send out the initial Q and implementations details
@@ -107,11 +108,16 @@ class FlowPuz(Problem):
     def genNeighbour(self, state):
         self.nodes_exp += 1
         # check newpaint, generate next..
+
         new_vertex = self.it_next[state.new_paint.index]
+        if new_vertex == 0:
+            self.it_next = self.it_next[1:]
         for value in state[new_vertex].domain:
             print "vertex: %d\tassuming value %s " % (new_vertex, lookupColor(value))
             new_state = state.copy()
             new_state.new_paint = new_state[new_vertex]
+            # if new_vertex == 4 and value == 3:
+            #     set_trace()
             if len(new_state[new_vertex].domain) == 1:
                 yield new_state
             new_state[new_vertex].makeAssumption(value, False)

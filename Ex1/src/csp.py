@@ -252,14 +252,20 @@ class Constraint(object):
             # print tup[0],'-',tup[1]
             # print self.vi_list
             # if len(tup) >= 4:
-            #     set_trace()
+            try:
+                self.function(*tup)
+            except TypeError as te:
+                set_trace()
+                a = 1
+
             if self.function(*tup):
-                if len(tup) == 5:
-                    check = state[self.vi_list[-1][-1]-1].domain[0]
-                    if check == tup[0] and check == tup[-1] and check == tup[-3]:
-                        tup = list(tup[:-1]) + [99]
-                        if not self.function(*tup):
-                            continue
+                # if len(tup) == 5:
+                #     set_trace()
+                #     check = state[self.vi_list[-1][-1]-1].domain[0]
+                #     if check == tup[0] and check == tup[-1] and check == tup[-3]:
+                #         tup = list(tup[:-1]) + [99]
+                #         if not self.function(*tup):
+                #             continue
                 can_satisfy = True
                 break
         return can_satisfy
@@ -281,10 +287,13 @@ def AC_3(cnet, state, vertex):
         for vi in c.getAdjacent(vertex, state): # this can be used, vertex is assumed
             # print "%d is considered adjacent to %d" % (vi.index, vertex)
             Q.append((vi, c))
+    origD = state[vertex].domain[0]
     while Q:
         v, c = Q.pop()
-        origDomain = v.domain
+        origDomain = [x for x in v.domain]
         if revise(v, c, state):
+            print "revised node %d with val %d : with original domain %s, reduced to %s" \
+                % (v.index, origD, origDomain, v.domain)
             if len(v.domain) == 0:
                 return False
             for c in cnet.getConstraint(v.index):

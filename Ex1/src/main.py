@@ -194,24 +194,41 @@ def flowParams(filename):
     for y in range(1,height-1):
         for x in range(1,width-1):
             cells = [n.map2d1d(posx,posy) for posx,posy in \
-                    [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
+                    [ (x,y), (x+1,y), (x,y+1), (x,y-1),(x-1,y) ]]
+            #          Acur, Brht      Cund       Dabo   Elft
+
+            # cells = [n.map2d1d(posx,posy) for posx,posy in \
+            #         [ (x,y), (x+1,y), (x,y+1)]]
             if (x,y) not in tmp_D:
-                # cnet.addLessThan(cells,  \
-                #             "abs(A - B) - abs(abs(A-B)-1)"
-                #             "+ abs(A - C) - abs(abs(A-C)-1)"
-                #             "+ abs(A - D) - abs(abs(A-D)-1)"
-                #             "+ abs(A - E) - abs(abs(A-E)-1)",
-                #             0)
+                cnet.addLessThan(cells,  \
+                            "abs(A - B) - abs(abs(A-B)-1)"
+                            "+ abs(A - C) - abs(abs(A-C)-1)"
+                            "+ abs(A - D) - abs(abs(A-D)-1)"
+                            "+ abs(A - E) - abs(abs(A-E)-1)",
+                            0)
+
                 cnet.addLambda(cells,"ABCDE",  \
                             lambda A,B,C,D,E:
-                             (A == B and A == C) or  \
-                             (A == B and A == D) or  \
-                             (A == B and A == E) or  \
-                             (A == C and A == D) or  \
-                             (A == C and A == E) or  \
-                             (A == D and A == E) ,
+                             (A == B and A is not C) or \
+                             (A == C and A is not B) or \
+                             (A == B and A == C and A is not D and A is not E) or \
+                             (A == D and A == E and A is not C and A is not B),
+                             # (A == D and A == E), # and A == D
                             True)
+
+                # cnet.addLambda(cells,"ABCDE",  \
+                #             lambda A,B,C,D,E:
+                #              (A == B and A == C) or  \
+                #              (A == B and A == D) or  \
+                #              (A == B and A == E) or  \
+                #              (A == C and A == D) or  \
+                #              (A == C and A == E) or  \
+                #              (A == D and A == E) ,
+                #             True)
+                #
             else:
+                cells = [n.map2d1d(posx,posy) for posx,posy in \
+                        [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
                 cnet.addLessThan(cells, \
                             "abs(A - B) - abs(abs(A-B)-1)"
                             "+ abs(A - C) - abs(abs(A-C)-1)"
@@ -223,13 +240,24 @@ def flowParams(filename):
     for y in range(1,height-1):
         cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (0,y), (0,y+1), (1,y), (0,y-1)]]
+                # A:cur    B:bel   C: nxtX D:abo
+
         if (0,y) not in tmp_D:
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
                         "+ abs(A - C) - abs(abs(A-C)-1)"
                         "+ abs(A - D) - abs(abs(A-D)-1)",
                         -1)
+
+            cnet.addLambda(cells,"ABCD",  \
+                        lambda A,B,C,D:
+                            (A == B and A is not C) or \
+                            (A == C and A is not B) or \
+                           ( A == B and A == C and A is not D),
+                        True)
         else:
+            cells = [n.map2d1d(posx,posy) for posx,posy in \
+                    [ (0,y), (0,y+1), (1,y), (0,y-1)]]
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
                         "+ abs(A - C) - abs(abs(A-C)-1)"
@@ -255,13 +283,26 @@ def flowParams(filename):
     for x in range(1,width-1):
         cells = [n.map2d1d(posx,posy) for posx,posy in \
                 [ (x,0), (x+1,0), (x-1,0), (x,1)]]
+
+        # cells = [n.map2d1d(posx,posy) for posx,posy in \
+        #         [ (x,0), (x+1,0), (x,1)]]
         if (x,0) not in tmp_D:
+            cnet.addLambda(cells,"ABCD",  \
+                        lambda A,B,C,D:
+                            (A == B and A is not C) or \
+                            (A == C and A is not B) or \
+                           ( A == B and A == C and A is not D),
+                        True)
+            cells = [n.map2d1d(posx,posy) for posx,posy in \
+                    [ (x,0), (x+1,0), (x-1,0), (x,1)]]
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
                         "+ abs(A - C) - abs(abs(A-C)-1)"
                         "+ abs(A - D) - abs(abs(A-D)-1)",
                         -1)
         else:
+            cells = [n.map2d1d(posx,posy) for posx,posy in \
+                    [ (x,0), (x+1,0), (x-1,0), (x,1)]]
             cnet.addLessThan(cells,  \
                         "abs(A - B) - abs(abs(A-B)-1)"
                         "+ abs(A - C) - abs(abs(A-C)-1)"
