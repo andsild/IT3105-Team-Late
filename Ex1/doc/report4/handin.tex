@@ -222,8 +222,7 @@ the A*-GAC requires much copying states and domains, so much excess overhead
 is included. However, the program still runs in under 20 seconds for all 
 the given test inputs, so we have not spent time optimizing the function\footnote{
     using properties such as that you can determine exactly which cell you need
-to compare using only the indexes $i,j$}
--
+to compare using only the indexes $i,j$}.
 
 % Firstly we pair each row with all columns 
 % and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
@@ -232,7 +231,7 @@ to compare using only the indexes $i,j$}
 \subsection{Choice of heuristic}
 After finishing our solver, it was easy to see that few states are ever created and
 expanded. This is due to the coupling of constraints: each row is paired
-with every column, and verca visa. In general this means that reducing one domain forces
+with every column, and vice versa. In general this means that reducing one domain forces
 the GAC to filter the entire space of VI's multiple times.
 With a small problem space for the A*-algorithm, it became clear that the
 choise of heuristic is not critical. We used ``min-domain'', which works OK.
@@ -305,6 +304,19 @@ Clearly, random is bad..
 \subsection{Choice of heurstic}
 We scanned through 
 
+\begin{figure}[Hb]
+\centering
+    \includegraphics[keepaspectratio, height=8cm]{flowpuz.png}
+\caption{Flowpuzzle example}
+\label{fig:Flowpuzzle}
+\end{figure}
+
+\begin{figure}[Hb]
+\centering
+    \includegraphics[keepaspectratio, height=8cm]{ngram.png}
+\caption{Nonogram example}
+\label{fig:Nonogram}
+\end{figure}
 
 
 
