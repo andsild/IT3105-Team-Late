@@ -285,8 +285,6 @@ def AC_3(cnet, state, vertex):
         v, c = Q.pop()
         origDomain = [x for x in v.domain]
         if revise(v, c, state):
-            print "revised node %d with val %d : with original domain %s, reduced to %s" \
-                % (v.index, origD, origDomain, v.domain)
             if len(v.domain) == 0:
                 return False
             for c in cnet.getConstraint(v.index):
