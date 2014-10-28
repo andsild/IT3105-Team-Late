@@ -27,7 +27,7 @@ def generatePos(rule, width):
         for s in xrange(start, end):
             ss[group] = s
             if sum(ss) > total_spaces:
-                break
+               break
             if group == ngroups:
                 if sum(ss)==total_spaces:
                     outputs.append(ss[:])
@@ -65,7 +65,7 @@ def searchParams(filename, mode):
                 width += 1
 
             yield np.array( [ list(y for x in range(start_y, start_y + height) for y in range(start_x, start_x + width)),
-                            list(x for x in range(start_y, start_y + height) for y in range(start_x, start_x + width))]
+                              list(x for x in range(start_y, start_y + height) for y in range(start_x, start_x + width))]
                      )
 
     inData = open(filename)
@@ -218,7 +218,7 @@ def flowParams(filename):
                             "+ abs(A - D) - abs(abs(A-D)-1)"
                             "+ abs(A - E) - abs(abs(A-E)-1)",
                             2)
-
+            
     # LEFT BORDER
     for y in range(1,height-1):
         cells = [n.map2d1d(posx,posy) for posx,posy in \
