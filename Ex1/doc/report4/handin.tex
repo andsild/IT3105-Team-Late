@@ -92,7 +92,9 @@
 \maketitle
 
 \begin{abstract}
-    This text answers assignment 3 and 4: Solving puzzles with our A*-GAC system solver.
+    This text answers assignment 3, 4: Combining Best-First Search and Constraint-Satisfaction to Solve Complex Puzzles.  
+    In this document, we explain representations, heuristics and design decisions we used to handle flow puzzels and nonograms tasks. 
+    The assignment is built on previous modul through several extensions.
 \end{abstract}
 
 % \begin{IEEEkeywords}
@@ -100,7 +102,7 @@
 % \end{IEEEkeywords}
 \IEEEPARstart{C}{SP} solutions defines variables with domains.
 A valid solution is one where the domain of all variables has been reduced to the
-singleton domain. This occurs by making sure that a:) no constraints are violated
+singleton domain. This occurs by making sure that a) no constraints are violated
 and b) all variables are iterated over, and been locked to a single value in their
 domain.
 
@@ -143,7 +145,7 @@ his project using directions, it might be that it is inefficient in
 our model when using GAC and constraint propagation.
 
 In our model, we represent the board as a 2D-grid of cells, each representing one
-vertex instance $v_{i,j}$ for poosition $i,j$ in the cartesian plane.
+vertex instance $v_{i,j}$ for position $i,j$ in the cartesian plane.
 For each $v$, you can assign $k$ colors, where $k$ is given by
 the number of endpoints / 2. 
 Each cell $v_{i,j}$ must be a part of the path
@@ -151,7 +153,7 @@ Each cell $v_{i,j}$ must be a part of the path
 from an endpoint $e_{i,j}$ to another endpoint $e_{i+\alpha,j+\beta}$.
 Therefore our constraints are modelled as follows:
 \begin{align}
-    \forall{i,j}: leastTwoOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == v_{i,j} \\
+    \forall{i,j}: leastTwoOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == v_{i,j} \\   %ALL arguments are same
     \forall{i,j}: leastOneOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == e_{i,j}
 \end{align}
 this can also be thought of as applying a 5-point stencil to the grid
@@ -174,14 +176,57 @@ We scanned through
 
 \section*{Modelling Nonograms}
 While nonograms certainly also can be expressed as SAT, we found it easier to
-follow the model suggested to us in the assignment text. Given a rule
-$r$, we generate all possible sequences.
+follow the model suggested to us in the assignment text. In this approach firstly from given input 
+we need to calculate all possible linear patterns that fill the row and satisfy the segment specification. 
+Same for columns. We do this with recursive function $generatePos$ inspired by this project:
+\small\begin{verbatim}
+[https://github.com/coolbutuseless
+/nonogram-solver]
+\end{verbatim}
+\normalsize
+Here from given rule $r$, we generate all possible sequences for row or column where "filled" 
+cells are represented with positive value of mapped coordinates of the cell and "unfilled" conversely negative. 
+We use the same representation of cells as in previous module - vertex instances with two coordinates 
+in 2D-grid board, however mapped in single value in row or column pattern representation.\\
 
-propagates..
+Here we are able to build the CNET. In this step we had to create a new subclass of CNET with 
+overridden constructor. Just because we use variables with constant domain size in previous modules 
+and this case we work with variable domain size.
+In our approach we use each row and each column as variable. Then all viable patterns for specific rows 
+and columns are their domains.
+As the contraint there is only one function applied overall:
+\begin{verbatim}
+func = lambda A,B: len(A.intersection(B))
+\end{verbatim}
+Here we can assume A variable for rows and B variable for columns. Firstly we pair each row with all columns 
+and then we pass through these pairs with intersection checking. In particular, we check for the length of intersection 
+between possible row and column pattern and accept only value $1$ as valid solution. % DO WE? eval_value is not used anywhere, only intersection?
 
 \subsection{Choice of heuristic}
+In this approach we can find heuristics in some places:
+\begin{enumerate}
+    \item in A* we used the same $h-function$ as in previous graph coloring module where an index value to each node 
+    in the search tree is given determined by:
+    \begin{verbatim}
+     f = depth + h(domains)
+     \end{verbatim}
+     In $h-function$ we count the size of all domains to each variable and then the state with lowest value is chosen.\\
+    \item New vertex is generated in specific state as first chosen from vertexes where the domain size where not
+    reduced to $1$. Subsequently for all values in its domain assumptions are made domain revised and new states
+    generated.
+\end{enumerate}
 
-\subsection{Choice of next cell}
+\subsection{Structure and other}
+In the nonogram solver module we use new subclass of our general $Problem$ again. As usually, we needed 
+to implement basic abstract methods for triggering initial queue in A*, generating neighbours, update method for painting, 
+final destructor and also unique constructer as we mentioned. These are quite simple functions, therefore we do 
+not consider it necessary to discuss them in more details.\\
+
+In order to create fast solution we decided to use sets instead of lists for preserving and comparing all values in 
+domains of our variables. We also use indexing of values in variables and we try eliminate all redundant copies. 
+This decision forced us to create modified version of $revise$ method.
+
+
 
 PICTURES?
 

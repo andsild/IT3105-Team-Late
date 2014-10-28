@@ -377,7 +377,7 @@ def ngramParams(filename):
     print possible_cols
 
     cnet = CNET3(possible_rows, possible_cols)
-    prob = Ngram(network, cnet, possible_rows, possible_cols, color_pool)
+    prob = Ngram(network, cnet, color_pool)
 
     return network.widget, prob
 

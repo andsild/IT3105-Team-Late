@@ -5,11 +5,9 @@ from astar import State, Problem, astar
 from csp import *
 
 class Ngram(Problem):
-    def __init__(self, network, cnet, p_rows, p_cols, colors):
+    def __init__(self, network, cnet, colors):
         super(Ngram, self).__init__(network)
         self.cnet = cnet
-        self.p_rows = p_rows
-        self.p_cols = p_cols
         self.colors = colors
         self.mode = "Ngrams"
 
