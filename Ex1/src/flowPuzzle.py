@@ -113,7 +113,7 @@ class FlowPuz(Problem):
         if new_vertex == 0:
             self.it_next = self.it_next[1:]
         for value in state[new_vertex].domain:
-            print "vertex: %d\tassuming value %s " % (new_vertex, lookupColor(value))
+            print "vertex: %d\tassuming value %s,domInd: %d " % (new_vertex, lookupColor(value), value)
             new_state = state.copy()
             new_state.new_paint = new_state[new_vertex]
             # if new_vertex == 4 and value == 3:

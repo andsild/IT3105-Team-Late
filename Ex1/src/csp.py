@@ -243,31 +243,24 @@ class Constraint(object):
                 if index is not vertex]
 
     def canSatisfy(self, state):
-        #FIXME: circular stuff
         self.addState(state)
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
 
-        for tup in product(*arg_list):
-            # print tup[0],'-',tup[1]
-            # print self.vi_list
-            # if len(tup) >= 4:
-            try:
-                self.function(*tup)
-            except TypeError as te:
-                set_trace()
-                a = 1
+        # if [ ind[1] for ind in self.vi_list] == [13,14,18,8,12]:
+        # if [ ind[1] for ind in self.vi_list] == [12,13,17,7,11]:
+        #         # and arg_list == [ [2], [2], [3], [2]]:
+        #     print self.vi_list
+        #     print arg_list
+        #     set_trace()
 
+        for tup in product(*arg_list):
             if self.function(*tup):
-                # if len(tup) == 5:
-                #     set_trace()
-                #     check = state[self.vi_list[-1][-1]-1].domain[0]
-                #     if check == tup[0] and check == tup[-1] and check == tup[-3]:
-                #         tup = list(tup[:-1]) + [99]
-                #         if not self.function(*tup):
-                #             continue
                 can_satisfy = True
                 break
+        # if not can_satisfy:
+        #     print "could not satisfy.."
+        # print "could satisfy"
         return can_satisfy
 
 def revise(variable, constraint, state):

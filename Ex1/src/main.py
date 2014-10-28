@@ -200,32 +200,32 @@ def flowParams(filename):
             # cells = [n.map2d1d(posx,posy) for posx,posy in \
             #         [ (x,y), (x+1,y), (x,y+1)]]
             if (x,y) not in tmp_D:
-                cnet.addLessThan(cells,  \
-                            "abs(A - B) - abs(abs(A-B)-1)"
-                            "+ abs(A - C) - abs(abs(A-C)-1)"
-                            "+ abs(A - D) - abs(abs(A-D)-1)"
-                            "+ abs(A - E) - abs(abs(A-E)-1)",
-                            0)
+                # cnet.addLessThan(cells,  \
+                #             "abs(A - B) - abs(abs(A-B)-1)"
+                #             "+ abs(A - C) - abs(abs(A-C)-1)"
+                #             "+ abs(A - D) - abs(abs(A-D)-1)"
+                #             "+ abs(A - E) - abs(abs(A-E)-1)",
+                #             0)
 
                 cnet.addLambda(cells,"ABCDE",  \
                             lambda A,B,C,D,E:
                              (A == B and A is not C) or \
                              (A == C and A is not B) or \
-                             (A == B and A == C and A is not D and A is not E) or \
-                             (A == D and A == E and A is not C and A is not B),
+                            (A == B and A == C and (A is not D and A is not E)) or \
+                             (A == D and A == E and (A is not C and A is not B)),
                              # (A == D and A == E), # and A == D
                             True)
 
-                # cnet.addLambda(cells,"ABCDE",  \
-                #             lambda A,B,C,D,E:
-                #              (A == B and A == C) or  \
-                #              (A == B and A == D) or  \
-                #              (A == B and A == E) or  \
-                #              (A == C and A == D) or  \
-                #              (A == C and A == E) or  \
-                #              (A == D and A == E) ,
-                #             True)
-                #
+                cnet.addLambda(cells,"ABCDE",  \
+                            lambda A,B,C,D,E:
+                             (A == B and A == C) or  \
+                             (A == B and A == D) or  \
+                             (A == B and A == E) or  \
+                             (A == C and A == D) or  \
+                             (A == C and A == E) or  \
+                             (A == D and A == E) ,
+                            True)
+                
             else:
                 cells = [n.map2d1d(posx,posy) for posx,posy in \
                         [ (x,y), (x+1,y), (x-1,y), (x,y+1), (x,y-1)]]
@@ -282,7 +282,8 @@ def flowParams(filename):
     # UPPER BORDER
     for x in range(1,width-1):
         cells = [n.map2d1d(posx,posy) for posx,posy in \
-                [ (x,0), (x+1,0), (x-1,0), (x,1)]]
+                [ (x,0), (x+1,0), (x,1), (x-1,0) ]]
+                 # Acur   Brht     Cund   Dlft
 
         # cells = [n.map2d1d(posx,posy) for posx,posy in \
         #         [ (x,0), (x+1,0), (x,1)]]
