@@ -93,7 +93,7 @@
 
 \begin{abstract}
     This text answers assignment 3, 4: Combining Best-First Search and Constraint-Satisfaction to Solve Complex Puzzles.  
-    In this document, we explain representations, heuristics and design decisions we used to handle flow puzzles and nonograms tasks. 
+    In this document, we explain representations, heuristics and design decisions we used to handle flow puzzels and nonograms tasks. 
     The assignment is built on previous module using simple extensions and subclassing.
 \end{abstract}
 
@@ -122,7 +122,7 @@ are:
     \item Special case handling for when the domains consist of \textit{sets} rather
         than single numbers, as used in the previous assignment.
 \end{enumerate}
-Apart from item 1 and 2, this assignment is solved by subclassing the class
+Apart from item 1 and 2, this assignement is solved by subclassing the class
 ``Problem'' and implementing its abstract methods\footnote{in ``astar.py'': triggerStart(), genNeighbour(), destructor(), updateStates()}
 . Also, you will need to parse the input for each problem. This is done in our
 ``main.py''. As a reminder, the abstract methods of the ``Problem'' class
@@ -131,8 +131,8 @@ defines:
     \item[Drawing] - how each state should be painted. The method receives 
         both the previous state and the current one. By comparing the states, you
         can avoid repainting the whole GUI, or use a lazy updating scheme.
-        In this assignment, with either few states or nodes, we chose the latter.
-    \item[Destructor] - what to do when the A* queue is exhausted. In this assignment
+        In this assignement, with either few states or nodes, we chose the latter.
+    \item[Destructor] - what to do when the A* queue is exhausted. In this assigment
         we simply print the total number of nodes used and expanded in the
         A*-search, and do a last repainting of the GUI.
     \item[Generating successor states] - defines how, given a state, to generate
@@ -144,7 +144,7 @@ defines:
 \subsection*{Considerations}
 Both problems could be fully expressed as SAT, so we found both problems to
 be NP-hard. Therefore we knew that to find exact solutions, we would have
-non-polynomial problem-sizes. It was therefore tempting to use local search,
+non-polyomial problem-sizes. It was therefore tempting to use local search,
 but we felt that the inputs given were small enough that an iterative solution
 would do well.
 
@@ -156,7 +156,7 @@ orderings given their rule $r$. The disadvantage of this approach, namely the la
 to be critical to our application under the premise that we would always solve
 relatively small boards.
 
-Each cell in the Cartesian-grid used in a nonograms can be represented by a single number.
+Each cell in the cartesian-grid used in a nonogram can be represented by a single number.
 We did this numbering in the fashion seen in ~\autoref{fig:grid}.
 % We used cell numbering such that a cell at row i, column j has coordinate 
 % $(\text{WIDTH} \times i) + j$.
@@ -193,12 +193,12 @@ two possible domain values: [-2,4] and [2,-4].
         % % y-axis label
         % \node at (0, 5) {200px};
     \end{tikzpicture}
-    \caption{Our representation of a Cartesian grid}
+    \caption{Our representation of a cartesian grid}
 \label{fig:grid}
 \end{figure}
 
 Now, all constraints can be expressed as matchings between two VI's,
-a row and a column. In pseudo-code, our generated lambda is as follows:
+a row and a column. In pseudocode, our generated lambda is as follows:
 \begin{verbatim}
 len(A.intersection(B)) == 1
 \end{verbatim}
@@ -213,7 +213,7 @@ The disadvantage to our lambda is that the constraints will assess large spaces,
 while the constraint only depend on one value in each domain. Also,
 the A*-GAC requires much copying states and domains, so much excess overhead
 is included. However, the program still runs in under 20 seconds for all 
-the given test inputs, so we have not spent time optimising the function\footnote{
+the given test inputs, so we have not spent time optimizing the function\footnote{
     using properties such as that you can determine exactly which cell you need
 to compare using only the indexes $i,j$}.
 
@@ -227,7 +227,7 @@ expanded. This is due to the coupling of constraints: each row is paired
 with every column, and vice versa. In general this means that reducing one domain forces
 the GAC to filter the entire space of VI's multiple times.
 With a small problem space for the A*-algorithm, it became clear that the
-choice of heuristic is not critical. We used ``min-domain'', which works OK.
+choise of heuristic is not critical. We used ``min-domain'', which works OK.
 
 % In this approach we can find heuristics in some places:
 % \begin{enumerate}
@@ -239,7 +239,7 @@ choice of heuristic is not critical. We used ``min-domain'', which works OK.
 %      In $h-function$ we count the size of all domains to each variable and then the state with lowest value is chosen.\\
 \subsection{Choice of next VI}
 We tried experimenting with the choice of each VI. We initially postulated that
-choosing a centre row or column would yield would be faster. However, it is
+choosing a center row or column would yield would be faster. However, it is
 important to note that to the constraints only binary relationships matter,
 and pruning one row will likely invoke constraints from all other rows.
 Therefore the starting VI is chosen randomly.
@@ -259,11 +259,11 @@ While the benchmark of Michael Spivey
 \normalsize
 found that it can be faster to represent point in the graph by its
 incoming/outgoing direction of flow (NE, NW, NS, WE, WS \dots), 
-we chose SAT because of the intended ease of implementing it in our
+we chose SAT because of the inteded ease of implementing it in our
 model, and also with the knowledge that the input files were no bigger than
 $10 \times 10$, and that small differences in performance is not critical to our evaluation.
 
-The way we modelled our problem was not strictly True of False values. Instead,
+The way we modeled our problem was not strictly True of False values. Instead,
 each cell had a domain value $d_{i,j}$ that indicated its color. Thus, the scope
 of all possible domains for a given cell was $k$, where k is the number of different
 colors. This can still be used to express similarities in relationships,
@@ -285,9 +285,9 @@ and for endpoints:
 \caption{Stencil operation}
 \label{fig:stencil}
 \end{figure}
-These constraints can be modelled as a nested set of conditional branches,
-or, to keep the problem adherent to numbers only, asserting that the sum,
-for each neighbour: abs(DIFF(COLOR$_{adj}$)) - abs(DIFF(COLOR$_{adj}$) - 1)
+These constraints can be modeled as a nested set of conditional branches,
+or, to keep the probram adherant to numbers only, asserting that the sum,
+for each neigbour: abs(DIFF(COLOR$_{adj}$)) - abs(DIFF(COLOR$_{adj}$) - 1)
 $\leq \alpha$ (given that there are $n$ variables, we can assert how many have the same value).
 are sufficient for simple problems, but they miss in the case shown in
 ~\autoref{fig:fail}.
@@ -309,17 +309,17 @@ are sufficient for simple problems, but they miss in the case shown in
 \end{figure}
 
 Before we present how we solved this problem,
-we must review our choice of nodes:
+we must review our choise of nodes:
 
 \subsection*{Choice of next cell}
 When iterating over the board, randomly choosing a cell and iterating over its domain
 puts you at risk for finding a good partial solution that needs to be backtracked
 many many times. An example would be to make a guess of a path in two separate corners
-that can never meet. Before this is realised, you would have generated many
+that can never meet. Before this is realized, you would have generated many
 states with possible permutations in between.
 
 If one is always propagating a path, backtracking begins as soon
-as \textit{one or several} paths are deemed invalid. To always propagate a path, 
+as \textit{one or several} paths are deamed invalid. To always propogate a path, 
 you can choose a starting node in a corner and iterate over the board.
 Now, noticing, that a path that starts in a corner propels in \textit{both}
 directions, you will likely determine if the path is valid if you iterate over
@@ -328,7 +328,7 @@ we use the diagonal of the board. In ~\autoref{fig:grid} this would be
 [1,2,4,3,5,6].
 
 \subsection{Additional constraints}
-Now, using the fact that we know we are always propagating or starting
+Now, using the fact that we know we are always propogating or starting
 a path when we make assumption from A*-states, we can always assume
 that any cell that we expand \textit{has flow incoming}. Since we start in the
 north west, this means that we can assume that when considering a cell,
@@ -345,24 +345,17 @@ This is sufficient to solve all the example input problems and some other
 test cases we designed, but will, if you are unfortunate,
 make it possible to have loops in the solution.
 
-\subsection{Choice of heuristic}
-While there are several heuristics available, we again feel that ``min-conflicts''
+\subsection{Choice of heurstic}
+While there are several heuristics availible, we again feel that ``min-conflicts''
 won away for being the most efficient. 
 
 One can early on determine if a solution for the flow puzzle is inefficient.
 By counting the min cost from each node to each other (using for example Manhattan distance)
-, one can note that if there are not enough available cells to fill in the
-remaining, unfinished paths for each end-node, then the solution is in feasible.
+, one can note that if there are not enough availible cells to fill in the
+remaining, unfinished paths for each end-node, then the solution is infeasible.
 We did, however, feel that the cost of computing this number, when using our 
 diagonal iterations, did not pay off. Trusting our approach, we kept the heuristic
 function simple.
-
-\begin{figure}[Hb]
-\centering
-    \includegraphics[keepaspectratio, height=3cm]{IMG_5237.JPG}
-\caption{Flowpuzzle example}
-\label{fig:Flowpuzzle}
-\end{figure}
 
 \begin{figure}[Hb]
 \centering
