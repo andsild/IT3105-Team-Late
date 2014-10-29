@@ -142,13 +142,6 @@ defines:
 
 
 \subsection*{Considerations}
-The biggest problem we found related to using A*-GAC was that we could not
-implement a solution that relied on states.
-For example, apart from running time, it should not matter if a constraint
-$c_1$  is run before constraint $c_2$ - they should both prune their domain as
-much as needed. Therefore we could not implement thoughts such as
-``if check(A) then othercheck (B)''.
-
 Both problems could be fully expressed as SAT, so we found both problems to
 be NP-hard. Therefore we knew that to find exact solutions, we would have
 non-polyomial problem-sizes. It was therefore tempting to use local search,
@@ -192,9 +185,9 @@ two possible domain values: [-2,4] and [2,-4].
         \node at (0.5, 0.5) {1};
         \node at (1.5, 0.5) {2};
         \node at (2.5, 0.5) {3};
-        \node at (0.5, 1.5) {3};
-        \node at (1.5, 1.5) {4};
-        \node at (2.5, 1.5) {5};
+        \node at (0.5, 1.5) {4};
+        \node at (1.5, 1.5) {5};
+        \node at (2.5, 1.5) {6};
         % % x-axis label
         % \node at (4.5, -0.5) {200px};
         % % y-axis label
@@ -266,43 +259,103 @@ While the benchmark of Michael Spivey
 \normalsize
 found that it can be faster to represent point in the graph by its
 incoming/outgoing direction of flow (NE, NW, NS, WE, WS \dots), 
-we chose SAT because of its simplicity and ease of implementing it in our
+we chose SAT because of the inteded ease of implementing it in our
 model, and also with the knowledge that the input files were no bigger than
 $10 \times 10$, and that small differences in performance is not critical to our evaluation.
-Also, the SAT formulation meant that we had small domains, which is important
-when using our CNET because domains are copied quite often... So therefore, 
-even if the winning ``numberlink'' from the benchmark[ibid] modeled 
-his project using directions, it might be that it is inefficient in 
-our model when using GAC and constraint propagation.
 
-In our model, we represent the board as a 2D-grid of cells, each representing one
-vertex instance $v_{i,j}$ for position $i,j$ in the cartesian plane.
-For each $v$, you can assign $k$ colors, where $k$ is given by
-the number of endpoints / 2. 
-Each cell $v_{i,j}$ must be a part of the path
-\footnote{I will assume the reader is has a mutual understanding of ``path''}
-from an endpoint $e_{i,j}$ to another endpoint $e_{i+\alpha,j+\beta}$.
-Therefore our constraints are modelled as follows:
-\begin{align}
-    \forall{i,j}: leastTwoOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == v_{i,j} \\   %ALL arguments are same
-    \forall{i,j}: leastOneOf( v_{i+1,j},v_{i+1,j},v_{i+1,j},v_{i+1,j}, ) == e_{i,j}
-\end{align}
-this can also be thought of as applying a 5-point stencil to the grid
-and validating each neighbour value. This constraint only applies to the entir
-LOOPS, deffered
+The way we modeled our problem was not strictly True of False values. Instead,
+each cell had a domain value $d_{i,j}$ that indicated its color. Thus, the scope
+of all possible domains for a given cell was $k$, where k is the number of different
+colors. This can still be used to express similarities in relationships,
+however, with a reduced set of constraints, which we are about to explain.
 
+We defined the neighbour of a cell to be the similar to a 5-point stencil,
+except on the borders, where the out-of-bounds values are omitted. 
+The first constraints for a cells are easy: for regular cells:
+\begin{equation}
+    \text{at least two neighbours share color}
+\end{equation}
+and for endpoints:
+\begin{equation}
+    \text{at least one neighbour share color}
+\end{equation}
 \begin{figure}[Hb]
 \centering
-    \includegraphics[height=2cm,keepaspectratio,width=2.5in]{stencil.jpg}
+    \includegraphics[height=3cm,keepaspectratio,width=2.5in]{stencil.jpg}
 \caption{Stencil operation}
 \label{fig:stencil}
 \end{figure}
+These constraints can be modeled as a nested set of conditional branches,
+or, to keep the probram adherant to numbers only, asserting that the sum,
+for each neigbour: abs(DIFF(COLOR$_{adj}$)) - abs(DIFF(COLOR$_{adj}$) - 1)
+$\leq \alpha$ (given that there are $n$ variables, we can assert how many have the same value).
+are sufficient for simple problems, but they miss in the case shown in
+~\autoref{fig:fail}.
+\begin{figure}[Hb]
+\centering
+  % TikZ picture with origin upper left
+    \begin{tikzpicture}[yscale=-1] 
+        % 4x4 grid
+        \draw (0, 0) grid (2, 2);
+        % origin point
+        \draw [color=blue, fill=blue] (0.5, 0.5) circle (0.1);
+        \draw [color=blue, fill=blue] (1.5, 0.5) circle (0.1);
+        \draw [color=blue, fill=blue] (0.5, 1.5) circle (0.1);
+        \draw [color=blue, fill=blue] (1.5, 1.5) circle (0.1);
+    \end{tikzpicture}
+    \caption{Failure for constraint 1) and 2): all cells are satisfied, but there is a
+    loss of flow}
+\label{fig:fail}
+\end{figure}
 
-\subsection{Choice of next cell}
-Clearly, random is bad..
+Before we present how we solved this problem,
+we must review our choise of nodes:
+
+\subsection*{Choice of next cell}
+When iterating over the board, randomly choosing a cell and iterating over its domain
+puts you at risk for finding a good partial solution that needs to be backtracked
+many many times. An example would be to make a guess of a path in two separate corners
+that can never meet. Before this is realized, you would have generated many
+states with possible permutations in between.
+
+If one is always propagating a path, backtracking begins as soon
+as \textit{one or several} paths are deamed invalid. To always propogate a path, 
+you can choose a starting node in a corner and iterate over the board.
+Now, noticing, that a path that starts in a corner propels in \textit{both}
+directions, you will likely determine if the path is valid if you iterate over
+the diagonal of the board. Therefore, when choosing the next cell, 
+we use the diagonal of the board. In ~\autoref{fig:grid} this would be
+[1,2,4,3,5,6].
+
+\subsection{Additional constraints}
+Now, using the fact that we know we are always propogating or starting
+a path when we make assumption from A*-states, we can always assume
+that any cell that we expand \textit{has flow incoming}. Since we start in the
+north west, this means that we can assume that when considering a cell,
+it has flow coming in from the north or west. If not, this means we are
+making a new path, and neither NORTH or WEST is set, so must ``toggle''
+both east and south.
+
+These constraints are again, working, but they also fail to see some scenarios:
+when a SOUTH or EAST neighbour is an endpoint, flow can go as shown in
+$\autoref{fig:flowprob}$. We dealt with this by asserting that if 
+neighbour $(i,j+1)$, or $(i+1,j)$ is an endpoint, you are allowed to have a
+node with 3 adjacent neighbours.
+This is sufficient to solve all the example input problems and some other
+test cases we designed, but will, if you are unfortunate,
+make it possible to have loops in the solution.
 
 \subsection{Choice of heurstic}
-We scanned through 
+While there are several heuristics availible, we again feel that ``min-conflicts''
+won away for being the most efficient. 
+
+One can early on determine if a solution for the flow puzzle is inefficient.
+By counting the min cost from each node to each other (using for example Manhattan distance)
+, one can note that if there are not enough availible cells to fill in the
+remaining, unfinished paths for each end-node, then the solution is infeasible.
+We did, however, feel that the cost of computing this number, when using our 
+diagonal iterations, did not pay off. Trusting our approach, we kept the heuristic
+function simple.
 
 \begin{figure}[Hb]
 \centering
@@ -318,7 +371,10 @@ We scanned through
 \label{fig:Nonogram}
 \end{figure}
 
-
+\section*{In the End}
+This was a fun project to work on. We were surprised, and annoyed by how difficult
+path uniqueness was to settle with SAT. In the end, we would like to post some screenshots
+that shows the program in use.
 
 
 \end{document}
