@@ -201,33 +201,33 @@ def flowParams(filename):
             #         [ (x,y), (x+1,y), (x,y+1)]]
             if (x,y) not in tmp_D:
 
-                if (x+1,y) in tmp_D:
-                    cnet.addLambda(cells,"ABCDE",  \
-                                lambda A,B,C,D,E:
-                                (A == B and A is not C) or \
-                                (A == C and A is not B) or \
-                                (((A == D and not A == E) or (A == E and A is not D)) and A == C and A == B) or \
-                                (A == B and A == C and (A is not D and A is not E)) or \
-                                (A == D and A == E and (A is not C and A is not B)),
-                                True)
-                # if (x,y+1) in tmp_D:
+                # if (x+1,y) in tmp_D:
                 #     cnet.addLambda(cells,"ABCDE",  \
                 #                 lambda A,B,C,D,E:
                 #                 (A == B and A is not C) or \
                 #                 (A == C and A is not B) or \
-                #                 ((A == E and A is not D) and A == C and A == B) or \
+                #                 (((A == D and not A == E) or (A == E and A is not D)) and A == C and A == B) or \
                 #                 (A == B and A == C and (A is not D and A is not E)) or \
                 #                 (A == D and A == E and (A is not C and A is not B)),
                 #                 True)
-                else:
-                    cnet.addLambda(cells,"ABCDE",  \
-                                lambda A,B,C,D,E:
-                                (A == B and A is not C) or \
-                                (A == C and A is not B) or \
-                                # (A == B and A == C and A == D) or \
-                                (A == B and A == C and (A is not D and A is not E)) or \
-                                (A == D and A == E and (A is not C and A is not B)),
-                                True)
+                # # if (x,y+1) in tmp_D:
+                # #     cnet.addLambda(cells,"ABCDE",  \
+                # #                 lambda A,B,C,D,E:
+                # #                 (A == B and A is not C) or \
+                # #                 (A == C and A is not B) or \
+                # #                 ((A == E and A is not D) and A == C and A == B) or \
+                # #                 (A == B and A == C and (A is not D and A is not E)) or \
+                # #                 (A == D and A == E and (A is not C and A is not B)),
+                # #                 True)
+                # else:
+                cnet.addLambda(cells,"ABCDE",  \
+                            lambda A,B,C,D,E:
+                            (A == B and A is not C) or \
+                            (A == C and A is not B) or \
+                            # (A == B and A == C and A == D) or \
+                            (A == B and A == C and (A is not D and A is not E)) or \
+                            (A == D and A == E and (A is not C and A is not B)),
+                            True)
 
                 cnet.addLambda(cells,"ABCDE",  \
                             lambda A,B,C,D,E:

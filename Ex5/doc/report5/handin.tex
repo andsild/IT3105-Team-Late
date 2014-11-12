@@ -81,7 +81,7 @@
 % can use linebreaks \\ within to get better formatting as desired
 \title{2048 Expectimax Solver}
 
-\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
+\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students of NTNU}% <-this % stops a space. jobtitle in memberkj
 }% \thanks{Utsendt 2014}}
 
 % The paper headers
@@ -141,15 +141,14 @@ is not too big and one can use statistics to get accurate enough resuls.
 
 
 Using stochastic information in adversial search leads to expectimax. 
-After doing adversial search up to a given depth, you can back up from each node
-and introduce a chance node. The chance nodes multiply the value to each
+After expanding the search space up to a given depth, you can back up from each
+node and introduce a chance node. The chance nodes multiply the value to each
 of its children (given a state, the objective value to each of the children).
+The chance nodes are used when pruning the search space. Their importance is that
+unlikely values will yield a lower penalty to the overall score of the search node,
+such that the node is not necessarily pruned away.
 
-
-
-to assessing search states with objective functions, you also add the probability
-that each event will occur. This
-
+\section*{Hey}
 
 
 

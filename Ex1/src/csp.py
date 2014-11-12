@@ -177,8 +177,8 @@ class CSPState(State):
         unassigned = [ (len(vi.domain),index) for index,vi in enumerate(self.domains) \
                if len(vi.domain) > 1 ]
         if len(unassigned) > 0:
-            return min(unassigned)[1]
-            return unassigned[-0]
+            # return min(unassigned)[1]
+            return unassigned[-1][1]
         return self.genRandomVertex()
     
     def getUnassigned(self):
@@ -247,20 +247,10 @@ class Constraint(object):
         can_satisfy = False
         arg_list = [ state[self.sym_to_variable[symv]].domain for symv,_ in self.vi_list ]
 
-        # if [ ind[1] for ind in self.vi_list] == [13,14,18,8,12]:
-        # if [ ind[1] for ind in self.vi_list] == [12,13,17,7,11]:
-        #         # and arg_list == [ [2], [2], [3], [2]]:
-        #     print self.vi_list
-        #     print arg_list
-        #     set_trace()
-
         for tup in product(*arg_list):
             if self.function(*tup):
                 can_satisfy = True
                 break
-        # if not can_satisfy:
-        #     print "could not satisfy.."
-        # print "could satisfy"
         return can_satisfy
 
 def revise(variable, constraint, state):
