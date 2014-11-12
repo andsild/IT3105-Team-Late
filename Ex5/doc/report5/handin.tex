@@ -44,6 +44,7 @@
 \documentclass[journal]{IEEEtran}
 
 \newcommand{\subparagraph}{}
+\def\naive{na\"{\i}ve}
 
 \usepackage{amsmath,
             amssymb,
@@ -118,6 +119,17 @@ In the case of 2048, this could yield a valid solution in a short amount of
 time. However, not everyone has access to such fast hardware and
 multi-threading so a way to prune the search space is needed.
 
+\section*{Assumptions}
+While we yearn to learn and explore science, time is a serious impendiment.
+Therefore we have rigiously worked to create a solver within the assignment bounds:
+\begin{enumerate}
+    \item The highest value tile does not need to exceed 4096.
+    \item Execution time is not critical (roughly $< 10$minutes)
+\end{enumerate}
+This implies that our chosen heuristic and solver method does not need a strong
+level of optimization to work. Indeed, the work of~\cite{brutesolver} shows that
+a \naive{} brute force can be used to solve the game within the bounds listed above.
+
 \section*{Minimax Algorithm}
 The purpose of minimax is to minimize loss for a worst possible scenario.
 This means choosing an action such that your opponent can do ``least amount of damages'',
@@ -126,6 +138,7 @@ For 2048 this would mean always making a move such that no matter where the next
 tile goes, and no matter what value, you will still find a way for success.
 
 % PERFECT INFORMATION
+% DISCRETE SPACE
 % PLY
 
 2048, however, is a stochastic game. The opponent will never purposly select a
@@ -153,6 +166,14 @@ To assess whether or not a current game state is good or not, we have different
 objective functions to assess game state. Using these to advance in the
 solution space is called heuristical search. Our heuristics are developed based
 on ideas we found online and through some play of our own.
+BENCHMARK
+BENCHMARK
+BENCHMARK
+BENCHMARK
+BENCHMARK
+BENCHMARK
+BENCHMARK
+BENCHMARK
 \subsection*{Gradients}
 If a large value is in the middle of the board, it will be hard to pair up
 with other adjacent tiles. Therefore, we would like to set a natural preference
@@ -219,7 +240,7 @@ Many other heuristic functions exist:
     \item\label{it:free} \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
     \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
         tiles.
-    \item\label{it:merges} \textit{Possible merges} \textendash{} prefer boards where many merges are possible,
+    \item\label{it:merges} \textbf{Possible merges} \textendash{} prefer boards where many merges are possible,
         i.e.\ boards with tiles of the same value.
 \end{enumerate}
 
@@ -239,6 +260,15 @@ move. In addition, we have to apply our mask in~\autoref{fig:gradient} four time
 and introduce chance nodes. Therefore, to avoid cluttered code and
 execution, we chose to only rely on the gradient method. However, if this assignment
 had rewarded execution time and scores higher than $4096$, we would implement
-more of the heuristics mentioned above.
+more of the heuristics mentioned above. 
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,../bib/paper}
+\begin{thebibliography}{1}
+\bibitem{brutesolver}
+    ``ronzil'' \emph{2048-AI}, \textit{git-repository}.\hskip 1em plus
+  0.5em minus 0.4em\relax GitHub
+\end{thebibliography}
 
 \end{document}
