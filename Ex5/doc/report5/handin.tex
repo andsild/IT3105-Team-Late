@@ -212,18 +212,33 @@ the largest resulting value is chosen as the one to be used as a value for the s
 \end{figure}
 
 \section*{Why not use more heuristics?}
-Many heuristic functions exist:
-\begin{itemize}
-    \item \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
-    \item \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
-    \item \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
+
+Many other heuristic functions exist:
+\begin{enumerate}
+    \item\label{it:score} \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
+    \item\label{it:free} \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
+    \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
         tiles.
-    \item Possible merges \textendash{} prefer boards where many merges are possible,
+    \item\label{it:merges} \textit{Possible merges} \textendash{} prefer boards where many merges are possible,
         i.e.\ boards with tiles of the same value.
-\end{itemize}
+\end{enumerate}
 
+Heuristic~\ref{it:score} is difficult to implement in practise. When greedily preffering
+boards with higher tiles you might exclude boards with high merges.
+Heuristic~\ref{it:free} can also be used. Arguably, it is already used in our gradient
+function: boards with tiles in opposite corners are penalized. Therefore we did
+not see the need to implement this heuristic expliclitly. Furthermore, there are
+cases where having many free tiles not necessarily is a bad thing.
+The two last heuristics are shown to 
 
-\section*{end}
-
+Exepctimax has execution time $O(b^{m})$. Here, $b$ is the \textit{branching factor},
+i.e.\ the number of possible children from a given board. For each move, $0 \leq b \leq 4$.
+$m$ is the depth of the search tree.  It can easily be seen that this execution time
+quickly grows: for a search depth of 6, the execution time is $4096$ for each possible 
+move. In addition, we have to apply our mask in~\autoref{fig:gradient} four times 
+and introduce chance nodes. Therefore, to avoid cluttered code and
+execution, we chose to only rely on the gradient method. However, if this assignment
+had rewarded execution time and scores higher than $4096$, we would implement
+more of the heuristics mentioned above.
 
 \end{document}
