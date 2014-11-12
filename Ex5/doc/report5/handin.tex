@@ -1,0 +1,159 @@
+%% bare_jrnl.tex
+%% V1.3
+%% 2007/01/11
+%% by Michael Shell
+%% see http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.7 or later) with an IEEE journal paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%
+%% File list of work: IEEEtran.cls, IEEEtran_HOWTO.pdf, bare_adv.tex,
+%%                    bare_conf.tex, bare_jrnl.tex, bare_jrnl_compsoc.tex
+%%*************************************************************************
+
+\documentclass[journal]{IEEEtran}
+
+\newcommand{\subparagraph}{}
+
+\usepackage{amsmath,
+            amssymb,
+            amsthm,
+            atbegshi,
+            caption,
+            subcaption,
+            epigraph,
+            etoolbox,
+            enumitem,
+            fancyhdr,
+            geometry,
+            graphicx,
+            hyperref,
+            kpfonts,
+            lipsum,
+            longtable,
+            natbib,
+            tabulary,
+            thmtools,
+            tikz,
+            tikzpagenodes,
+            titletoc,
+            titlesec,
+            tocloft,
+            url,
+            wrapfig
+}
+\usepackage[utf8]{inputenc}
+
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{2048 Expectimax Solver}
+
+\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students }% <-this % stops a space. jobtitle in memberkj
+}% \thanks{Utsendt 2014}}
+
+% The paper headers
+\markboth{2048 Expectimax Solver}%
+{h}
+
+% make the title area
+\maketitle
+
+\begin{abstract}
+    This text answers assignment 5: writing a solver for the game 2048.
+    The purpose of the game is to slide tiles with numbers $2^{n}$, and join them
+    together to form 2048 ($2^{11}$), or possibly higher. 
+    We present a solver using Expectimax algorithm. We explain our choice of
+    heuristics and results.
+\end{abstract}
+
+% \begin{IEEEkeywords}
+%     Stuff
+% \end{IEEEkeywords}
+\IEEEPARstart{2}{048} can be thought of as a 2-player, turn-based game. The
+opponent places tiles valued either $2$ or $4$ in an availible location. Then,
+the other player makes a move to slide all tiles in a given direction. This
+goes back and forth until there are no more availible moves. 
+
+In a turn-based game, you have the time to consider the consequences for each possible
+action. This gives computers immense advantages over humans:
+IBM's chess-solving machine ``Deep Blue'' won against Garry Kasparov in 1997 considered more than
+200 million possible moves per second\footnote{For more, see
+    \href{http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}
+{http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}}.
+
+In the case of 2048, this could yield a valid solution in a short amount of
+time. However, not everyone has access to such fast hardware and
+multi-threading so a way to prune the search space is needed.
+
+\section*{Minimax Algorithm}
+The purpose of minimax is to minimize loss for a worst possible scenario.
+This means choosing an action such that your opponent can do ``least amount of damages'',
+i.e. leaving you in a promising state. This is also called \textit{adversial search}.
+For 2048 this would mean always making a move such that no matter where the next
+tile goes, and no matter what value, you will still find a way for success.
+
+% PERFECT INFORMATION
+% PLY
+
+2048, however, is a stochastic game. The opponent will never purposly select a
+bad tile, nor \textit{choose} a bad value. This is to say that there is no opponent,
+so it is possible to always land a best case scenario. Therefore, we felt that minimax,
+considering the worst case, is too pessimistic in its search space.
+Furthermore, the distribution of numbered tiles are given:
+there is a 90\% chance of getting a tile valued 2, and 10\% chance of getting a tile
+valued 4. The location is random. Also note that in some cases, a tile
+in position $i,j$  is no different from having a tile in position $i+i,j$ if the
+next move it to slide the tiles downward. Thus the possible search space
+is not too big and one can use statistics to get accurate enough resuls.
+
+
+Using stochastic information in adversial search leads to expectimax. 
+After doing adversial search up to a given depth, you can back up from each node
+and introduce a chance node. The chance nodes multiply the value to each
+of its children (given a state, the objective value to each of the children).
+
+
+
+to assessing search states with objective functions, you also add the probability
+that each event will occur. This
+
+
+
+
+\section*{end}
+
+
+\end{document}
