@@ -121,7 +121,7 @@ multi-threading so a way to prune the search space is needed.
 \section*{Minimax Algorithm}
 The purpose of minimax is to minimize loss for a worst possible scenario.
 This means choosing an action such that your opponent can do ``least amount of damages'',
-i.e. leaving you in a promising state. This is also called \textit{adversial search}.
+i.e.\ leaving you in a promising state. This is also called \textit{adversial search}.
 For 2048 this would mean always making a move such that no matter where the next
 tile goes, and no matter what value, you will still find a way for success.
 
@@ -148,8 +148,79 @@ The chance nodes are used when pruning the search space. Their importance is tha
 unlikely values will yield a lower penalty to the overall score of the search node,
 such that the node is not necessarily pruned away.
 
-\section*{Hey}
+\section*{Heuristic}
+To assess whether or not a current game state is good or not, we have different
+objective functions to assess game state. Using these to advance in the
+solution space is called heuristical search. Our heuristics are developed based
+on ideas we found online and through some play of our own.
+\subsection*{Gradients}
+If a large value is in the middle of the board, it will be hard to pair up
+with other adjacent tiles. Therefore, we would like to set a natural preference
+for having larger values clustered in a corner. This way, they do not interfere
+with other lower-valued tiles. Next to the highest value tile, you want other,
+lower valued cells. This extends throughout the board. However, having large values
+in two corners implies that we have two (or more) tiles with large values, separated
+by lower tiles. Therefore, we penalize boards where large values are far apart.
 
+To calculate the value of a board, we apply a 4x4 mask and retrieve the
+sum of adding all the values in the masked board.  
+The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a scalar
+which is multiplied with the value from the board. Since large value might be clustered
+in all corners, we apply 4 masks, one for each corner respectively. Then,
+the largest resulting value is chosen as the one to be used as a value for the state.
+
+\begin{figure}[Hb]
+\centering
+  % TikZ picture with origin upper left
+    \begin{tikzpicture}[yscale=-1] 
+        % 4x4 grid
+        \draw (0, 0) grid (4, 4);
+        % origin point
+        % \draw [color=blue, fill=blue] (0, 0) circle (0.1);
+        % % x-axis
+        % \draw [thick,->] (0, 0) -- (3.5, 0);
+        % % y-axis
+        % \draw [thick,->] (0, 0) -- (0, 3.5);
+        % origin label
+        % \node at (-0.5, 0.5) {1};
+        \node at (0.5, 0.5) {3};
+        \node at (1.5, 0.5) {2};
+        \node at (2.5, 0.5) {1};
+        \node at (3.5, 0.5) {0};
+
+        \node at (0.5, 1.5) {2};
+        \node at (1.5, 1.5) {1};
+        \node at (2.5, 1.5) {0};
+        \node at (3.5, 1.5) {-1};
+
+        \node at (0.5, 2.5) {1};
+        \node at (1.5, 2.5) {0};
+        \node at (2.5, 2.5) {-1};
+        \node at (3.5, 2.5) {-2};
+
+        \node at (0.5, 3.5) {0};
+        \node at (1.5, 3.5) {-1};
+        \node at (2.5, 3.5) {-2};
+        \node at (3.5, 3.5) {-3};
+        % % x-axis label
+        % \node at (4.5, -0.5) {200px};
+        % % y-axis label
+        % \node at (0, 5) {200px};
+    \end{tikzpicture}
+    \caption{Our gradient mask}
+\label{fig:gradient}
+\end{figure}
+
+\section*{Why not use more heuristics?}
+Many heuristic functions exist:
+\begin{itemize}
+    \item \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
+    \item \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
+    \item \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
+        tiles.
+    \item Possible merges \textendash{} prefer boards where many merges are possible,
+        i.e.\ boards with tiles of the same value.
+\end{itemize}
 
 
 \section*{end}
