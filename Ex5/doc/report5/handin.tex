@@ -82,12 +82,10 @@
 \tikzset{%
     treenode/.style = {align=center, inner sep=0pt, text centered,
     font=\sffamily},
-    arn_n/.style = {treenode, circle, white, font=\sffamily\bfseries,
-    draw=black, fill=black, text width=1.5em},% arbre rouge noir, noeud noir
-    arn_r/.style = {treenode, circle, red, draw=red,
+    arnN/.style = {treenode, circle, white, font=\sffamily\bfseries,
+    draw=black, fill=black, text width=3.5em},
+    arnR/.style = {treenode, circle, red, draw=red,
     text width=2.9em, very thick},% arbre rouge noir, noeud rouge
-    arn_x/.style = {treenode, rectangle, draw=black,
-    minimum width=0.5em, minimum height=0.5em}% arbre rouge noir, nil
 }
 
 \begin{document}
@@ -327,21 +325,37 @@ itself. The builtin solver works as follows:
 \begin{framed}
 \begin{tikzpicture}[->,>=stealth',level/.style={sibling distance = 4cm/#1,
   level distance = 1.5cm}]
-  \node [arn_n, label={[label distance=.2cm]20:current board}] {}
-  child{node [arn_r,label={[label distance=0.4cm]20:possible tiles}] {$15\cdot{p_{a}}$}
-            % 
-            child{node [arn_n] {16} edge from parent node[above left] {N} }
-            child{node [arn_n] {20} edge from parent node[above left] {S} }
-            child{node [arn_n] {30} edge from parent node[above right] {W} }
+  \node [arnR, label={[label distance=.2cm]20:current board}] {$\alpha$}
+        child{node [arnN]%,label={[label distance=0.4cm]20:possible moves}]
+        {$\max{\dots}$}
+            child{node [arnR] {$\text{grad}\cdot{}p_{a}$} 
+            }
+            child{node [arnR] {$\text{grad}\cdot{}p_{b}$} 
+                    edge from parent node[above right] {tile with prob $p$}
+                % edge from parent node[above] {tile}
+            }
+            % child{node [arnR] {$\text{grad}\cdot{}p_{c}$} 
+            %     % edge from parent node[above] {tile}
+            % }
+        edge from parent node[above left] {E} 
     }
-    child{node [arn_r] {$47\cdot{p_{b}}$}
-            child{node [arn_n] {15} edge from parent node[above left] {N} }
-            child{node [arn_n] {09} edge from parent node[above left] {E} }
+        child{node [arnN]%,label={[label distance=0.4cm]20:possible moves}]
+            {$\max{\dots}$}
+                child{node [arnR] {$\text{grad}\cdot{}p_{c}$} 
+                        % edge from parent node[above left] 
+                }
+                child{node {\dotso}
+                    % edge from parent node[above] {tile}
+                }
+            edge from parent node[above right] {W} 
         }
 ;
 \end{tikzpicture}
 \end{framed}
-\caption{Example expectimax tree, with implicit chance nodes}
+\caption{Example expectimax tree, with implicit chance nodes. 
+    Each black cell is a board after a move is made (waiting for opponent to
+    place a tile). The black cells' value is the highest value of its children.
+}
 \end{figure}
 
 To realize the above code, a few classes are needed. We implemented each 
@@ -354,12 +368,12 @@ chose not to use this apporach, even though it allows fast board checks.
 
 \section*{Results}
 Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\%
-of the cases, in about XXX minutes. \autoref{fig:max} shows this result and
+of the cases, in about 5 minutes. \autoref{fig:max} shows this result and
 our board.
 
 \begin{figure}[b]
 \centering
-    \includegraphics[keepaspectratio, height=3cm]{fig/8192.png}
+    \includegraphics[keepaspectratio, height=6cm]{fig/8192.png}
 \caption{Example solver and board}
 \label{fig:max}
 \end{figure}
