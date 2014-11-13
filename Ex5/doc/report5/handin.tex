@@ -106,8 +106,6 @@
 
 \begin{abstract}
     This text answers assignment 5: writing a solver for the game 2048.
-    The purpose of the game is to slide tiles with numbers $2^{n}$, and join them
-    together to form 2048 ($2^{11}$), or possibly higher.
     We present a solver using Expectimax algorithm. We explain our choice of
     heuristics and results.
 \end{abstract}
@@ -115,8 +113,11 @@
 % \begin{IEEEkeywords}
 %     2048, expectimax, IT3105
 % \end{IEEEkeywords}
-\IEEEPARstart{2}{048} can be thought of as a 2-player, turn-based game. The
-opponent places tiles valued either $2$ or $4$ in an availible location. Then,
+\IEEEPARstart{T}{he} purpose of the game is to slide tiles with numbers
+$2^{n}$, and join them together to form 2048 ($2^{11}$), or possibly higher.
+It can be thought of as a 2-player, turn-based game. 
+The opponent places tiles valued either $2$ or $4$ in an availible location.
+Then,
 the other player makes a move to slide all tiles in a given direction. This
 goes back and forth until there are no more availible moves.
 
@@ -129,8 +130,9 @@ time. However, not everyone has access to such fast hardware and
 multi-threading so a way to prune the search space is needed.
 
 \section*{Assumptions}
-While we yearn to learn and explore science, time is a serious impendiment.
-Therefore we have rigiously worked to create a solver within the assignment bounds:
+It is possible to obtain tiles values up to $2^{14}$ within reasonable time.
+Our assignment bounds, however, did not require us to achieve such a high level
+of performance:
 \begin{enumerate}
     \item The highest value tile does not need to exceed 4096.
     \item Execution time is not critical (roughly $< 10$minutes)
