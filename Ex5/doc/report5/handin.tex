@@ -18,7 +18,7 @@
 %% Legal Notice:
 %% This code is offered as-is without any warranty either expressed or
 %% implied; without even the implied warranty of MERCHANTABILITY or
-%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% FITNESS FOR A PARTICULAR PURPOSE!
 %% User assumes all risk.
 %% In no event shall IEEE or any contributor to this code be liable for
 %% any damages or losses, including, but not limited to, incidental,
@@ -74,7 +74,18 @@
             wrapfig
 }
 \usepackage[utf8]{inputenc}
+\usetikzlibrary{arrows}
 
+\tikzset{%
+    treenode/.style = {align=center, inner sep=0pt, text centered,
+    font=\sffamily},
+    arn_n/.style = {treenode, circle, white, font=\sffamily\bfseries,
+    draw=black, fill=black, text width=1.5em},% arbre rouge noir, noeud noir
+    arn_r/.style = {treenode, circle, red, draw=red,
+    text width=2.9em, very thick},% arbre rouge noir, noeud rouge
+    arn_x/.style = {treenode, rectangle, draw=black,
+    minimum width=0.5em, minimum height=0.5em}% arbre rouge noir, nil
+}
 
 \begin{document}
 %
@@ -95,7 +106,7 @@
 \begin{abstract}
     This text answers assignment 5: writing a solver for the game 2048.
     The purpose of the game is to slide tiles with numbers $2^{n}$, and join them
-    together to form 2048 ($2^{11}$), or possibly higher. 
+    together to form 2048 ($2^{11}$), or possibly higher.
     We present a solver using Expectimax algorithm. We explain our choice of
     heuristics and results.
 \end{abstract}
@@ -106,7 +117,7 @@
 \IEEEPARstart{2}{048} can be thought of as a 2-player, turn-based game. The
 opponent places tiles valued either $2$ or $4$ in an availible location. Then,
 the other player makes a move to slide all tiles in a given direction. This
-goes back and forth until there are no more availible moves. 
+goes back and forth until there are no more availible moves.
 
 In a turn-based game, you have the time to consider the consequences for each possible
 action. This gives computers immense advantages over humans:
@@ -152,7 +163,7 @@ next move it to slide the tiles downward. Thus the possible search space
 is not too big and one can use statistics to get accurate enough resuls.
 
 
-Using stochastic information in adversial search leads to expectimax. 
+Using stochastic information in adversial search leads to expectimax.
 After expanding the search space up to a given depth, you can back up from each
 node and introduce a chance node. The chance nodes multiply the value to each
 of its children (given a state, the objective value to each of the children).
@@ -183,7 +194,7 @@ in two corners implies that we have two (or more) tiles with large values, separ
 by lower tiles. Therefore, we penalize boards where large values are far apart.
 
 To calculate the value of a board, we apply a 4x4 mask and retrieve the
-sum of adding all the values in the masked board.  
+sum of adding all the values in the masked board.
 The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a scalar
 which is multiplied with the value from the board. Since large value might be clustered
 in all corners, we apply 4 masks, one for each corner respectively. Then,
@@ -192,7 +203,7 @@ the largest resulting value is chosen as the one to be used as a value for the s
 \begin{figure}[Hb]
 \centering
   % TikZ picture with origin upper left
-    \begin{tikzpicture}[yscale=-1] 
+    \begin{tikzpicture}[yscale=-1]
         % 4x4 grid
         \draw (0, 0) grid (4, 4);
         % origin point
@@ -240,7 +251,7 @@ Many other heuristic functions exist:
     \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
         tiles.
     \item\label{it:merges} \textbf{Possible merges} \textendash{} prefer boards where many merges are possible,
-        i.e.\ boards with tiles of the same value.
+       i.e.\ boards with tiles of the same value.
 \end{enumerate}
 
 Heuristic~\ref{it:score} is difficult to implement in practise. When greedily preffering
@@ -249,7 +260,7 @@ Heuristic~\ref{it:free} can also be used. Arguably, it is already used in our gr
 function: boards with tiles in opposite corners are penalized. Therefore we did
 not see the need to implement this heuristic expliclitly. Furthermore, there are
 cases where having many free tiles not necessarily is a bad thing.
-The two last heuristics are shown to 
+The two last heuristics are shown to
 
 Exepctimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
 i.e.\ the number of possible children from a given board. For each state, $0
@@ -260,9 +271,51 @@ time is $4^{6}\cdot{n^{4}}$ for each possible move. In addition, we have to appl
 in~\autoref{fig:gradient} four times and introduce chance nodes. Therefore, to
 avoid cluttered code and execution, we chose to only rely on the gradient
 method. However, if this assignment had rewarded execution time and scores
-higher than $4096$, we would implement more of the heuristics mentioned above. 
+higher than $4096$, we would implement more of the heuristics mentioned above.
 
-\section*{Structure of source code
+\section*{Structure of source code}
+We implemented our solution in Java. This is because both members of the group
+were familiar with the language. The GUI is rendered through a JFrame, and the tiles are
+drawn using AWT's Graphics2D.
+
+There is a builtin keylistener that reads for keyboard input. However, one can also
+enable autosolving, which toggles a flag in the keylistener and solves the board by
+itself. The builtin solver works as follows:
+\begin{enumerate}
+    \item For each possible move (left,right,up,down) by the player, call ``computers''
+    \item ``computer'': For each possible tile placement:
+        \begin{enumerate}
+            \item place a tile, and call all possible player moves,
+                decrementing depth by 1
+        \end{enumerate}
+    \item \dotso continue until depth == 0
+\end{enumerate}
+
+The chance nodes discussed earlier are made implictly by stacking
+
+\begin{figure}[Hb!]
+\begin{tikzpicture}[->,>=stealth',level/.style={sibling distance = 4cm/#1,
+  level distance = 1.5cm}]
+  \node [arn_n, label={[label distance=.2cm]20:current board}] {}
+  child{node [arn_r,label={[label distance=0.4cm]20:possible tiles\dotso{}}] {$15\cdot{p_{a}}$}
+            % 
+            child{node [arn_n] {16} edge from parent node[above left] {N} }
+            child{node [arn_n] {20} edge from parent node[above left] {S} }
+            child{node [arn_n] {30} edge from parent node[above left] {W} }
+            % child{ node [arn_n] {10}
+            %     child{ node [arn_r] {5} edge from parent node[above left]
+            %              {$x$}} %for a named pointer
+            %                 child{ node [arn_x] {}}
+            % }
+    }
+    child{node [arn_r] {$47\cdot{p_{b}}$}
+            child{node [arn_n] {15} edge from parent node[above left] {N} }
+            child{node [arn_n] {09} edge from parent node[above left] {E} }
+        }
+;
+\end{tikzpicture}
+\caption{Example expectimax tree}
+\end{figure}
 
 
 
