@@ -193,7 +193,7 @@ lower valued cells. This extends throughout the board. However, having large val
 in two corners implies that we have two (or more) tiles with large values, separated
 by lower tiles. Therefore, we penalize boards where large values are far apart.
 
-To calculate the value of a board, we apply a 4x4 mask and retrieve the
+To calculate the value of a board, we apply a $4\times{}4$ mask and retrieve the
 sum of adding all the values in the masked board.
 The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a scalar
 which is multiplied with the value from the board. Since large value might be clustered
@@ -285,13 +285,15 @@ itself. The builtin solver works as follows:
     \item For each possible move (left,right,up,down) by the player, call ``computers''
     \item ``computer'': For each possible tile placement:
         \begin{enumerate}
-            \item place a tile, and call all possible player moves,
+            \item place a tile
+            \item call all possible player moves,
                 decrementing depth by 1
         \end{enumerate}
-    \item \dotso continue until depth == 0
+    \item calculate E[current state]
+    \item \dotso{} goto step 1 if depth \textgreater{} 0
+    \item Get E[current node], multiply upward to root
+    \item Once complete $k$-depth=tree is complete, choost most promising branch.
 \end{enumerate}
-
-The chance nodes discussed earlier are made implictly by stacking
 
 \begin{figure}[Hb!]
 \begin{tikzpicture}[->,>=stealth',level/.style={sibling distance = 4cm/#1,
@@ -301,12 +303,7 @@ The chance nodes discussed earlier are made implictly by stacking
             % 
             child{node [arn_n] {16} edge from parent node[above left] {N} }
             child{node [arn_n] {20} edge from parent node[above left] {S} }
-            child{node [arn_n] {30} edge from parent node[above left] {W} }
-            % child{ node [arn_n] {10}
-            %     child{ node [arn_r] {5} edge from parent node[above left]
-            %              {$x$}} %for a named pointer
-            %                 child{ node [arn_x] {}}
-            % }
+            child{node [arn_n] {30} edge from parent node[above right] {W} }
     }
     child{node [arn_r] {$47\cdot{p_{b}}$}
             child{node [arn_n] {15} edge from parent node[above left] {N} }
@@ -314,13 +311,33 @@ The chance nodes discussed earlier are made implictly by stacking
         }
 ;
 \end{tikzpicture}
-\caption{Example expectimax tree}
+\caption{Example expectimax tree, with implicit chance nodes}
+\end{figure}
+
+To realize the above code, a few classes are needed. We implemented each 
+possible board as a class with each tile as a subclass. It could be noted that since each tile will not need
+to exceed $2^16 = 65536$, a 64 bit architecture can represent one row as a 64-bit number
+($16 \times 4$) which permits fast bitwise operations for altering the board.
+However, without classes (objects) the GUI is more difficult to render, so we 
+chose not to use this apporach, even though it allows fast board checks.
+
+\section*{Results}
+Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\%
+of the cases, in about XXX minutes. \autoref{fig:max} shows this result and
+our board.
+
+\begin{figure}[Hb]
+\centering
+    \includegraphics[keepaspectratio, height=3cm]{fig/8192.png}
+\caption{Example solver and board}
+\label{fig:max}
 \end{figure}
 
 
 
+
 \bibliographystyle{IEEEtran}
-\bibliography{IEEEabrv,../bib/paper}
+% \bibliography{IEEEabrv,../bib/paper}
 \begin{thebibliography}{1}
 \bibitem{brutesolver}
     ``ronzil'' \emph{2048-AI}, \textit{git-repository}.\hskip 1em plus
