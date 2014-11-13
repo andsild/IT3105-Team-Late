@@ -74,7 +74,7 @@
             wrapfig
 }
 \usepackage[utf8]{inputenc}
-\usepackage[left=2cm,right=2cm,bottom=3cm]{geometry}
+\usepackage[left=2.1cm,right=2.1cm,bottom=3cm]{geometry}
 \usetikzlibrary{arrows}
 
 \DeclareMathOperator*{\argmax}{\arg\!\max}
@@ -96,7 +96,7 @@
 % can use linebreaks \\ within to get better formatting as desired
 \title{2048 Expectimax Solver}
 
-\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students of NTNU}% <-this % stops a space. jobtitle in memberkj
+\author{Anders Sildnes, Andrej Leitner~\IEEEmembership{students at NTNU}% <-this % stops a space. jobtitle in memberkj
 }% \thanks{Utsendt 2014}}
 
 % The paper headers
@@ -125,9 +125,7 @@ goes back and forth until there are no more availible moves.
 In a turn-based game, you have the time to consider the consequences for each possible
 action. This gives computers immense advantages over humans:
 IBM's chess-solving machine ``Deep Blue'' won against Garry Kasparov in 1997 considered more than
-200 million possible moves per second\footnote{For more, see
-    \href{http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}
-{http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}}.
+200 million possible moves per second\footnote{Info taken from lecture slides}.
 In the case of 2048, this could yield a valid solution in a short amount of
 time. However, not everyone has access to such fast hardware and
 multi-threading so a way to prune the search space is needed.
@@ -241,7 +239,7 @@ the largest resulting value is chosen as the one to be used as a value for the s
         % % y-axis label
         % \node at (0, 5) {200px};
     \end{tikzpicture}
-    \caption{Our gradient mask}
+    \caption{Our gradient mask ($g_{NW}$)}
 \label{fig:gradient}
 \end{figure}
 
@@ -263,8 +261,10 @@ Formally, the gradient calculation can be calculated as follows:
 \end{align*}
 \end{framed}
 
-Furtherly, to each chosen gradient value, we calculate $E$[board]. This
-is given by the probability of having a tile valued either 2 or 4.
+Furtherly, to each chosen gradient value, we calculate $E$[board], i.e.\ the
+expected value, given the value of the board and the probability. This
+is given by the probability of having a tile valued either 2 or 4. We assume
+there is a uniform probability of tile location (so this probability is 1).
 The values are multiplied together, and when combined make up 
 the heuristical assessment value for each board.
 
@@ -307,6 +307,7 @@ drawn using AWT's Graphics2D.
 There is a builtin keylistener that reads for keyboard input. However, one can also
 enable autosolving, which toggles a flag in the keylistener and solves the board by
 itself. The builtin solver works as follows:
+\begin{framed}
 \begin{enumerate}
     \item For each possible move (left,right,up,down) by the player, call ``computers''
     \item ``computer'': For each possible tile placement:
@@ -320,12 +321,14 @@ itself. The builtin solver works as follows:
     \item Get E[current node], multiply upward to root
     \item Once complete $k$-depth=tree is complete, choost most promising branch.
 \end{enumerate}
+\end{framed}
 
-\begin{figure}[Hb!]
+\begin{figure}
+\begin{framed}
 \begin{tikzpicture}[->,>=stealth',level/.style={sibling distance = 4cm/#1,
   level distance = 1.5cm}]
   \node [arn_n, label={[label distance=.2cm]20:current board}] {}
-  child{node [arn_r,label={[label distance=0.4cm]20:possible tiles\dotso{}}] {$15\cdot{p_{a}}$}
+  child{node [arn_r,label={[label distance=0.4cm]20:possible tiles}] {$15\cdot{p_{a}}$}
             % 
             child{node [arn_n] {16} edge from parent node[above left] {N} }
             child{node [arn_n] {20} edge from parent node[above left] {S} }
@@ -337,13 +340,15 @@ itself. The builtin solver works as follows:
         }
 ;
 \end{tikzpicture}
+\end{framed}
 \caption{Example expectimax tree, with implicit chance nodes}
 \end{figure}
 
 To realize the above code, a few classes are needed. We implemented each 
 possible board as a class with each tile as a subclass. It could be noted that since each tile will not need
-to exceed $2^16 = 65536$, a 64 bit architecture can represent one row as a 64-bit number
-($16 \times 4$) which permits fast bitwise operations for altering the board.
+to exceed $2^{16} = 65536$, a 64-bit architecture can represent one row as a
+64-bit number ($16 \times 4$) which permits fast bitwise operations for
+altering the board.
 However, without classes (objects) the GUI is more difficult to render, so we 
 chose not to use this apporach, even though it allows fast board checks.
 
@@ -352,14 +357,12 @@ Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\
 of the cases, in about XXX minutes. \autoref{fig:max} shows this result and
 our board.
 
-\begin{figure}[Hb]
+\begin{figure}[b]
 \centering
     \includegraphics[keepaspectratio, height=3cm]{fig/8192.png}
 \caption{Example solver and board}
 \label{fig:max}
 \end{figure}
-
-
 
 
 \bibliographystyle{IEEEtran}
