@@ -114,7 +114,6 @@ IBM's chess-solving machine ``Deep Blue'' won against Garry Kasparov in 1997 con
 200 million possible moves per second\footnote{For more, see
     \href{http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}
 {http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/}}.
-
 In the case of 2048, this could yield a valid solution in a short amount of
 time. However, not everyone has access to such fast hardware and
 multi-threading so a way to prune the search space is needed.
@@ -252,15 +251,19 @@ not see the need to implement this heuristic expliclitly. Furthermore, there are
 cases where having many free tiles not necessarily is a bad thing.
 The two last heuristics are shown to 
 
-Exepctimax has execution time $O(b^{m})$. Here, $b$ is the \textit{branching factor},
-i.e.\ the number of possible children from a given board. For each move, $0 \leq b \leq 4$.
-$m$ is the depth of the search tree.  It can easily be seen that this execution time
-quickly grows: for a search depth of 6, the execution time is $4096$ for each possible 
-move. In addition, we have to apply our mask in~\autoref{fig:gradient} four times 
-and introduce chance nodes. Therefore, to avoid cluttered code and
-execution, we chose to only rely on the gradient method. However, if this assignment
-had rewarded execution time and scores higher than $4096$, we would implement
-more of the heuristics mentioned above. 
+Exepctimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
+i.e.\ the number of possible children from a given board. For each state, $0
+\leq b \leq 4$.  $m$ is the depth of the search tree. $n$ is the number of possible
+moves, i.e.\ possible tiles with value either $2$ or $4$. It can easily be seen
+that this execution time quickly grows: for a search depth of 6, the execution
+time is $4^{6}\cdot{n^{4}}$ for each possible move. In addition, we have to apply our mask
+in~\autoref{fig:gradient} four times and introduce chance nodes. Therefore, to
+avoid cluttered code and execution, we chose to only rely on the gradient
+method. However, if this assignment had rewarded execution time and scores
+higher than $4096$, we would implement more of the heuristics mentioned above. 
+
+\section*{Structure of source code
+
 
 
 \bibliographystyle{IEEEtran}
