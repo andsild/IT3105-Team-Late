@@ -51,18 +51,18 @@
             amsthm,
             atbegshi,
             caption,
-            subcaption,
             epigraph,
             etoolbox,
             enumitem,
             fancyhdr,
-            geometry,
+            framed,
             graphicx,
             hyperref,
             kpfonts,
             lipsum,
             longtable,
             natbib,
+            subcaption,
             tabulary,
             thmtools,
             tikz,
@@ -74,7 +74,10 @@
             wrapfig
 }
 \usepackage[utf8]{inputenc}
+\usepackage[left=2cm,right=2cm,bottom=3cm]{geometry}
 \usetikzlibrary{arrows}
+
+\DeclareMathOperator*{\argmax}{\arg\!\max}
 
 \tikzset{%
     treenode/.style = {align=center, inner sep=0pt, text centered,
@@ -112,7 +115,7 @@
 \end{abstract}
 
 % \begin{IEEEkeywords}
-%     Stuff
+%     2048, expectimax, IT3105
 % \end{IEEEkeywords}
 \IEEEPARstart{2}{048} can be thought of as a 2-player, turn-based game. The
 opponent places tiles valued either $2$ or $4$ in an availible location. Then,
@@ -241,6 +244,29 @@ the largest resulting value is chosen as the one to be used as a value for the s
     \caption{Our gradient mask}
 \label{fig:gradient}
 \end{figure}
+
+Formally, the gradient calculation can be calculated as follows:
+\begin{framed}
+\begin{align*}
+    \textbf{Let} \\
+    \text{\ board}_{i,j} &= 4\times{}4 \text{\ square lattice} \\
+                            &\text{s.t. } \text{board}_{0,0} \text{\ represents north west} \\
+    dec(x) &= \left\{x, x-1, x-2, x-3\right\} \\
+    inc(x) &= \left\{x, x+1, x+2, x+3\right\} \\
+    g_{NW} &= {dec(3), \dots dec(0)} \\
+    g_{NE} &= {dec(0), \dots dec(3)} \\
+    g_{SW} &= {inc(-3), \dots inc(0)} \\
+    g_{SE} &= {inc(0), \dots inc(-3)} \\
+    G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
+    \textbf{Then:} \\
+    \text{gradient } &= \argmax\limits_{\forall{}g \in G}\sum\limits_{i,j}{{\ g_{i,j} \cdot \text{board}_{i,j}}}
+\end{align*}
+\end{framed}
+
+Furtherly, to each chosen gradient value, we calculate $E$[board]. This
+is given by the probability of having a tile valued either 2 or 4.
+The values are multiplied together, and when combined make up 
+the heuristical assessment value for each board.
 
 \section*{Why not use more heuristics?}
 
