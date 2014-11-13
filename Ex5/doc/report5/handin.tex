@@ -237,7 +237,7 @@ the largest resulting value is chosen as the one to be used as a value for the s
         % % y-axis label
         % \node at (0, 5) {200px};
     \end{tikzpicture}
-    \caption{Our gradient mask ($g_{NW}$)}
+    \caption{Example gradient mask ($g_{NW}$)}
 \label{fig:gradient}
 \end{figure}
 
@@ -255,6 +255,7 @@ Formally, the gradient calculation can be calculated as follows:
     g_{SE} &= {inc(0), \dots inc(-3)} \\
     G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
     \textbf{Then:} \\
+    \textit{For a } & \textit{given board:} \\
     \text{gradient } &= \argmax\limits_{\forall{}g \in G}\sum\limits_{i,j}{{\ g_{i,j} \cdot \text{board}_{i,j}}}
 \end{align*}
 \end{framed}
@@ -330,7 +331,7 @@ itself. The builtin solver works as follows:
         {$\max{\dots}$}
             child{node [arnR] {$\text{grad}\cdot{}p_{a}$} 
             }
-            child{node [arnR] {$\text{grad}\cdot{}p_{b}$} 
+            child{node  {\dotso} 
                     edge from parent node[above right] {tile with prob $p$}
                 % edge from parent node[above] {tile}
             }
@@ -341,7 +342,7 @@ itself. The builtin solver works as follows:
     }
         child{node [arnN]%,label={[label distance=0.4cm]20:possible moves}]
             {$\max{\dots}$}
-                child{node [arnR] {$\text{grad}\cdot{}p_{c}$} 
+                child{node [arnR] {$\text{grad}\cdot{}p_{b}$} 
                         % edge from parent node[above left] 
                 }
                 child{node {\dotso}
@@ -368,7 +369,7 @@ chose not to use this apporach, even though it allows fast board checks.
 
 \section*{Results}
 Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\%
-of the cases, in about 5 minutes. \autoref{fig:max} shows this result and
+of the cases, in $< 5$ minutes. \autoref{fig:max} shows this result and
 our board.
 
 \begin{figure}[b]
