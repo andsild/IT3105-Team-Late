@@ -74,7 +74,7 @@
 }
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage[utf8]{inputenc}
-\usepackage[left=2.1cm,right=2.1cm,bottom=3cm]{geometry}
+\usepackage[left=2.38cm,right=2.38cm,bottom=4.231cm]{geometry}
 \usetikzlibrary{arrows}
 
 \DeclareMathOperator*{\argmax}{\arg\!\max}
@@ -250,10 +250,10 @@ described formally below:
                             &\text{s.t. } \text{board}_{0,0} \text{\ represents north west} \\
     dec(x) &= \left\{x, x-1, x-2, x-3\right\} \\
     inc(x) &= \left\{x, x+1, x+2, x+3\right\} \\
-    g_{NW} &= {dec(3), \dots dec(0)}~(\autoref{fig:gradient})\\
-    g_{SW} &= {dec(0), \dots dec(3)} \\
-    g_{SE} &= {inc(-3), \dots inc(0)} \\
-    g_{NE} &= {inc(0), \dots inc(-3)} \\
+    g_{NW} &= {dec(3), \dots, dec(0)}~(\autoref{fig:gradient})\\
+    g_{SW} &= {dec(0), \dots, dec(3)} \\
+    g_{SE} &= {inc(-3), \dots, inc(0)} \\
+    g_{NE} &= {inc(0), \dots, inc(-3)} \\
     G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
     \textbf{Then:} \\
     \textit{For a } & \textit{given board:} \\
@@ -299,6 +299,7 @@ in~\autoref{fig:gradient} four times and introduce chance nodes. Thus, to
 avoid cluttered code, we chose to only rely on the gradient
 method. 
 
+\newpage
 \section*{Structure of source code}
 We implemented our solution in Java. This is because both members of the group
 were familiar with the language. The GUI is rendered through a JFrame, and the tiles are
@@ -309,6 +310,7 @@ enable auto-solving, which toggles a flag in the key-listener and forces the com
 to use AI to solve the game by itself. The built-in solver works as follows:
 \begin{framed}
 \begin{enumerate}
+    \item depth = 6
     \item For each possible move (left,right,up,down) by the player:
     \begin{enumerate}
     \item For each possible tile placement:
@@ -320,8 +322,12 @@ to use AI to solve the game by itself. The built-in solver works as follows:
     \end{enumerate}
     \item calculate E[current state]
     \item \dotso{} goto step 1 if depth \textgreater{} 0
-    \item Get E[current node], multiply upward to root
-    \item Once complete $k$-depth=tree is complete, choose most promising branch.
+    \item Get E[current node], multiply upward to root:
+        \begin{enumerate}
+            \item For each maximizer node:
+            \item set E[node] /= $\sum\limits_{child}{p_{c}}$
+        \end{enumerate}
+    \item Once complete $k$-depth tree is complete, choose most promising branch.
 \end{enumerate}
 \end{framed}
 
@@ -362,13 +368,16 @@ to use AI to solve the game by itself. The built-in solver works as follows:
 }
 \end{figure}
 
-To realize the above code, a few classes are needed. We implemented each 
-possible board as a class with each tile as a subclass. It could be noted that since each tile will not need
-to exceed $2^{16} = 65536$, a 64-bit architecture can represent one row as a
-64-bit number ($16 \times 4$) which permits fast bit-wise operations for
-altering the board.
-However, without classes (objects) the GUI is more difficult to render, so we 
-chose not to use this approach, even though it allows fast board checks.
+To realize the above code, a few structures are needed. We implemented each 
+possible board as a class with each tile as a subclass. It could be noted that
+since each tile will not need to exceed $2^{16} = 65536$, a 64-bit architecture
+can represent one row as a 64-bit number ($16 \times 4$) which permits fast
+bit-wise operations for altering the board.  However, without classes (objects)
+the GUI is more difficult to render, so we chose not to use this approach, even
+though it allows fast board checks.
+
+Our choice of depth 6 for the search tree comes from trial and error experimenting.
+Depth 6 appears to have the best result to time ratio.
 
 \section*{Results}
 Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\%
