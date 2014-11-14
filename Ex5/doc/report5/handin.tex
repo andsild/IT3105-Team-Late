@@ -270,7 +270,7 @@ the heuristical assessment value for each board.
 
 \section*{Why not use more heuristics?}
 
-Many other heuristic functions exist:
+Many other heuristic functions exist, for example:
 \begin{enumerate}
     \item\label{it:score} \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
     \item\label{it:free} \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
@@ -285,18 +285,19 @@ goal of the game is to achieve a high score, relying on the game score alone
 is a greedy choice. Sometimes it is better to keep tiles with similar values.
 Arguably, heuristic~\ref{it:free} is already used in our gradient
 function by adding negative values in our gradient masks. The two last
-heuristics are shown to
+heuristics are shown to be effective, but we chose not to implement them. This
+is for the reasons outlined below and since they were not necessary to achieve
+our assignment bounds.
 
 Exepctimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
-i.e.\ the number of possible children from a given board. For each state, $0
+i.e.\ the number of possible children from a given board. For each board, $0
 \leq b \leq 4$.  $m$ is the depth of the search tree. $n$ is the number of possible
 moves, i.e.\ possible tiles with value either $2$ or $4$. It can easily be seen
 that this execution time quickly grows: for a search depth of 6, the execution
 time is $4^{6}\cdot{n^{4}}$ for each possible move. In addition, we have to apply our mask
-in~\autoref{fig:gradient} four times and introduce chance nodes. Therefore, to
-avoid cluttered code and execution, we chose to only rely on the gradient
-method. However, if this assignment had rewarded execution time and scores
-higher than $4096$, we would implement more of the heuristics mentioned above.
+in~\autoref{fig:gradient} four times and introduce chance nodes. Thus, to
+avoid cluttered code, we chose to only rely on the gradient
+method. 
 
 \section*{Structure of source code}
 We implemented our solution in Java. This is because both members of the group
@@ -304,17 +305,19 @@ were familiar with the language. The GUI is rendered through a JFrame, and the t
 drawn using AWT's Graphics2D.
 
 There is a builtin keylistener that reads for keyboard input. However, one can also
-enable autosolving, which toggles a flag in the keylistener and solves the board by
+enable autosolving, which toggles a flag in the keylistener and solves the game by
 itself. The builtin solver works as follows:
 \begin{framed}
 \begin{enumerate}
-    \item For each possible move (left,right,up,down) by the player, call ``computers''
-    \item ``computer'': For each possible tile placement:
+    \item For each possible move (left,right,up,down) by the player:
+    \begin{enumerate}
+    \item For each possible tile placement:
         \begin{enumerate}
             \item place a tile
             \item call all possible player moves,
                 decrementing depth by 1
         \end{enumerate}
+    \end{enumerate}
     \item calculate E[current state]
     \item \dotso{} goto step 1 if depth \textgreater{} 0
     \item Get E[current node], multiply upward to root
