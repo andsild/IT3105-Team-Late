@@ -147,9 +147,9 @@ Still, we have implemented an expectimax approach which is much more scalable.
 \section*{Minimax Algorithm}
 The purpose of minimax is to minimize loss for a worst possible scenario.
 This means choosing an action such that your opponent can do ``least amount of damage'',
-i.e.\ leaving you in a promising state. The process of to determine the best
-action available given your opponent's possible re-action is also referred to as 
-\textit{adversarial search}.
+i.e.\ leaving you in a promising state. The process of determing the best
+action availbile given your opponent's possible re-action is also referred to as 
+\textit{adversial search}.
 For 2048 this would mean always making a move such that no matter where the next
 tile goes, and no matter what value, your action minimizes loss.
 
@@ -157,14 +157,14 @@ tile goes, and no matter what value, your action minimizes loss.
 % DISCRETE SPACE
 % PLY
 
-2048, however, is a stochastic game. The opponent will never intelligently
+2048, however, is a stochastic game. The opponent will never inteligently
 select a bad location or value. Therefore, we felt that minimax, which always prepares
 for the worst case, is too pessimistic in its choice of actions. Furthermore, the
 distribution of tiles are given: there is a 90\% chance of getting a
 tile valued 2, and 10\% chance of getting a tile valued 4. Thus, it is possible
-to make somewhat accurate predictions about the expected likelihood of future states of the
+to make somewhat accurate predictions about the expected likelyhood of future states of the
 game. What cannot be predicted is the location of new tiles. However, the possible
-locations are typically not many enough so that an adversarial search cannot completely
+locations are typically not many enough so that an adversial search cannot completely
 explore the possible outcomes.
 
 
@@ -189,7 +189,7 @@ with other adjacent tiles. Therefore, we would like to set a natural preference
 for having larger values clustered in a corner. This way, they do not interfere
 with other lower-valued tiles. However, having large values
 in separate corners implies that there are lower valued tiles between them.
-This makes the board hard to maneuver and reduces the possible spaces. 
+This makes the board hard to manouver and reduces the possible spaces. 
 Therefore, we want to penalize the score when values are spread out.
 
 To calculate the value of a board, we apply a $4\times{}4$ mask and retrieve the
@@ -261,12 +261,12 @@ described formally below:
 \end{align*}
 \end{framed}
 
-Further, to each chosen gradient value, we calculate $E$[board], i.e.\ the
+Furtherly, to each chosen gradient value, we calculate $E$[board], i.e.\ the
 expected value, given the value of the board and the probability. This
 is given by the probability of having a tile valued either 2 or 4. We assume
 there is a uniform probability of tile location (so this probability is 1).
 The values are multiplied together, and when combined make up 
-the heuristic assessment value for each board.
+the heuristical assessment value for each board.
 
 \section*{Why not use more heuristics?}
 
@@ -274,13 +274,13 @@ Many other heuristic functions exist, for example:
 \begin{enumerate}
     \item\label{it:score} \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
     \item\label{it:free} \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
-    \item\label{it:nonmono} \textbf{Non-monotonic rows/columns} \textendash{}
+    \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{}
         prefer boards where values next to each other are in order.
     \item\label{it:merges} \textbf{Possible merges} \textendash{} prefer boards
         where many merges are possible, i.e.\ boards with tiles of same value.
 \end{enumerate}
 
-Heuristic~\ref{it:score} is difficult to implement in practice. While the overall
+Heuristic~\ref{it:score} is difficult to implement in practise. While the overall
 goal of the game is to achieve a high score, relying on the game score alone
 is a greedy choice. Sometimes it is better to keep tiles with similar values.
 Arguably, heuristic~\ref{it:free} is already used in our gradient
@@ -289,7 +289,7 @@ heuristics are shown to be effective, but we chose not to implement them. This
 is for the reasons outlined below and since they were not necessary to achieve
 our assignment bounds.
 
-Expectimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
+Exepctimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
 i.e.\ the number of possible children from a given board. For each board, $0
 \leq b \leq 4$.  $m$ is the depth of the search tree. $n$ is the number of possible
 moves, i.e.\ possible tiles with value either $2$ or $4$. It can easily be seen
@@ -304,9 +304,9 @@ We implemented our solution in Java. This is because both members of the group
 were familiar with the language. The GUI is rendered through a JFrame, and the tiles are
 drawn using AWT's Graphics2D.
 
-There is a built-in key-listener that reads for keyboard input. However, one can also
-enable auto-solving, which toggles a flag in the key-listener and forces the computer
-to use AI to solve the game by itself. The built-in solver works as follows:
+There is a builtin keylistener that reads for keyboard input. However, one can also
+enable autosolving, which toggles a flag in the keylistener and forces the computer
+to use AI to solve the game by itself. The builtin solver works as follows:
 \begin{framed}
 \begin{enumerate}
     \item For each possible move (left,right,up,down) by the player:
@@ -321,7 +321,7 @@ to use AI to solve the game by itself. The built-in solver works as follows:
     \item calculate E[current state]
     \item \dotso{} goto step 1 if depth \textgreater{} 0
     \item Get E[current node], multiply upward to root
-    \item Once complete $k$-depth=tree is complete, choose most promising branch.
+    \item Once complete $k$-depth=tree is complete, choost most promising branch.
 \end{enumerate}
 \end{framed}
 
@@ -365,10 +365,10 @@ to use AI to solve the game by itself. The built-in solver works as follows:
 To realize the above code, a few classes are needed. We implemented each 
 possible board as a class with each tile as a subclass. It could be noted that since each tile will not need
 to exceed $2^{16} = 65536$, a 64-bit architecture can represent one row as a
-64-bit number ($16 \times 4$) which permits fast bit-wise operations for
+64-bit number ($16 \times 4$) which permits fast bitwise operations for
 altering the board.
 However, without classes (objects) the GUI is more difficult to render, so we 
-chose not to use this approach, even though it allows fast board checks.
+chose not to use this apporach, even though it allows fast board checks.
 
 \section*{Results}
 Our highest result achieved so far is 8192. On average, we achieve $4096$ in 80\%
