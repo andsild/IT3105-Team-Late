@@ -187,17 +187,19 @@ own.
 If a large value is in the middle of the board, it will be hard to pair up
 with other adjacent tiles. Therefore, we would like to set a natural preference
 for having larger values clustered in a corner. This way, they do not interfere
-with other lower-valued tiles. Next to the highest value tile, you want other,
-lower valued cells. This extends throughout the board. However, having large values
-in two corners implies that we have two (or more) tiles with large values, separated
-by lower tiles. Therefore, we penalize boards where large values are far apart.
+with other lower-valued tiles. However, having large values
+in separate corners implies that there are lower valued tiles between them.
+This makes the board hard to manouver and reduces the possible spaces. 
+Therefore, we want to penalize the score when values are spread out.
 
 To calculate the value of a board, we apply a $4\times{}4$ mask and retrieve the
 sum of adding all the values in the masked board.
-The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a scalar
-which is multiplied with the value from the board. Since large value might be clustered
-in all corners, we apply 4 masks, one for each corner respectively. Then,
-the largest resulting value is chosen as the one to be used as a value for the state.
+The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a
+scalar which is multiplied with the value from the board. Since large value
+might be clustered in either 4 corners, we apply 4 different masks, one for
+each corner respectively.  Then, we only consider the largest resulting value
+is chosen as the one to be used as a value for the state. The procedure is
+described formally below:
 
 \begin{figure}[Hb]
 \centering
@@ -241,7 +243,6 @@ the largest resulting value is chosen as the one to be used as a value for the s
 \label{fig:gradient}
 \end{figure}
 
-Formally, the gradient calculation can be calculated as follows:
 \begin{framed}
 \begin{align*}
     \textbf{Let} \\
@@ -249,10 +250,10 @@ Formally, the gradient calculation can be calculated as follows:
                             &\text{s.t. } \text{board}_{0,0} \text{\ represents north west} \\
     dec(x) &= \left\{x, x-1, x-2, x-3\right\} \\
     inc(x) &= \left\{x, x+1, x+2, x+3\right\} \\
-    g_{NW} &= {dec(3), \dots dec(0)} \\
-    g_{NE} &= {dec(0), \dots dec(3)} \\
-    g_{SW} &= {inc(-3), \dots inc(0)} \\
-    g_{SE} &= {inc(0), \dots inc(-3)} \\
+    g_{NW} &= {dec(3), \dots dec(0)}~(\autoref{fig:gradient})\\
+    g_{SW} &= {dec(0), \dots dec(3)} \\
+    g_{SE} &= {inc(-3), \dots inc(0)} \\
+    g_{NE} &= {inc(0), \dots inc(-3)} \\
     G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
     \textbf{Then:} \\
     \textit{For a } & \textit{given board:} \\
@@ -273,19 +274,18 @@ Many other heuristic functions exist:
 \begin{enumerate}
     \item\label{it:score} \textbf{Board score} \textendash{} whenever two cells merge, the board score increases.
     \item\label{it:free} \textbf{Free tiles} \textendash{} giving scores based on how many cells are left.
-    \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{} prefer boards where there are large, but similar
-        tiles.
-    \item\label{it:merges} \textbf{Possible merges} \textendash{} prefer boards where many merges are possible,
-       i.e.\ boards with tiles of the same value.
+    \item\label{it:nonmono} \textbf{Non-monotnic rows/coumns} \textendash{}
+        prefer boards where values next to each other are in order.
+    \item\label{it:merges} \textbf{Possible merges} \textendash{} prefer boards
+        where many merges are possible, i.e.\ boards with tiles of same value.
 \end{enumerate}
 
-Heuristic~\ref{it:score} is difficult to implement in practise. When greedily preffering
-boards with higher tiles you might exclude boards with high merges.
-Heuristic~\ref{it:free} can also be used. Arguably, it is already used in our gradient
-function: boards with tiles in opposite corners are penalized. Therefore we did
-not see the need to implement this heuristic expliclitly. Furthermore, there are
-cases where having many free tiles not necessarily is a bad thing.
-The two last heuristics are shown to
+Heuristic~\ref{it:score} is difficult to implement in practise. While the overall
+goal of the game is to achieve a high score, relying on the game score alone
+is a greedy choice. Sometimes it is better to keep tiles with similar values.
+Arguably, heuristic~\ref{it:free} is already used in our gradient
+function by adding negative values in our gradient masks. The two last
+heuristics are shown to
 
 Exepctimax has execution time $O(b^{m}n^{m})$. Here, $b$ is the \textit{branching factor},
 i.e.\ the number of possible children from a given board. For each state, $0
