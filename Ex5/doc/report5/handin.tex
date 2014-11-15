@@ -189,10 +189,10 @@ with other adjacent tiles. Therefore, we would like to set a natural preference
 for having larger values clustered in a corner. This way, they do not interfere
 with other lower-valued tiles. However, having large values
 in separate corners implies that there are lower valued tiles between them.
-This makes the board hard to maneuver and reduces the possible spaces. 
-Therefore, we want to penalize the score when values are spread out.
-
-To calculate the value of a board, we apply a $4\times{}4$ mask and retrieve the
+This makes the board hard to maneuver and reduces the possible spaces.
+Therefore, we want to penalize the score when values are spread throughout the
+board. \newline
+\indent To calculate the value of a board, we apply a $4\times{}4$ mask and retrieve the
 sum of adding all the values in the masked board.
 The mask is shown \autoref{fig:gradient}. Each number in the tiles represents a
 scalar which is multiplied with the value from the board. Since large value
@@ -200,6 +200,24 @@ might be clustered in either 4 corners, we apply 4 different masks, one for
 each corner respectively.  Then, we only consider the largest resulting value
 is chosen as the one to be used as a value for the state. The procedure is
 described formally below:
+
+\begin{framed}
+\begin{align*}
+    \textbf{Let} \\
+    \text{\ board}_{i,j} &= 4\times{}4 \text{\ square lattice} \\
+                            &\text{s.t. } \text{board}_{0,0} \text{\ represents north west} \\
+    dec(x) &= \left\{x, x-1, x-2, x-3\right\} \\
+    inc(x) &= \left\{x, x+1, x+2, x+3\right\} \\
+    g_{NW} &= {dec(3), \dots, dec(0)}~(\autoref{fig:gradient})\\
+    g_{SW} &= {dec(0), \dots, dec(3)} \\
+    g_{SE} &= {inc(-3), \dots, inc(0)} \\
+    g_{NE} &= {inc(0), \dots, inc(-3)} \\
+    G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
+    \textbf{Then:} \\
+    \textit{For a } & \textit{given board:} \\
+    \text{gradient } &= \max\limits_{\forall{}g \in G}\sum\limits_{i,j}{{\ g_{i,j} \cdot \text{board}_{i,j}}}
+\end{align*}
+\end{framed}
 
 \begin{figure}[Hb]
 \centering
@@ -243,23 +261,6 @@ described formally below:
 \label{fig:gradient}
 \end{figure}
 
-\begin{framed}
-\begin{align*}
-    \textbf{Let} \\
-    \text{\ board}_{i,j} &= 4\times{}4 \text{\ square lattice} \\
-                            &\text{s.t. } \text{board}_{0,0} \text{\ represents north west} \\
-    dec(x) &= \left\{x, x-1, x-2, x-3\right\} \\
-    inc(x) &= \left\{x, x+1, x+2, x+3\right\} \\
-    g_{NW} &= {dec(3), \dots, dec(0)}~(\autoref{fig:gradient})\\
-    g_{SW} &= {dec(0), \dots, dec(3)} \\
-    g_{SE} &= {inc(-3), \dots, inc(0)} \\
-    g_{NE} &= {inc(0), \dots, inc(-3)} \\
-    G &= \left\{g_{NW}, g_{NE}, g_{SW}, g_{SE}\right\} \\
-    \textbf{Then:} \\
-    \textit{For a } & \textit{given board:} \\
-    \text{gradient } &= \max\limits_{\forall{}g \in G}\sum\limits_{i,j}{{\ g_{i,j} \cdot \text{board}_{i,j}}}
-\end{align*}
-\end{framed}
 
 Further, to each chosen gradient value, we calculate $E$[board], i.e.\ the
 expected value, given the value of the board and the probability. This
