@@ -379,7 +379,7 @@ though it allows fast board checks.
 
 Our choice of depth 6 for the search tree comes from trial and error experimenting.
 Depth 6 appears to have the best result to time ratio. If our search space
-was faster to calculate, we could probably have expanded. Conversely, if we
+was faster to calculate, we could probably have expanded. Conversively, if we
 needed higher score results, it would need to be expanded.
 
 \section*{Results}
