@@ -8,7 +8,7 @@ Grades:
              2:          GAC works smoothly)  
              
 Assignment 3/4: 37 / 45 Nonograms worked in all cases, even the 'tough' case. One case, however, failed, for reasons beyond us.  
-                        Flow puzzles work ISH. They fail the case where there is a path as follows:
+                        Flow puzzles work ISH. They fail the case where there is a path as follows:  
                       .  f . .  
                       .  f F .  
                       .  f f .  
